@@ -8,6 +8,6 @@ import (
 
 func main() {
 	testName := os.Args[1]
-    // testSuite := testsuite.AvaTestSuite{}
-    println(fmt.Sprintf("Would run %v", testName))
+	networkInfoFilepath := os.Args[2]
+    println(fmt.Sprintf("Would run %v using network data filepath %v", testName, networkInfoFilepath))
 }
