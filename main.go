@@ -4,8 +4,6 @@ import (
     "bytes"
     "encoding/json"
 	"flag"
-    "fmt"
-    "os"
     "io/ioutil"
     "github.com/sirupsen/logrus"
     "net/http"
