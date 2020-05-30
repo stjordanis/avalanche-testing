@@ -1,4 +1,4 @@
-package api
+package pchain
 
 type Validator struct {
 	StartTime string

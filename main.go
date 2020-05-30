@@ -4,49 +4,34 @@ import (
     "bytes"
     "encoding/json"
     "io/ioutil"
-    "log"
+    "github.com/sirupsen/logrus"
     "net/http"
     "time"
 
-    "github.com/kurtosis-tech/ava-test-controller/api"
+    "github.com/kurtosis-tech/ava-test-controller/rpc/pchain"
 )
 
-// TODO TODO TODO Get this from serialization of testnet
 const (
+    // TODO TODO TODO Get this from serialization of testnet
     TEST_TARGET_URL="http://172.23.0.2:9650/"
     RPC_BODY= `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
+    // TODO TODO TODO Put retry configuration into sensible client object
     RETRIES=5
     RETRY_WAIT_SECONDS=5*time.Second
 )
 
-type Validator struct {
-    StartTime string
-    EndTime string
-    StakeAmount string
-    Id string
-}
-
-type ValidatorList []*Validator
-
-type ValidatorResponse struct {
-    Jsonrpc string
-    Result map[string]ValidatorList
-    Id int
-}
-
 func main() {
-    println("Sup world")
-
+    logrus.Infof("Test controller has been started.")
     var jsonStr = []byte(RPC_BODY)
     var jsonBuffer = bytes.NewBuffer(jsonStr)
-    log.Printf("Request as string: %s", jsonBuffer.String())
+    logrus.Infof("Test request as string: %s", jsonBuffer.String())
 
-    var validatorList ValidatorList
+    var validatorList pchain.ValidatorList
     for i := 0; i < RETRIES; i++ {
-        resp, err := http.Post(TEST_TARGET_URL + api.GetPChainEndpoint(), "application/json", jsonBuffer)
+        resp, err := http.Post(TEST_TARGET_URL + pchain.GetPChainEndpoint(), "application/json", jsonBuffer)
         if err != nil {
-            log.Printf("Attempted connection...: %s", err.Error())
-            log.Printf("Could not connect on attempt %d, retrying...", i+1)
+            logrus.Infof("Attempted connection...: %s", err.Error())
+            logrus.Infof("Could not connect on attempt %d, retrying...", i+1)
             time.Sleep(RETRY_WAIT_SECONDS)
             continue
         }
@@ -54,22 +39,22 @@ func main() {
 
         body, err := ioutil.ReadAll(resp.Body)
         if err != nil {
-            log.Fatalln(err)
+            logrus.Fatalln(err)
         }
 
-        var validatorResponse ValidatorResponse
+        var validatorResponse pchain.ValidatorResponse
         json.Unmarshal(body, &validatorResponse)
 
         validatorList = validatorResponse.Result["validators"]
         if len(validatorList) > 0 {
-            log.Printf("Found validators!")
+            logrus.Infof("Found validators!")
             break
         }
     }
     for _, validator := range validatorList {
-        log.Printf("Validator id: %s", validator.Id)
+        logrus.Infof("Validator id: %s", validator.Id)
     }
     if len(validatorList) < 1 {
-        log.Printf("Failed to find a single validator.")
+        logrus.Infof("Failed to find a single validator.")
     }
 }
