@@ -7,12 +7,13 @@ import (
     "log"
     "net/http"
     "time"
+
+    "github.com/kurtosis-tech/ava-test-controller/api"
 )
 
 // TODO TODO TODO Get this from serialization of testnet
 const (
     TEST_TARGET_URL="http://172.23.0.2:9650/"
-    PCHAIN_ENDPOINT="ext/P"
     RPC_BODY= `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
     RETRIES=5
     RETRY_WAIT_SECONDS=5*time.Second
@@ -42,7 +43,7 @@ func main() {
 
     var validatorList ValidatorList
     for i := 0; i < RETRIES; i++ {
-        resp, err := http.Post(TEST_TARGET_URL + PCHAIN_ENDPOINT, "application/json", jsonBuffer)
+        resp, err := http.Post(TEST_TARGET_URL + api.GetPChainEndpoint(), "application/json", jsonBuffer)
         if err != nil {
             log.Printf("Attempted connection...: %s", err.Error())
             log.Printf("Could not connect on attempt %d, retrying...", i+1)
