@@ -12,7 +12,7 @@ func main() {
 	testNameArg := flag.String(
 		"test",
 		"",
-		"Comma-separated list of specific tests to run (omit to run all tests)",
+		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
 	)
 
 	networkInfoFilepathArg := flag.String(
