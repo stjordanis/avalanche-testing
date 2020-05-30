@@ -37,7 +37,8 @@ func main() {
 	)
 	flag.Parse()
 
-	if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
+	// TODO TODO TODO Uncomment this out to start reading serialized network config.
+	/*if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
 		panic("Nonexistent file: " + *networkInfoFilepathArg)
 	}
 
@@ -48,7 +49,7 @@ func main() {
 		// TODO make this a proper error
 		panic("Could not read file bytes!")
 	}
-	println(fmt.Sprintf("Contents of file: %v", string(data)))
+	println(fmt.Sprintf("Contents of file: %v", string(data)))*/
 
 	// Run RPC Test on PChain.
 	var jsonStr = []byte(RPC_BODY)
