@@ -19,5 +19,5 @@ ENV PATH="/dist:${PATH}"
 # Copy binary from build to main folder
 RUN cp /build/controller .
 
-CMD ["controller"]
 
+CMD ["controller", "${TEST_NAME}", "${NETWORK_DATA_FILEPATH}"]

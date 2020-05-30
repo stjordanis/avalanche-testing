@@ -3,6 +3,8 @@ package main
 import (
     "bytes"
     "encoding/json"
+    "fmt"
+    "os"
     "io/ioutil"
     "github.com/sirupsen/logrus"
     "net/http"
@@ -21,14 +23,24 @@ const (
 )
 
 func main() {
-    logrus.Infof("Test controller has been started.")
+    testName := os.Args[1]
+    networkInfoFilepath := os.Args[2]
+    println(fmt.Sprintf("Would run %v:", testName))
+
+    data, err := ioutil.ReadFile(networkInfoFilepath)
+    if err != nil {
+        // TODO make this a proper error
+        panic("Could not read file bytes!")
+    }
+    println(fmt.Sprintf("Contents of file: %v", string(data)))
+
     var jsonStr = []byte(RPC_BODY)
     var jsonBuffer = bytes.NewBuffer(jsonStr)
     logrus.Infof("Test request as string: %s", jsonBuffer.String())
 
     var validatorList pchain.ValidatorList
     for i := 0; i < RETRIES; i++ {
-        resp, err := http.Post(TEST_TARGET_URL + pchain.GetPChainEndpoint(), "application/json", jsonBuffer)
+        resp, err := http.Post(TEST_TARGET_URL+pchain.GetPChainEndpoint(), "application/json", jsonBuffer)
         if err != nil {
             logrus.Infof("Attempted connection...: %s", err.Error())
             logrus.Infof("Could not connect on attempt %d, retrying...", i+1)
@@ -58,3 +70,4 @@ func main() {
         logrus.Infof("Failed to find a single validator.")
     }
 }
+
