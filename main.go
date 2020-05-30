@@ -3,11 +3,13 @@ package main
 import (
     "bytes"
     "encoding/json"
-	"flag"
-    "io/ioutil"
+	//"flag"
+	//"fmt"
+	"io/ioutil"
     "github.com/sirupsen/logrus"
     "net/http"
-    "time"
+	//"os"
+	"time"
 
     "github.com/kurtosis-tech/ava-test-controller/rpc/pchain"
 )
@@ -22,7 +24,8 @@ const (
 )
 
 func main() {
-	testNameArg := flag.String(
+	// TODO TODO TODO Uncomment this out to start reading serialized network config.
+	/*testNameArg := flag.String(
 		"test",
 		"",
 		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
@@ -35,8 +38,7 @@ func main() {
 	)
 	flag.Parse()
 
-	// TODO TODO TODO Uncomment this out to start reading serialized network config.
-	/*if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
+	if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
 		panic("Nonexistent file: " + *networkInfoFilepathArg)
 	}
 
