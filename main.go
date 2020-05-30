@@ -26,7 +26,7 @@ func main() {
 		panic("Nonexistent file: " + *networkInfoFilepathArg)
 	}
 
-    println(fmt.Sprintf("Would run %v:" , *testNameArg))
+	println(fmt.Sprintf("Would run %v:" , *testNameArg))
 
 	data, err := ioutil.ReadFile(*networkInfoFilepathArg)
 	if err != nil {
