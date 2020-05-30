@@ -1,10 +1,24 @@
 FROM golang:1.13-alpine
 
-WORKDIR /go/src/app
+WORKDIR /build
+# Copy and download dependencies using go mod
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# Copy the code into the container
 COPY . .
 
-RUN go get -d -v ./...
-RUN go install -v ./...
+# Build the application
+RUN go build -o controller .
+
+# Move to /dist directory as the place for resulting binary folder
+WORKDIR /dist
+ENV PATH="/dist:${PATH}"
+
+# Copy binary from build to main folder
+RUN cp /build/controller .
+
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
