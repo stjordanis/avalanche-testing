@@ -6,10 +6,13 @@ import (
 	"github.com/kurtosis-tech/kurtosis/ava_commons/testsuite"
 	"github.com/kurtosis-tech/kurtosis/commons/testnet"
 	testsuite2 "github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
 func main() {
+	logrus.SetLevel(logrus.DebugLevel)
+
 	testNameArg := flag.String(
 		"test",
 		"",
@@ -22,6 +25,8 @@ func main() {
 		"Filepath of file containing JSON-serialized representation of the network of service Docker containers",
 	)
 	flag.Parse()
+
+	logrus.Infof("Running test '%v'...", *testNameArg)
 
 	if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
 		panic("Nonexistent file: " + *networkInfoFilepathArg)
@@ -39,7 +44,11 @@ func main() {
 		panic("Decoding raw service network information failed")
 	}
 
-	testConfig, found := testsuite.AvaTestSuite{}.GetTests()[*testNameArg]
+	testConfigs := testsuite.AvaTestSuite{}.GetTests()
+
+	logrus.Debugf("Test configs: %v", testConfigs)
+
+	testConfig, found := testConfigs[*testNameArg]
 	if !found {
 		panic("Nonexistent test: " + *testNameArg)
 	}
