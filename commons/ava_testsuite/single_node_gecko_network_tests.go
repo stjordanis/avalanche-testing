@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
-	"github.com/kurtosis-tech/kurtosis/controller"
+	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -16,7 +16,7 @@ const (
 )
 
 type SingleNodeGeckoNetworkBasicTest struct {}
-func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context controller.TestContext) {
+func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
 	httpSocket := castedNetwork.GetNode().GetJsonRpcSocket()
 
@@ -49,7 +49,7 @@ func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context con
 }
 
 type SingleNodeNetworkGetValidatorsTest struct{}
-func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context controller.TestContext) {
+func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
 
 	// TODO Move these into a better location
