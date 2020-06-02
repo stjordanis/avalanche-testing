@@ -1,31 +1,19 @@
 package main
 
 import (
-    "bytes"
-    "encoding/json"
-	//"flag"
-	//"fmt"
-	"io/ioutil"
-    "github.com/sirupsen/logrus"
-    "net/http"
-	//"os"
-	"time"
-
-    "github.com/kurtosis-tech/ava-test-controller/rpc/pchain"
-)
-
-const (
-    // TODO TODO TODO Get this from serialization of testnet
-    TEST_TARGET_URL="http://172.23.0.2:9650/"
-    RPC_BODY= `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
-    // TODO TODO TODO Put retry configuration into sensible client object
-    RETRIES=5
-    RETRY_WAIT_SECONDS=5*time.Second
+	"encoding/gob"
+	"flag"
+	"github.com/kurtosis-tech/kurtosis/ava_commons/testsuite"
+	"github.com/kurtosis-tech/kurtosis/commons/testnet"
+	testsuite2 "github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/sirupsen/logrus"
+	"os"
 )
 
 func main() {
-	// TODO TODO TODO Uncomment this out to start reading serialized network config.
-	/*testNameArg := flag.String(
+	logrus.SetLevel(logrus.DebugLevel)
+
+	testNameArg := flag.String(
 		"test",
 		"",
 		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
@@ -38,53 +26,48 @@ func main() {
 	)
 	flag.Parse()
 
+	logrus.Infof("Running test '%v'...", *testNameArg)
+
 	if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
 		panic("Nonexistent file: " + *networkInfoFilepathArg)
 	}
 
-	println(fmt.Sprintf("Would run %v:", *testNameArg))
-
-	data, err := ioutil.ReadFile(*networkInfoFilepathArg)
+	fp, err := os.Open(*networkInfoFilepathArg)
 	if err != nil {
-		// TODO make this a proper error
-		panic("Could not read file bytes!")
+		panic("Could not open network info file for reading")
 	}
-	println(fmt.Sprintf("Contents of file: %v", string(data)))*/
+	decoder := gob.NewDecoder(fp)
 
-	// Run RPC Test on PChain.
-	var jsonStr = []byte(RPC_BODY)
-	var jsonBuffer = bytes.NewBuffer(jsonStr)
-	logrus.Infof("Test request as string: %s", jsonBuffer.String())
-
-	var validatorList pchain.ValidatorList
-	for i := 0; i < RETRIES; i++ {
-		resp, err := http.Post(TEST_TARGET_URL+pchain.GetPChainEndpoint(), "application/json", jsonBuffer)
-		if err != nil {
-			logrus.Infof("Attempted connection...: %s", err.Error())
-			logrus.Infof("Could not connect on attempt %d, retrying...", i+1)
-			time.Sleep(RETRY_WAIT_SECONDS)
-			continue
-		}
-		defer resp.Body.Close()
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			logrus.Fatalln(err)
-		}
-
-		var validatorResponse pchain.ValidatorResponse
-		json.Unmarshal(body, &validatorResponse)
-
-		validatorList = validatorResponse.Result["validators"]
-		if len(validatorList) > 0 {
-			logrus.Infof("Found validators!")
-			break
-		}
+	var rawServiceNetwork testnet.RawServiceNetwork
+	err = decoder.Decode(&rawServiceNetwork)
+	if err != nil {
+		panic("Decoding raw service network information failed")
 	}
-	for _, validator := range validatorList {
-		logrus.Infof("Validator id: %s", validator.Id)
+
+	testConfigs := testsuite.AvaTestSuite{}.GetTests()
+
+	logrus.Debugf("Test configs: %v", testConfigs)
+
+	testConfig, found := testConfigs[*testNameArg]
+	if !found {
+		panic("Nonexistent test: " + *testNameArg)
 	}
-	if len(validatorList) < 1 {
-		logrus.Infof("Failed to find a single validator.")
+
+	untypedNetwork, err := testConfig.NetworkLoader.LoadNetwork(rawServiceNetwork.ServiceIPs)
+	if err != nil {
+		panic("Unable to load network from service IPs")
+	}
+
+	testSucceeded := true
+	context := testsuite2.TestContext{}
+	testConfig.Test.Run(untypedNetwork, context)
+	defer func() {
+		if result := recover(); result != nil {
+			testSucceeded = false
+		}
+	}()
+
+	if !testSucceeded {
+		os.Exit(1)
 	}
 }
