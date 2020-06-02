@@ -1,4 +1,9 @@
+# Vim Swampfiles
+*.swp
+
 .idea/
+
+build/
 
 controller
 ava-test-controller
