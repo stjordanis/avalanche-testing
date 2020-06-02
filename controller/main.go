@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/testsuite"
-	"github.com/kurtosis-tech/kurtosis/commons/testnet"
-	testsuite2 "github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 	"os"
 )
@@ -28,46 +26,14 @@ func main() {
 
 	logrus.Infof("Running test '%v'...", *testNameArg)
 
-	if _, err := os.Stat(*networkInfoFilepathArg); err != nil {
-		panic("Nonexistent file: " + *networkInfoFilepathArg)
-	}
-
-	fp, err := os.Open(*networkInfoFilepathArg)
+	controller := controller.NewTestController(testsuite.AvaTestSuite{})
+	// TODO replace the boolean result with detailed information about the test suite results
+	succeeded, err := controller.RunTests(*testNameArg, *networkInfoFilepathArg)
 	if err != nil {
-		panic("Could not open network info file for reading")
-	}
-	decoder := gob.NewDecoder(fp)
-
-	var rawServiceNetwork testnet.RawServiceNetwork
-	err = decoder.Decode(&rawServiceNetwork)
-	if err != nil {
-		panic("Decoding raw service network information failed")
+		panic(err)
 	}
 
-	testConfigs := testsuite.AvaTestSuite{}.GetTests()
-
-	logrus.Debugf("Test configs: %v", testConfigs)
-
-	testConfig, found := testConfigs[*testNameArg]
-	if !found {
-		panic("Nonexistent test: " + *testNameArg)
-	}
-
-	untypedNetwork, err := testConfig.NetworkLoader.LoadNetwork(rawServiceNetwork.ServiceIPs)
-	if err != nil {
-		panic("Unable to load network from service IPs")
-	}
-
-	testSucceeded := true
-	context := testsuite2.TestContext{}
-	testConfig.Test.Run(untypedNetwork, context)
-	defer func() {
-		if result := recover(); result != nil {
-			testSucceeded = false
-		}
-	}()
-
-	if !testSucceeded {
+	if !succeeded {
 		os.Exit(1)
 	}
 }
