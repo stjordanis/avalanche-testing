@@ -7,7 +7,7 @@ docker pull "${DEFAULT_GECKO_IMAGE}"
 
 bash "${ROOT_DIRPATH}"/scripts/build_images.sh
 #LATEST_INITIALIZER_TAG="kurtosistech/ava-e2e-tests_initializer:latest"
-LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller
+LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 
 go get -d -t -v github.com/kurtosis-tech/ava-e2e-tests/...
 
