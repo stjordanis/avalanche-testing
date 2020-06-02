@@ -1,7 +1,7 @@
 set -euo pipefail
-SCRIPTS_PATH="$(cd "$(dirname "${0}")" && pwd)"
-KURTOSIS_PATH="$(dirname "${SCRIPTS_PATH}")"
+SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 
+KURTOSIS_PATH="$(dirname "${SCRIPT_DIRPATH}")"
 LATEST_KURTOSIS_TAG="kurtosistech/kurtosis:latest"
 LATEST_CONTROLLER_TAG="kurtosistech/ava-test-controller:latest"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"

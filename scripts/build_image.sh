@@ -1,22 +1,16 @@
 #!/bin/bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -euo pipefail
+SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-if [ $# -eq 0 ]
-  then
-    COMMIT="$(git --git-dir="${KURTOSIS_PATH}/.git" rev-parse --short HEAD)"
-    TAG="kurtosis-$COMMIT"
-  else
-    TAG=$1
-fi
-
-IMAGE_TAG=$1
-SCRIPTS_PATH=$(cd $(dirname "${BASH_SOURCE[0]}"); pwd)
-KURTOSIS_PATH=$(dirname "${SCRIPTS_PATH}")
+ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 DOCKER="${DOCKER:-docker}"
 
-COMMIT="$(git --git-dir="${KURTOSIS_PATH}/.git" rev-parse --short HEAD)"
+if [ ${#} -eq 0 ]; then
+    COMMIT="$(git --git-dir="${ROOT_DIRPATH}/.git" rev-parse --short HEAD)"
+else
+    COMMIT="${1}"
+fi
 
-"${DOCKER}" build -t "$TAG" "${KURTOSIS_PATH}"
+TAG="ava-test-controller:${COMMIT}"
+"${DOCKER}" build -t "${TAG}" "${ROOT_DIRPATH}" -f "${ROOT_DIRPATH}/controller/Dockerfile"
