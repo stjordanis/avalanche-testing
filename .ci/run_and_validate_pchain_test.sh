@@ -9,12 +9,9 @@ bash "${ROOT_DIRPATH}"/scripts/build_images.sh
 #LATEST_INITIALIZER_TAG="kurtosistech/ava-e2e-tests_initializer:latest"
 LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 
-go get -d -t -v github.com/kurtosis-tech/ava-e2e-tests/...
+bash "${ROOT_DIRPATH}"/scripts/build.sh
 
-cd $GOPATH/src/github.com/kurtosis-tech/ava-e2e-tests
-./scripts/build.sh
-
-(./build/ava-e2e-tests -gecko-image-name="${DEFAULT_GECKO_IMAGE}"\
+("${ROOT_DIRPATH}"/build/ava-e2e-tests -gecko-image-name="${DEFAULT_GECKO_IMAGE}"\
  -test-controller-image-name="${LATEST_CONTROLLER_TAG}") &
 
 #(docker run -v /var/run/docker.sock:/var/run/docker.sock \
