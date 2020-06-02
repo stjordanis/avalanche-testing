@@ -2,16 +2,16 @@ FROM golang:1.13-alpine
 
 WORKDIR /build
 # Copy and download dependencies using go mod
-COPY ../go.mod .
-COPY ../go.sum .
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
 # Copy the code into the container
-COPY .. .
+COPY . .
 
 # Build the application
-RUN go build -o controller .
+RUN go build -o test-controller controller/main.go
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
-CMD controller --test=$TEST_NAME --network-info-filepath=$NETWORK_DATA_FILEPATH
+CMD test-controller --test=$TEST_NAME --network-info-filepath=$NETWORK_DATA_FILEPATH
