@@ -32,4 +32,4 @@ COPY . .
 RUN go build -o test-initializer initializer/main.go
 
 # Command to run when starting the container
-CMD test-initializer --gecko-image-name=${DEFAULT_GECKO_IMAGE} --test-controller-image-name=${TEST_CONTROLLER_IMAGE}
+CMD ./test-initializer --gecko-image-name=${DEFAULT_GECKO_IMAGE} --test-controller-image-name=${TEST_CONTROLLER_IMAGE}
