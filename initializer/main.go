@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 )
@@ -45,7 +45,7 @@ func main() {
 	flag.Parse()
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
-		testsuite.AvaTestSuite{},
+		ava_testsuite.AvaTestSuite{},
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*portRangeStartArg,

@@ -1,4 +1,4 @@
-package testsuite
+package ava_testsuite
 
 // TODO probably organize this into a client API!!
 type Validator struct {
