@@ -14,7 +14,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.TestConfig {
 	tenNodeNetworkLoader := ava_networks.TenNodeGeckoNetworkLoader{}
 
 
-	result["tenNodeBasicTest"] = testsuite.TestConfig{
+	result["tenNodeGetValidatorsTest"] = testsuite.TestConfig{
 		Test:          TenNodeNetworkGetValidatorsTest{},
 		NetworkLoader: tenNodeNetworkLoader,
 	}
