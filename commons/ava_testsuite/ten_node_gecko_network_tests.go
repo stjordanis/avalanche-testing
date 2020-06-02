@@ -1,18 +1,18 @@
-package testsuite
+package ava_testsuite
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/kurtosis/controller"
 	"io/ioutil"
 	"net/http"
 )
 
 type TenNodeGeckoNetworkBasicTest struct {}
-func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(networks.TenNodeGeckoNetwork)
+func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context controller.TestContext) {
+	castedNetwork := network.(ava_networks.TenNodeGeckoNetwork)
 
 	service, err := castedNetwork.GetGeckoService(0)
 	if err != nil {

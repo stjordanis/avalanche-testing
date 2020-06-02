@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -26,7 +26,7 @@ func main() {
 
 	logrus.Infof("Running test '%v'...", *testNameArg)
 
-	controller := controller.NewTestController(testsuite.AvaTestSuite{})
+	controller := controller.NewTestController(ava_testsuite.AvaTestSuite{})
 	// TODO replace the boolean result with detailed information about the test suite results
 	succeeded, err := controller.RunTests(*testNameArg, *networkInfoFilepathArg)
 	if err != nil {

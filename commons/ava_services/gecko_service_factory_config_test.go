@@ -1,7 +1,7 @@
-package services
+package ava_services
 
 import (
-	"github.com/kurtosis-tech/kurtosis/commons/testnet"
+	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"gotest.tools/assert"
 	"testing"
 )
@@ -30,11 +30,11 @@ func TestGetContainerStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actualNoDeps := factoryConfig.GetStartCommand(TEST_IP, make([]testnet.Service, 0))
+	actualNoDeps := factoryConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
 	assert.DeepEqual(t, expectedNoDeps, actualNoDeps)
 
 	testDependency := GeckoService{ipAddr: "1.2.3.4"}
-	testDependencySlice := []testnet.Service{
+	testDependencySlice := []services.Service{
 		testDependency,
 	}
 	expectedWithDeps := append(expectedNoDeps, "--bootstrap-ips=1.2.3.4:9651")

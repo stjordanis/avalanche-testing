@@ -1,9 +1,9 @@
-package services
+package ava_services
 
 import (
 	"fmt"
 	"github.com/docker/go-connections/nat"
-	"github.com/kurtosis-tech/kurtosis/commons/testnet"
+	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"log"
 	"strconv"
 	"strings"
@@ -25,21 +25,21 @@ func NewGeckoService(ipAddr string) *GeckoService {
 		ipAddr:      ipAddr,
 	}
 }
-func (g GeckoService) GetStakingSocket() testnet.ServiceSocket {
+func (g GeckoService) GetStakingSocket() services.ServiceSocket {
 	stakingPort, err := nat.NewPort("tcp", strconv.Itoa(stakingPort))
 	if err != nil {
 		// Realllllly don't think we should deal with propagating this one.... it means the user mistyped an integer
 		panic(err)
 	}
-	return *testnet.NewServiceSocket(g.ipAddr, stakingPort)
+	return *services.NewServiceSocket(g.ipAddr, stakingPort)
 }
 
-func (g GeckoService) GetJsonRpcSocket() testnet.ServiceSocket {
+func (g GeckoService) GetJsonRpcSocket() services.ServiceSocket {
 	httpPort, err := nat.NewPort("tcp", strconv.Itoa(httpPort))
 	if err != nil {
 		panic(err)
 	}
-	return *testnet.NewServiceSocket(g.ipAddr, httpPort)
+	return *services.NewServiceSocket(g.ipAddr, httpPort)
 }
 
 // ================ Gecko Service Factory =============================
@@ -83,7 +83,7 @@ func (g GeckoServiceFactoryConfig) GetUsedPorts() map[int]bool {
 	}
 }
 
-func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []testnet.Service) []string {
+func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -118,6 +118,6 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 	return commandList
 }
 
-func (g GeckoServiceFactoryConfig) GetServiceFromIp(ipAddr string) testnet.Service {
+func (g GeckoServiceFactoryConfig) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }

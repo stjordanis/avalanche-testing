@@ -1,11 +1,11 @@
-package testsuite
+package ava_testsuite
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -16,8 +16,8 @@ const (
 )
 
 type SingleNodeGeckoNetworkBasicTest struct {}
-func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(networks.SingleNodeGeckoNetwork)
+func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context controller.TestContext) {
+	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
 	httpSocket := castedNetwork.GetNode().GetJsonRpcSocket()
 
 	requestBody, err := json.Marshal(map[string]string{
@@ -49,8 +49,8 @@ func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context tes
 }
 
 type SingleNodeNetworkGetValidatorsTest struct{}
-func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(networks.SingleNodeGeckoNetwork)
+func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context controller.TestContext) {
+	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
 
 	// TODO Move these into a better location
 	RPC_BODY := `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
