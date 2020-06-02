@@ -1,4 +1,4 @@
-module github.com/kurtosis-tech/ava-test-controller
+module github.com/kurtosis-tech/ava-e2e-tests
 
 go 1.13
 
