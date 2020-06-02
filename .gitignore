@@ -5,5 +5,5 @@
 
 build/
 
-controller
-ava-test-controller
+test-controller
+test-initializer
