@@ -1,21 +1,20 @@
 set -euo pipefail
 SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
+ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 
-KURTOSIS_PATH="$(dirname "${SCRIPT_DIRPATH}")"
-LATEST_KURTOSIS_TAG="kurtosistech/kurtosis:latest"
-LATEST_CONTROLLER_TAG="kurtosistech/ava-test-controller:latest"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
-
-bash "${KURTOSIS_PATH}"/scripts/build_image.sh "${LATEST_KURTOSIS_TAG}"
-docker pull "${LATEST_CONTROLLER_TAG}"
 docker pull "${DEFAULT_GECKO_IMAGE}"
+
+bash "${ROOT_DIRPATH}"/scripts/build_images.sh
+LATEST_INITIALIZER_TAG="kurtosistech/ava-e2e-tests_initializer:latest"
+LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller:latest"
 
 (docker run -v /var/run/docker.sock:/var/run/docker.sock \
 --env DEFAULT_GECKO_IMAGE="${DEFAULT_GECKO_IMAGE}" \
 --env TEST_CONTROLLER_IMAGE="${LATEST_CONTROLLER_TAG}" \
-"${LATEST_KURTOSIS_TAG}") &
+"${LATEST_INITIALIZER_TAG}") &
 
-kurtosis_pid=${!}
+kurtosis_pid="${!}"
 
 # Sleep while Kurtosis spins up testnet and runs controller to execute tests.
 sleep 90

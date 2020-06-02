@@ -9,7 +9,7 @@ ENV GO111MODULE=on \
     # Defaults for images point to DockerHub endpoints.
     # These should be set in docker container run args
     DEFAULT_GECKO_IMAGE="avaplatform/gecko" \
-    TEST_CONTROLLER_IMAGE="kurtosistech/ava-test-controller:latest"
+    TEST_CONTROLLER_IMAGE="kurtosistech/ava-e2e-tests:test-controller_latest"
 
 
 # Move to working directory /build
@@ -29,13 +29,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o kurtosis .
-
-# Move to /dist directory as the place for resulting binary folder
-WORKDIR /dist
-
-# Copy binary from build to main folder
-RUN cp /build/kurtosis .
+RUN go build -o test-initializer initializer/main.go
 
 # Command to run when starting the container
-CMD /dist/kurtosis --gecko-image-name=${DEFAULT_GECKO_IMAGE} --test-controller-image-name=${TEST_CONTROLLER_IMAGE}
+CMD test-initializer --gecko-image-name=${DEFAULT_GECKO_IMAGE} --test-controller-image-name=${TEST_CONTROLLER_IMAGE}
