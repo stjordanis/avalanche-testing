@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kurtosis-tech/kurtosis/ava_commons/networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"

@@ -1,7 +1,7 @@
 package networks
 
 import (
-	"github.com/kurtosis-tech/kurtosis/ava_commons/services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/services"
 	"github.com/kurtosis-tech/kurtosis/commons/testnet"
 	"github.com/palantir/stacktrace"
 )

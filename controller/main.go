@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/gob"
 	"flag"
-	"github.com/kurtosis-tech/kurtosis/ava_commons/testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/testsuite"
 	"github.com/kurtosis-tech/kurtosis/commons/testnet"
 	testsuite2 "github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/sirupsen/logrus"
