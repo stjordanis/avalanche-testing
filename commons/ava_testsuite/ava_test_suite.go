@@ -1,16 +1,13 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 
 type AvaTestSuite struct {}
 
-func (a AvaTestSuite) GetTests() map[string]testsuite.TestConfig {
-	result := make(map[string]testsuite.TestConfig)
-
-	singleNodeNetworkLoaer := ava_networks.SingleNodeGeckoNetworkLoader{}
+func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
+	result := make(map[string]testsuite.Test)
 
 	/*
 	result["singleNodeBasicTest"] = ava_testsuite.TestConfig{
@@ -20,10 +17,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.TestConfig {
 	*/
 
 	// TODO make make the network loader-getting step a part of the Test itself
-	result["singleNodeGetValidatorsTest"] = testsuite.TestConfig{
-		Test: SingleNodeNetworkGetValidatorsTest{},
-		NetworkLoader: singleNodeNetworkLoaer,
-	}
+	result["singleNodeGetValidatorsTest"] = SingleNodeNetworkGetValidatorsTest{}
 
 	return result
 }

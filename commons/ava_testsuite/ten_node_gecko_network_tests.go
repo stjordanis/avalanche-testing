@@ -48,4 +48,9 @@ func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite
 	println(string(body))
 }
 
+func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() testsuite.TestNetworkLoader {
+	return ava_networks.TenNodeGeckoNetworkLoader{}
+}
+
+
 
