@@ -50,6 +50,11 @@ func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite
 	println(string(body))
 }
 
+func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() testsuite.TestNetworkLoader {
+	return ava_networks.TenNodeGeckoNetworkLoader{}
+}
+
+
 type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TenNodeGeckoNetwork)
@@ -103,4 +108,7 @@ func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context tes
 	context.AssertTrue(len(validatorList) >= 1)
 }
 
+func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() testsuite.TestNetworkLoader {
+	return ava_networks.TenNodeGeckoNetworkLoader{}
+}
 

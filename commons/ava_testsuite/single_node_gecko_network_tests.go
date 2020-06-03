@@ -48,6 +48,10 @@ func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context tes
 	println(string(body))
 }
 
+func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() testsuite.TestNetworkLoader {
+	return ava_networks.SingleNodeGeckoNetworkLoader{}
+}
+
 type SingleNodeNetworkGetValidatorsTest struct{}
 func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
@@ -95,5 +99,9 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 		logrus.Infof("Validator id: %s", validator.Id)
 	}
 	context.AssertTrue(len(validatorList) >= 1)
+}
+
+func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() testsuite.TestNetworkLoader {
+	return ava_networks.SingleNodeGeckoNetworkLoader{}
 }
 
