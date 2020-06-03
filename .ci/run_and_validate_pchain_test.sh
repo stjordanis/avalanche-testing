@@ -9,7 +9,7 @@ DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
 docker pull "${DEFAULT_GECKO_IMAGE}"
 
 bash "${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"
-ACTUAL_EXIT_STATUS="$(docker ps -a --latest --filter ancestor="${LATEST_CONTROLLER_TAG}" --format="{{.Status}}")"
+ACTUAL_EXIT_STATUS="$(docker ps -a --latest --filter ancestor="${DEFAULT_CONTROLLER_TAG}" --format="{{.Status}}")"
 EXPECTED_EXIT_STATUS="Exited \(0\).*"
 
 echo "Exit status: ${ACTUAL_EXIT_STATUS}"
@@ -17,14 +17,14 @@ echo "Exit status: ${ACTUAL_EXIT_STATUS}"
 # Clear containers.
 echo "Clearing Ava Docker containers..."
 docker rm $(docker stop $(docker ps -a -q --filter ancestor="${DEFAULT_GECKO_IMAGE}" --format="{{.ID}}")) >/dev/null
-docker rm $(docker stop $(docker ps -a -q --filter ancestor="${LATEST_CONTROLLER_TAG}" --format="{{.ID}}")) >/dev/null
+docker rm $(docker stop $(docker ps -a -q --filter ancestor="${DEFAULT_CONTROLLER_TAG}" --format="{{.ID}}")) >/dev/null
 echo "Ava Docker containers cleared successfully"
 
 if [[ ${ACTUAL_EXIT_STATUS} =~ ${EXPECTED_EXIT_STATUS} ]]
 then
-  echo "Kurtosis test succeeded."
+  echo "Ava E2E tests succeeded."
   exit 0
 else
-  echo "Kurtosis test failed."
+  echo "Ava E2E tests failed."
   exit 1
 fi
