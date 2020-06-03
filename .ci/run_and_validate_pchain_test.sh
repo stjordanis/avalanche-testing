@@ -5,7 +5,7 @@ ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
 docker pull "${DEFAULT_GECKO_IMAGE}"
 
-bash "${ROOT_DIRPATH}"/scripts/build_images.sh
+bash "${ROOT_DIRPATH}"/scripts/build_controller_image.sh
 LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 
 bash "${ROOT_DIRPATH}"/scripts/build.sh

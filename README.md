@@ -7,12 +7,12 @@ This repo contains end-to-end tests for the Ava network using [the Kurtosis test
 
 ## Local Install
 1. Clone this repository
-1. Run `scripts/build_images.sh`
+1. Run `scripts/build_controller_image.sh`
 1. Run `scripts/build.sh`
 1. Run `build/ava-e2e-tests --help` to see the available flags for running the CLI
 1. Run the binary with the desired flags, noting that:
     * The Gecko image argument must be a Docker image built for Gecko
-    * The test controller image argument will likely be `kurtosistech/ava-e2e-tests_controller:latest` (which was created using `build_images.sh`)
+    * The test controller image argument will likely be `kurtosistech/ava-e2e-tests_controller:latest` (which was created when you built the image above)
 
 **A helpful tip:** as of 2020-06-02, the Kurtosis library doesn't yet stop the Docker containers that got started. You can use the following alias in your `.bashrc` to clear the running containers:
 
