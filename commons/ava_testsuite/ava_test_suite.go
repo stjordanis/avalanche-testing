@@ -1,7 +1,6 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 
