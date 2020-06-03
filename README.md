@@ -7,22 +7,26 @@ This repo contains end-to-end tests for the Ava network using [the Kurtosis test
 
 ## Running Locally
 1. Clone this repository
-1. Run `scripts/build_controller_image.sh`
-1. Run `scripts/build.sh`
-1. Run `build/ava-e2e-tests --help` to see the available flags for running the CLI
-1. Run the binary with the desired flags, noting that:
-    * The Gecko image argument must be a Docker image built for Gecko
-    * The test controller image argument will likely be `kurtosistech/ava-e2e-tests_controller:latest` (which was created when you built the image above)
-1. When you see output like `INFO[0006] Waiting for containerId xxxxxx` then you can Ctl-C to kill the CLI (auto-ending coming this week)
+1. Run `scripts/rebuild_and_run.sh`
 
 In your Docker engine you'll now see:
-* A set of running Docker containers representing the nodes of the test networks (which aren't yet cleaned up - also coming this week)
+* A set of running Docker containers representing the nodes of the test networks
 * A set of stopped Docker containers for the test controllers, one for each test
 
 To view the results of your tests, open the logs of the stopped test controller containers (this will also be improved this week)
 
+## Developing Locally
+Some info:
+* The initializer binary is produced in `build/ava-e2e-tests` every time `scripts/build.sh` is run; you can run this binary with the `--help` flag to see detailed start options
+* The `run.sh` script is a convenience for calling the binary with sane default arguments
+* The controller Docker image is produced to the Docker image tag `kurtosistech/ava-e2e-tests_controller:latest` (at time of writing) every time `scripts/build_controller_image.sh` is run
+* Every time you change:
+    1. The initializer you'll need to rerun `scripts/build.sh`
+    2. The controller you'll need to rerun `scripts/build_controller_image.sh`
+    3. The commons code you'll need to rerun both
+
 ### Helpful Tip
-You can use the following alias to clear running & stopped Docker containers of a certain type:
+You can use the following alias to stop & remove Docker containers of a certain type:
 
 ```
 # alias for clearing kurtosis containers 
