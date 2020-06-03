@@ -7,7 +7,7 @@ This repo contains end-to-end tests for the Ava network using [the Kurtosis test
 
 ## Running Locally
 1. Clone this repository
-1. Run `scripts/rebuild_and_run.sh`
+1. Run `scripts/full_rebuild_and_run.sh`
 
 In your Docker engine you'll now see:
 * A set of running Docker containers representing the nodes of the test networks
@@ -17,12 +17,12 @@ To view the results of your tests, open the logs of the stopped test controller 
 
 ## Developing Locally
 Some info:
-* The initializer binary is produced in `build/ava-e2e-tests` every time `scripts/build.sh` is run; you can run this binary with the `--help` flag to see detailed start options
+* The initializer binary is produced in `build/ava-e2e-tests` every time `scripts/rebuild_initializer_binary.sh` is run; you can run this binary with the `--help` flag to see detailed start options
 * The `run.sh` script is a convenience for calling the binary with sane default arguments
-* The controller Docker image is produced to the Docker image tag `kurtosistech/ava-e2e-tests_controller:latest` (at time of writing) every time `scripts/build_controller_image.sh` is run
+* The controller Docker image is produced to the Docker image tag `kurtosistech/ava-e2e-tests_controller:latest` (at time of writing) every time `scripts/rebuild_controller_image.sh` is run
 * Every time you change:
-    1. The initializer you'll need to rerun `scripts/build.sh`
-    2. The controller you'll need to rerun `scripts/build_controller_image.sh`
+    1. The initializer you'll need to rerun `scripts/rebuild_initializer_binary.sh`
+    2. The controller you'll need to rerun `scripts/rebuild_controller_image.sh`
     3. The commons code you'll need to rerun both
 
 ### Helpful Tip

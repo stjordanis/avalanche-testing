@@ -8,7 +8,7 @@ DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
 docker pull "${DEFAULT_GECKO_IMAGE}"
 
-bash "${ROOT_DIRPATH}/scripts/rebuild_and_run.sh"
+bash "${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"
 ACTUAL_EXIT_STATUS="$(docker ps -a --latest --filter ancestor="${LATEST_CONTROLLER_TAG}" --format="{{.Status}}")"
 EXPECTED_EXIT_STATUS="Exited \(0\).*"
 

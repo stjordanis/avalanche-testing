@@ -1,8 +1,8 @@
 set -euo pipefail
 script_dirpath="$(cd "$(dirname "${0}")" && pwd)"
 
-bash "${script_dirpath}/build_controller_image.sh"
-bash "${script_dirpath}/build.sh"
+bash "${script_dirpath}/rebuild_controller_image.sh"
+bash "${script_dirpath}/rebuild_initializer_binary.sh"
 
 # Allow user to override default Gecko image name if desired
 if [ "${#}" -gt 0 ]; then
