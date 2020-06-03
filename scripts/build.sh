@@ -16,7 +16,7 @@ go build -o "$MAIN_BINARY_OUTPUT_PATH" "$ROOT_DIRPATH/initializer/main.go"
 
 if [ -f "$MAIN_BINARY_OUTPUT_PATH" ]; then
         echo "Build Successful"
-        echo "Built binary at $MAIN_BINARY_OUTPUT_PATH"
+        echo "Built initializer binary at $MAIN_BINARY_OUTPUT_PATH"
         echo "Run '$MAIN_BINARY_OUTPUT_PATH --help' for usage."
 else
         echo "Build failure"
