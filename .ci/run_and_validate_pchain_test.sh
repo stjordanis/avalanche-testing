@@ -6,13 +6,12 @@ DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
 docker pull "${DEFAULT_GECKO_IMAGE}"
 
 bash "${ROOT_DIRPATH}"/scripts/build_images.sh
-LATEST_INITIALIZER_TAG="kurtosistech/ava-e2e-tests_initializer:latest"
-LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller:latest"
+LATEST_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 
-(docker run -v /var/run/docker.sock:/var/run/docker.sock \
---env DEFAULT_GECKO_IMAGE="${DEFAULT_GECKO_IMAGE}" \
---env TEST_CONTROLLER_IMAGE="${LATEST_CONTROLLER_TAG}" \
-"${LATEST_INITIALIZER_TAG}") &
+bash "${ROOT_DIRPATH}"/scripts/build.sh
+
+("${ROOT_DIRPATH}"/build/ava-e2e-tests -gecko-image-name="${DEFAULT_GECKO_IMAGE}"\
+ -test-controller-image-name="${LATEST_CONTROLLER_TAG}") &
 
 kurtosis_pid="${!}"
 
@@ -22,7 +21,7 @@ docker image ls
 docker ps -a
 kill "${kurtosis_pid}"
 
-ACTUAL_EXIT_STATUS="$(docker ps -a --latest --filter ancestor=kurtosistech/ava-test-controller:latest --format="{{.Status}}")"
+ACTUAL_EXIT_STATUS="$(docker ps -a --latest --filter ancestor="${LATEST_CONTROLLER_TAG}" --format="{{.Status}}")"
 EXPECTED_EXIT_STATUS="Exited \(0\).*"
 
 echo "Exit status: ${ACTUAL_EXIT_STATUS}"
