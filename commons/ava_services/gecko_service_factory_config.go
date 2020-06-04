@@ -93,7 +93,7 @@ func (g GeckoServiceFactoryConfig) GetFilepathsToMount() map[string]bool {
 	}
 }
 
-func (g GeckoServiceFactoryConfig) InitalizeMountedFiles(osFiles map[string]*os.File) {
+func (g GeckoServiceFactoryConfig) InitializeMountedFiles(osFiles map[string]*os.File) {
 	for filePath, filePointer := range osFiles {
 		logrus.Debugf("Path: %s, Pointer: %v", filePath, filePointer)
 	}
