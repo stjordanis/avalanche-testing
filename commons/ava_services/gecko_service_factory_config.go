@@ -1,12 +1,17 @@
 package ava_services
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -121,3 +126,40 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 func (g GeckoServiceFactoryConfig) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }
+
+func (g GeckoServiceFactoryConfig) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
+	castedService := toCheck.(GeckoService)
+	httpSocket := castedService.GetJsonRpcSocket()
+
+	requestBody, err := json.Marshal(map[string]string{
+		"jsonrpc": "2.0",
+		"id": "1",
+		"method": "admin.peers",
+	})
+	if err != nil {
+		return false
+	}
+
+	resp, err := http.Post(
+		fmt.Sprintf("http://%v:%v/ext/admin", httpSocket.GetIpAddr(), httpSocket.GetPort().Int()),
+		"application/json",
+		bytes.NewBuffer(requestBody),
+	)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	// TODO parse the response body as JSON and assert that we get the expected number of peers!!
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (g GeckoServiceFactoryConfig) GetStartupTimeout() time.Duration {
+	return 30 * time.Second
+}
+
