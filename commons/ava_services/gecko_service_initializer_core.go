@@ -14,7 +14,7 @@ const (
 	stakingPort = 9651
 )
 
-// ================= Gecko Service ==================================
+// ================= Service ==================================
 
 type GeckoService struct {
 	ipAddr string
@@ -37,7 +37,7 @@ func (g GeckoService) GetJsonRpcSocket() services.ServiceSocket {
 	return *services.NewServiceSocket(g.ipAddr, httpPort)
 }
 
-// ================ Gecko Service Factory =============================
+// ================ Initializer Core =============================
 type geckoLogLevel string
 const (
 	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
@@ -49,19 +49,19 @@ const (
 	CHECK_LIVENESS_RPC_BODY = `{"jsonrpc": "2.0", "id": "1", "method": "admin.peers"}`
 )
 
-type GeckoServiceFactoryConfig struct {
+type GeckoServiceInitializerCore struct {
 	snowSampleSize    int
 	snowQuorumSize    int
 	stakingTlsEnabled bool
 	logLevel          geckoLogLevel
 }
 
-func NewGeckoServiceFactoryConfig(
+func NewGeckoServiceInitializerCore(
 	snowSampleSize int,
 	snowQuorumSize int,
 	stakingTlsEnabled bool,
-	logLevel geckoLogLevel) *GeckoServiceFactoryConfig {
-	return &GeckoServiceFactoryConfig{
+	logLevel geckoLogLevel) *GeckoServiceInitializerCore {
+	return &GeckoServiceInitializerCore{
 		snowSampleSize:    snowSampleSize,
 		snowQuorumSize:    snowQuorumSize,
 		stakingTlsEnabled: stakingTlsEnabled,
@@ -69,14 +69,14 @@ func NewGeckoServiceFactoryConfig(
 	}
 }
 
-func (g GeckoServiceFactoryConfig) GetUsedPorts() map[int]bool {
+func (g GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
 	return map[int]bool{
 		httpPort:    true,
 		stakingPort: true,
 	}
 }
 
-func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
+func (g GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -111,6 +111,6 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 	return commandList
 }
 
-func (g GeckoServiceFactoryConfig) GetServiceFromIp(ipAddr string) services.Service {
+func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }

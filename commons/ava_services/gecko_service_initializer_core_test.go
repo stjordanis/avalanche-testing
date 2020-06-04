@@ -11,7 +11,7 @@ const TEST_IP="172.17.0.2"
 
 
 func TestGetContainerStartCommand(t *testing.T) {
-	initializerConfig := GeckoServiceFactoryConfig{
+	initializerConfig := GeckoServiceInitializerCore{
 		snowSampleSize:    1,
 		snowQuorumSize:    1,
 		stakingTlsEnabled: false,

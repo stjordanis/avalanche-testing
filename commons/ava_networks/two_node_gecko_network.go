@@ -22,7 +22,7 @@ func (network TwoNodeGeckoNetwork) GetDependentNode() ava_services.GeckoService 
 // ============= Loader =====================
 type TwoNodeGeckoNetworkLoader struct {}
 func (loader TwoNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
-	initializerCore := ava_services.NewGeckoServiceFactoryConfig(
+	initializerCore := ava_services.NewGeckoServiceInitializerCore(
 		2,
 		2,
 		false,
