@@ -7,6 +7,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// ============= Network =====================
 type TwoNodeGeckoNetwork struct{
 	bootNode      ava_services.GeckoService
 	dependentNode ava_services.GeckoService
@@ -18,18 +19,18 @@ func (network TwoNodeGeckoNetwork) GetDependentNode() ava_services.GeckoService 
 	return network.dependentNode
 }
 
+// ============= Loader =====================
 type TwoNodeGeckoNetworkLoader struct {}
-func (loader TwoNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (*networks.ServiceNetworkConfig, error) {
-	factoryConfig := ava_services.NewGeckoServiceFactoryConfig(
-		testImageName,
+func (loader TwoNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
+	initializerCore := ava_services.NewGeckoServiceFactoryConfig(
 		2,
 		2,
 		false,
 		ava_services.LOG_LEVEL_DEBUG)
-	factory := services.NewServiceFactory(factoryConfig)
+	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
 	builder := networks.NewServiceNetworkConfigBuilder()
-	config1 := builder.AddServiceConfiguration(*factory)
+	config1 := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)
 	bootNode, err := builder.AddService(config1, make(map[int]bool))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Could not add bootnode service")
@@ -45,11 +46,10 @@ func (loader TwoNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (
 	}
 	return builder.Build(), nil
 }
-func (loader TwoNodeGeckoNetworkLoader) LoadNetwork(ipAddrs map[int]string) (interface{}, error) {
-	bootNode := ava_services.NewGeckoService(ipAddrs[0])
-	dependentNode := ava_services.NewGeckoService(ipAddrs[1])
+func (loader TwoNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {
 	return TwoNodeGeckoNetwork{
-		bootNode:      *bootNode,
-		dependentNode: *dependentNode,
+		bootNode:      services[0].(ava_services.GeckoService),
+		dependentNode: services[1].(ava_services.GeckoService),
 	}, nil
 }
+

@@ -7,6 +7,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// ============= Network =====================
 type SingleNodeGeckoNetwork struct{
 	node ava_services.GeckoService
 }
@@ -14,26 +15,28 @@ func (network SingleNodeGeckoNetwork) GetNode() ava_services.GeckoService {
 	return network.node
 }
 
+// ============== Loader ======================
 type SingleNodeGeckoNetworkLoader struct {}
-func (loader SingleNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (*networks.ServiceNetworkConfig, error) {
-	factoryConfig := ava_services.NewGeckoServiceFactoryConfig(
-		testImageName,
+func (loader SingleNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
+	initializerCore := ava_services.NewGeckoServiceFactoryConfig(
 		1,
 		1,
 		false,
 		ava_services.LOG_LEVEL_DEBUG)
-	factory := services.NewServiceFactory(factoryConfig)
+	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
 	builder := networks.NewServiceNetworkConfigBuilder()
-	config1 := builder.AddServiceConfiguration(*factory)
+	config1 := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)
 	_, err := builder.AddService(config1, make(map[int]bool))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Could not add service")
 	}
 	return builder.Build(), nil
 }
-func (loader SingleNodeGeckoNetworkLoader) LoadNetwork(ipAddrs map[int]string) (interface{}, error) {
+
+func (loader SingleNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {
 	return SingleNodeGeckoNetwork{
-		node: *ava_services.NewGeckoService(ipAddrs[0]),
+		node: services[0].(ava_services.GeckoService),
 	}, nil
 }
+

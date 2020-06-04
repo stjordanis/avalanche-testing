@@ -20,11 +20,6 @@ type GeckoService struct {
 	ipAddr string
 }
 
-func NewGeckoService(ipAddr string) *GeckoService {
-	return &GeckoService{
-		ipAddr:      ipAddr,
-	}
-}
 func (g GeckoService) GetStakingSocket() services.ServiceSocket {
 	stakingPort, err := nat.NewPort("tcp", strconv.Itoa(stakingPort))
 	if err != nil {
@@ -48,32 +43,30 @@ const (
 	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
 	LOG_LEVEL_DEBUG   geckoLogLevel = "debug"
 	LOG_LEVEL_INFO    geckoLogLevel = "info"
+
+
+	// Body to send to check liveness of this type of Gecko service
+	CHECK_LIVENESS_RPC_BODY = `{"jsonrpc": "2.0", "id": "1", "method": "admin.peers"}`
 )
 
 type GeckoServiceFactoryConfig struct {
-	dockerImage       string
 	snowSampleSize    int
 	snowQuorumSize    int
 	stakingTlsEnabled bool
 	logLevel          geckoLogLevel
 }
 
-func NewGeckoServiceFactoryConfig(dockerImage string,
+func NewGeckoServiceFactoryConfig(
 	snowSampleSize int,
 	snowQuorumSize int,
 	stakingTlsEnabled bool,
 	logLevel geckoLogLevel) *GeckoServiceFactoryConfig {
 	return &GeckoServiceFactoryConfig{
-		dockerImage:       dockerImage,
 		snowSampleSize:    snowSampleSize,
 		snowQuorumSize:    snowQuorumSize,
 		stakingTlsEnabled: stakingTlsEnabled,
 		logLevel:          logLevel,
 	}
-}
-
-func (g GeckoServiceFactoryConfig) GetDockerImage() string {
-	return g.dockerImage
 }
 
 func (g GeckoServiceFactoryConfig) GetUsedPorts() map[int]bool {
