@@ -7,11 +7,11 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
-type FiveNodeGeckoNetwork struct{
+type FiveNodeStakingGeckoNetwork struct{
 	geckoServices map[int]ava_services.GeckoService
 }
 
-func (network FiveNodeGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoService, error){
+func (network FiveNodeStakingGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoService, error){
 	if i < 0 || i >= len(network.geckoServices) {
 		return ava_services.GeckoService{}, stacktrace.NewError("Invalid Gecko service ID")
 	}
@@ -21,8 +21,8 @@ func (network FiveNodeGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoSe
 }
 
 
-type FiveNodeGeckoNetworkLoader struct{}
-func (loader FiveNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (*networks.ServiceNetworkConfig, error) {
+type FiveNodeStakingGeckoNetworkLoader struct{}
+func (loader FiveNodeStakingGeckoNetworkLoader) GetNetworkConfig(testImageName string) (*networks.ServiceNetworkConfig, error) {
 	factoryConfig := ava_services.NewGeckoServiceFactoryConfig(
 		testImageName,
 		2,
@@ -74,12 +74,12 @@ func (loader FiveNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) 
 	return builder.Build(), nil
 }
 
-func (loader FiveNodeGeckoNetworkLoader) LoadNetwork(ipAddrs map[int]string) (interface{}, error) {
+func (loader FiveNodeStakingGeckoNetworkLoader) LoadNetwork(ipAddrs map[int]string) (interface{}, error) {
 	geckoServices := make(map[int]ava_services.GeckoService)
 	for serviceId, ipAddr := range ipAddrs {
 		geckoServices[serviceId] = *ava_services.NewGeckoService(ipAddr)
 	}
-	return TenNodeGeckoNetwork{
+	return FiveNodeStakingGeckoNetwork{
 		geckoServices: geckoServices,
 	}, nil
 }
