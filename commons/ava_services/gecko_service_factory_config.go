@@ -5,6 +5,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -12,6 +13,8 @@ import (
 const (
 	httpPort = 9650
 	stakingPort = 9651
+	stakingTlsCertPath = "node.crt"
+	stakingTlsKeyPath = "node.key"
 )
 
 // ================= Gecko Service ==================================
@@ -81,6 +84,20 @@ func (g GeckoServiceFactoryConfig) GetUsedPorts() map[int]bool {
 		httpPort:    true,
 		stakingPort: true,
 	}
+}
+
+func (g GeckoServiceFactoryConfig) GetFilepathsToMount() map[string]bool {
+	return map[string]bool{
+		stakingTlsCertPath: true,
+		stakingTlsKeyPath: true,
+	}
+}
+
+func (g GeckoServiceFactoryConfig) InitalizeMountedFiles(osFiles map[string]*os.File) {
+	for filePath, filePointer := range osFiles {
+		log.Printf("Path: %s, Pointer: %v", filePath, filePointer)
+	}
+	log.Printf("Filepaths: %+v", g.GetFilepathsToMount())
 }
 
 func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
