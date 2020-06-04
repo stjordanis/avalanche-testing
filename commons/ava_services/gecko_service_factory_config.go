@@ -94,7 +94,7 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 		fmt.Sprintf("--log-level=%s", g.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", g.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", g.snowQuorumSize),
-		fmt.Sprintf("--staking-tls-enabled=%v", g.stakingTlsEnabled),
+		fmt.Sprintf("--staking-tls-enabled=%v", false),
 	}
 
 	// If bootstrap nodes are down then Gecko will wait until they are, so we don't actually need to busy-loop making
