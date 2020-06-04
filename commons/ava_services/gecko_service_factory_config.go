@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"log"
+	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"strings"
@@ -95,9 +95,9 @@ func (g GeckoServiceFactoryConfig) GetFilepathsToMount() map[string]bool {
 
 func (g GeckoServiceFactoryConfig) InitalizeMountedFiles(osFiles map[string]*os.File) {
 	for filePath, filePointer := range osFiles {
-		log.Printf("Path: %s, Pointer: %v", filePath, filePointer)
+		logrus.Debugf("Path: %s, Pointer: %v", filePath, filePointer)
 	}
-	log.Printf("Filepaths: %+v", g.GetFilepathsToMount())
+	logrus.Printf("Filepaths: %+v", g.GetFilepathsToMount())
 }
 
 func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
@@ -131,7 +131,7 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
 	}
-	log.Printf("Command List: %+v", commandList)
+	logrus.Infof("Command List: %+v", commandList)
 	return commandList
 }
 
