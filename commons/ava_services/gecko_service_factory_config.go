@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"log"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 )
@@ -107,7 +107,7 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
 	}
-	log.Printf("Command List: %+v", commandList)
+	logrus.Debugf("Command list: %+v", commandList)
 	return commandList
 }
 
