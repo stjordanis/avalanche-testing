@@ -7,6 +7,7 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+// ============== Network ======================
 type TenNodeGeckoNetwork struct{
 	geckoServices map[int]ava_services.GeckoService
 }
@@ -19,19 +20,18 @@ func (network TenNodeGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoSer
 	return service, nil
 }
 
-
+// ============== Loader ======================
 type TenNodeGeckoNetworkLoader struct{}
-func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (*networks.ServiceNetworkConfig, error) {
-	factoryConfig := ava_services.NewGeckoServiceFactoryConfig(
-		testImageName,
+func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
+	initializerCore := ava_services.NewGeckoServiceFactoryConfig(
 		2,
 		2,
 		false,
 		ava_services.LOG_LEVEL_DEBUG)
-	factory := services.NewServiceFactory(factoryConfig)
+	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
 	builder := networks.NewServiceNetworkConfigBuilder()
-	config1 := builder.AddServiceConfiguration(*factory)
+	config1 := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)
 	bootNode0, err := builder.AddService(config1, make(map[int]bool))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Could not add bootnode service")
@@ -72,12 +72,14 @@ func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig(testImageName string) (
 
 	return builder.Build(), nil
 }
-func (loader TenNodeGeckoNetworkLoader) LoadNetwork(ipAddrs map[int]string) (interface{}, error) {
+
+func (loader TenNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {
 	geckoServices := make(map[int]ava_services.GeckoService)
-	for serviceId, ipAddr := range ipAddrs {
-		geckoServices[serviceId] = *ava_services.NewGeckoService(ipAddr)
+	for serviceId, service := range services {
+		geckoServices[serviceId] = service.(ava_services.GeckoService)
 	}
 	return TenNodeGeckoNetwork{
 		geckoServices: geckoServices,
 	}, nil
 }
+
