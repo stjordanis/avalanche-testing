@@ -36,6 +36,7 @@ func (api PChainApi) GetCurrentValidators() ([]Validator, error) {
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
+
 	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetValidatorsResponse
 	if err := json.Unmarshal(requestBody, &response); err != nil {
