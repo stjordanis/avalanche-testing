@@ -2,6 +2,7 @@ package ava_networks
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
@@ -9,15 +10,15 @@ import (
 
 // ============== Network ======================
 type NNodeGeckoNetwork struct{
-	geckoServices map[int]ava_services.GeckoService
+	geckoClients map[int]gecko_client.GeckoClient
 }
-func (network NNodeGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoService, error){
-	if i < 0 || i >= len(network.geckoServices) {
-		return ava_services.GeckoService{}, stacktrace.NewError("Invalid Gecko service ID")
+func (network NNodeGeckoNetwork) GetGeckoClient(i int) (gecko_client.GeckoClient, error){
+	if i < 0 || i >= len(network.geckoClients) {
+		return gecko_client.GeckoClient{}, stacktrace.NewError("Invalid Gecko client ID")
 	}
 	// TODO if we're just getting ava_services back from the ServiceConfigBuilder, then how can we make assumptions here??
-	service := network.geckoServices[i]
-	return service, nil
+	client := network.geckoClients[i]
+	return client, nil
 }
 
 // ============== Loader ======================
@@ -65,12 +66,14 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 }
 
 func (loader NNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {
-	geckoServices := make(map[int]ava_services.GeckoService)
+	geckoClients := make(map[int]gecko_client.GeckoClient)
 	for serviceId, service := range services {
-		geckoServices[serviceId] = service.(ava_services.GeckoService)
+		jsonRpcSocket := service.(ava_services.GeckoService).GetJsonRpcSocket()
+		clientPtr := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
+		geckoClients[serviceId] = *clientPtr
 	}
 	return NNodeGeckoNetwork{
-		geckoServices: geckoServices,
+		geckoClients: geckoClients,
 	}, nil
 }
 
