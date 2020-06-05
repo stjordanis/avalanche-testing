@@ -27,6 +27,7 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 	endpoint = strings.TrimLeft(endpoint, "/")
 
 	requestBodyStr := fmt.Sprintf(
+		// TODO once we have params we'll need to do real JSON marshalling
 		`{"jsonrpc": "%v", "method": "%v", "params":{},"id": %v}`,
 		JSON_RPC_VERSION,
 		method,
@@ -42,10 +43,10 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 		"application/json",
 		bytes.NewBuffer(requestBodyBytes),
 	)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error occurred when making JSON RPC POST request to %v", url)
 	}
+	defer resp.Body.Close()
 	statusCode := resp.StatusCode
 	logrus.Tracef("Got response with status code: %v", statusCode)
 
@@ -68,6 +69,7 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 type GeckoClient struct {
 	pChainApi PChainApi
 	adminApi  AdminApi
+	healthApi HealthApi
 }
 
 func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
@@ -79,6 +81,7 @@ func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
 	return &GeckoClient{
 		pChainApi: PChainApi{rpcRequester: rpcRequester},
 		adminApi: AdminApi{rpcRequester: rpcRequester},
+		healthApi: HealthApi{rpcRequester: rpcRequester},
 	}
 }
 
@@ -88,4 +91,8 @@ func (client GeckoClient) PChainApi() PChainApi {
 
 func (client GeckoClient) AdminApi() AdminApi {
 	return client.adminApi
+}
+
+func (client GeckoClient) HealthApi() HealthApi {
+	return client.healthApi
 }

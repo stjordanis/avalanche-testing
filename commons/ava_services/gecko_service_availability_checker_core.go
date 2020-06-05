@@ -1,41 +1,31 @@
 package ava_services
 
 import (
-	"bytes"
-	"fmt"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
+	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
 	"time"
+)
+
+
+const (
+	// Body to send to check liveness of this type of Gecko service
+	checkLivenessRpcBody = `{"jsonrpc": "2.0", "id": "1", "method": "admin.peers"}`
 )
 
 type GeckoServiceAvailabilityCheckerCore struct {}
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
 	castedService := toCheck.(GeckoService)
-	httpSocket := castedService.GetJsonRpcSocket()
-
-	jsonBodyBytes := []byte(CHECK_LIVENESS_RPC_BODY)
-	jsonBodyBuffer := bytes.NewBuffer(jsonBodyBytes)
-	resp, err := http.Post(
-		fmt.Sprintf("http://%v:%v/ext/admin", httpSocket.GetIpAddr(), httpSocket.GetPort().Int()),
-		"application/json",
-		jsonBodyBuffer,
-	)
+	jsonRpcSocket := castedService.GetJsonRpcSocket()
+	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
+	healthInfo, err := client.HealthApi().GetLiveness()
 	if err != nil {
-		logrus.Tracef("Error occurred in request to get peers: %v", err)
-		return false
-	}
-	defer resp.Body.Close()
-
-	// TODO parse the response body as JSON and assert that we get the expected number of peers!!
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logrus.Tracef("Error occurred when parsing response body: %v", err)
+		logrus.Trace(stacktrace.Propagate(err, "Error occurred in getting liveness"))
 		return false
 	}
 
-	return true
+	return healthInfo.Healthy
 }
 
 func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
