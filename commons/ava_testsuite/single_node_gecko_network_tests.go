@@ -2,12 +2,11 @@ package ava_testsuite
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-)
-
-const (
+	"time"
 )
 
 // =============== Basic Test ==================================
@@ -41,9 +40,20 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
 	}
 
-	validators, err := client.PChainApi().GetCurrentValidators()
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get current validators"))
+	// TODO This retry logic is only necessary because there's not a way for Ava nodes to reliably report
+	//  bootstrapping as complete; remove it when Gecko can report successful bootstrapping
+	var validators []gecko_client.Validator
+	for i := 0; i < 5; i++ {
+		validators, err = client.PChainApi().GetCurrentValidators()
+		if err == nil {
+			break
+		}
+		logrus.Error(stacktrace.Propagate(err, "Could not get current validators; sleeping for 5 seconds..."))
+		time.Sleep(5 * time.Second)
+	}
+	// TODO This should go away as soon as Ava can reliably report bootstrapping as complete
+	if validators == nil {
+		context.Fatal(stacktrace.NewError("Could not get validators even after retrying!"))
 	}
 
 	for _, validator := range validators {
