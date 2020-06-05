@@ -22,7 +22,7 @@ func (network TenNodeGeckoNetwork) GetGeckoService(i int) (ava_services.GeckoSer
 
 // ============== Loader ======================
 type TenNodeGeckoNetworkLoader struct{}
-func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
+func (loader TenNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkConfigBuilder) error {
 	initializerCore := ava_services.NewGeckoServiceInitializerCore(
 		2,
 		2,
@@ -30,11 +30,10 @@ func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNet
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
-	builder := networks.NewServiceNetworkConfigBuilder()
 	config1 := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)
 	bootNode0, err := builder.AddService(config1, make(map[int]bool))
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Could not add bootnode service")
+		return stacktrace.Propagate(err, "Could not add bootnode service")
 	}
 	bootNode1, err := builder.AddService(
 		config1,
@@ -43,7 +42,7 @@ func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNet
 		},
 	)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Could not add dependent service")
+		return stacktrace.Propagate(err, "Could not add dependent service")
 	}
 	bootNode2, err := builder.AddService(
 		config1,
@@ -53,7 +52,7 @@ func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNet
 		},
 	)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Could not add dependent service")
+		return stacktrace.Propagate(err, "Could not add dependent service")
 	}
 	bootNodeMap := map[int]bool{
 		bootNode0: true,
@@ -66,11 +65,11 @@ func (loader TenNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNet
 			bootNodeMap,
 		)
 		if err != nil {
-			return nil, stacktrace.Propagate(err, "Could not add dependent service")
+			return stacktrace.Propagate(err, "Could not add dependent service")
 		}
 	}
 
-	return builder.Build(), nil
+	return nil
 }
 
 func (loader TenNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {

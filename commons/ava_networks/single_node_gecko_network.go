@@ -17,7 +17,7 @@ func (network SingleNodeGeckoNetwork) GetNode() ava_services.GeckoService {
 
 // ============== Loader ======================
 type SingleNodeGeckoNetworkLoader struct {}
-func (loader SingleNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
+func (loader SingleNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkConfigBuilder) error {
 	initializerCore := ava_services.NewGeckoServiceInitializerCore(
 		1,
 		1,
@@ -25,13 +25,12 @@ func (loader SingleNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.Service
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
-	builder := networks.NewServiceNetworkConfigBuilder()
 	config1 := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)
 	_, err := builder.AddService(config1, make(map[int]bool))
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "Could not add service")
+		return stacktrace.Propagate(err, "Could not add service")
 	}
-	return builder.Build(), nil
+	return nil
 }
 
 func (loader SingleNodeGeckoNetworkLoader) WrapNetwork(services map[int]services.Service) (interface{}, error) {
