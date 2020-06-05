@@ -14,25 +14,25 @@ type PChainApi struct {
 	rpcRequester geckoJsonRpcRequester
 }
 
-type Validator struct {
-	StartTime string `json:"startTime"`
-	EndTime string	`json:"endTime"`
-	StakeAmount string	`json:"stakeAmount"`
-	Id string	`json:"id"`
-}
+func (api PChainApi) GetBlockchainStatus(blockchainId string) (BlockchainStatus, error) {
+	params := map[string]interface{}{
+		"blockchainID": blockchainId,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getBlockchainStatus", params)
+	if err != nil {
+		return BlockchainStatus{}, stacktrace.Propagate(err, "Error making request")
+	}
 
-type ValidatorList struct {
-	Validators []Validator	`json:"validators"`
-}
-
-type GetValidatorsResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result ValidatorList	`json:"result"`
-	Id int	`json:"id"`
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetBlockchainStatusResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return BlockchainStatus{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result, nil
 }
 
 func (api PChainApi) GetCurrentValidators() ([]Validator, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getCurrentValidators")
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getCurrentValidators", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}

@@ -33,7 +33,7 @@ type HealthApi struct {
 }
 
 func (api HealthApi) GetLiveness() (LivenessInfo, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(healthApiEndpoint, "health.getLiveness")
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(healthApiEndpoint, "health.getLiveness", make(map[string]interface{}))
 	if err != nil {
 		return LivenessInfo{}, stacktrace.Propagate(err, "Error getting liveness")
 	}

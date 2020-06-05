@@ -4,3 +4,5 @@
 * Updated CI check & documentation to reflect the use of the convenience scripts
 * Switched ServiceAvailabilityCheckerCore to use the `health` API's getLiveness call
 * Added `GeckoClient` with some basic endpoint implementations
+* Add parameters to `makeRpcRequest` on Gecko client
+* Add `GetBlockchainStatus` endpoint on Gecko client

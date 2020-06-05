@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/go-connections/nat"
 	"github.com/palantir/stacktrace"
@@ -21,23 +22,40 @@ type geckoJsonRpcRequester struct {
 	port nat.Port
 }
 
-func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method string) ([]byte, error) {
+type jsonRpcRequest struct {
+	jsonRpc string
+	method string
+	params map[string]interface{}
+	id int
+}
+
+func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error) {
 	// Either Golang or Ava have a very nasty & subtle behaviour where duplicated '//' in the URL is treated as GET, even if it's POST
 	// https://stackoverflow.com/questions/23463601/why-golang-treats-my-post-request-as-a-get-one
 	endpoint = strings.TrimLeft(endpoint, "/")
 
-	requestBodyStr := fmt.Sprintf(
-		// TODO once we have params we'll need to do real JSON marshalling
-		`{"jsonrpc": "%v", "method": "%v", "params":{},"id": %v}`,
-		JSON_RPC_VERSION,
-		method,
+	request := jsonRpcRequest{
+		jsonRpc: JSON_RPC_VERSION,
+		method: method,
+		params:  params,
 		// TODO let the user set this?
-		1)
-	requestBodyBytes := []byte(requestBodyStr)
+		id: 1,
+	}
+
+	requestBodyBytes, err := json.Marshal(request)
+	if err != nil {
+		return nil, stacktrace.Propagate(
+			err,
+			"Could not marshall request to endpoint '%v' with method '%v' and params '%v' to JSON",
+			endpoint,
+			method,
+			params)
+	}
+
 	url := fmt.Sprintf("http://%v:%v/%v", requester.ipAddr, requester.port.Int(), endpoint)
 
 	logrus.Tracef("Making request to url: %v", url)
-	logrus.Tracef("Request body: %v", requestBodyStr)
+	logrus.Tracef("Request body: %v", string(requestBodyBytes))
 	resp, err := http.Post(
 		url,
 		"application/json",

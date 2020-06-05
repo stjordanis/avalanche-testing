@@ -34,7 +34,7 @@ type GetPeersResponse struct {
 
 // TODO Maybe parse the response into IPAddr:Port for the user?
 func (api AdminApi) GetPeers() ([]Peer, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers")
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
