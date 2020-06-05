@@ -18,7 +18,7 @@ func (network SingleNodeGeckoNetwork) GetNode() ava_services.GeckoService {
 // ============== Loader ======================
 type SingleNodeGeckoNetworkLoader struct {}
 func (loader SingleNodeGeckoNetworkLoader) GetNetworkConfig() (*networks.ServiceNetworkConfig, error) {
-	initializerCore := ava_services.NewGeckoServiceFactoryConfig(
+	initializerCore := ava_services.NewGeckoServiceInitializerCore(
 		1,
 		1,
 		false,
