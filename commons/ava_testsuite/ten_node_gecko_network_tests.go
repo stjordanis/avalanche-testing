@@ -11,9 +11,10 @@ import (
 	"net/http"
 )
 
+// =============== Basic Test ==================================
 type TenNodeGeckoNetworkBasicTest struct {}
 func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TenNodeGeckoNetwork)
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
 	service, err := castedNetwork.GetGeckoService(0)
 	if err != nil {
@@ -49,14 +50,15 @@ func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite
 	println(string(body))
 }
 
-func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() testsuite.TestNetworkLoader {
-	return ava_networks.TenNodeGeckoNetworkLoader{}
+func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3)
 }
 
 
+// =============== Get Validators Test ==================================
 type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TenNodeGeckoNetwork)
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
 	// TODO Move these into a better location
 	RPC_BODY := `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
@@ -95,7 +97,7 @@ func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context tes
 	context.AssertTrue(len(validatorList) >= 1)
 }
 
-func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() testsuite.TestNetworkLoader {
-	return ava_networks.TenNodeGeckoNetworkLoader{}
+func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3)
 }
 

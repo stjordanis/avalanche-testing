@@ -14,10 +14,15 @@ import (
 const (
 )
 
+// =============== Basic Test ==================================
 type SingleNodeGeckoNetworkBasicTest struct {}
 func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
-	httpSocket := castedNetwork.GetNode().GetJsonRpcSocket()
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	service, err := castedNetwork.GetGeckoService(0)
+	if err != nil {
+		context.Fatal(err)
+	}
+	httpSocket := service.GetJsonRpcSocket()
 
 	requestBody, err := json.Marshal(map[string]string{
 		"jsonrpc": "2.0",
@@ -46,14 +51,14 @@ func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context tes
 	// TODO parse the response as JSON and assert that we get the expected number of peers
 	println(string(body))
 }
-
-func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() testsuite.TestNetworkLoader {
-	return ava_networks.SingleNodeGeckoNetworkLoader{}
+func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1)
 }
 
+// =============== Get Validators Test ==================================
 type SingleNodeNetworkGetValidatorsTest struct{}
 func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.SingleNodeGeckoNetwork)
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
 	// TODO Move these into a better location
 	RPC_BODY := `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
@@ -64,7 +69,11 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 	logrus.Infof("Test request as string: %s", jsonBuffer.String())
 
 	var validatorList ValidatorList
-	jsonRpcSocket := castedNetwork.GetNode().GetJsonRpcSocket()
+	service, err := castedNetwork.GetGeckoService(0)
+	if err != nil {
+		context.Fatal(err)
+	}
+	jsonRpcSocket := service.GetJsonRpcSocket()
 	endpoint := fmt.Sprintf("http://%v:%v/%v", jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort().Int(), GetPChainEndpoint())
 	resp, err := http.Post(endpoint, "application/json", jsonBuffer)
 	if err != nil {
@@ -87,7 +96,7 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 	context.AssertTrue(len(validatorList) >= 1)
 }
 
-func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() testsuite.TestNetworkLoader {
-	return ava_networks.SingleNodeGeckoNetworkLoader{}
+func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1)
 }
 
