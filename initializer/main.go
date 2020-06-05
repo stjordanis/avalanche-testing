@@ -6,6 +6,7 @@ import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
+	"os"
 	"strings"
 )
 
@@ -71,8 +72,22 @@ func main() {
 
 	// Create the container based on the configurations, but don't start it yet.
 	fmt.Println("I'm going to run a Gecko testnet, and hang while it's running! Kill me and then clear your docker containers.")
-	error := testSuiteRunner.RunTests(testNames)
+	results, error := testSuiteRunner.RunTests(testNames)
 	if error != nil {
 		panic(error)
+	}
+
+	logrus.Info("=========== TEST RESULTS ============")
+	allTestsSucceeded := true
+	for testName, result := range results {
+		// TODO get information about why stuff failed
+		logrus.Infof("- %v: %v", testName, result)
+		allTestsSucceeded = allTestsSucceeded && result == initializer.PASSED
+	}
+
+	if allTestsSucceeded {
+		os.Exit(0)
+	} else {
+		os.Exit(1)
 	}
 }

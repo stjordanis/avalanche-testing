@@ -93,7 +93,6 @@ func (g GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, depend
 	// If bootstrap nodes are down then Gecko will wait until they are, so we don't actually need to busy-loop making
 	// requests to the nodes
 	if dependencies != nil && len(dependencies) > 0 {
-		// TODO realllllllly wish Go had generics, so we didn't have to do this!
 		avaDependencies := make([]AvaService, 0, len(dependencies))
 		for _, service := range dependencies {
 			avaDependencies = append(avaDependencies, service.(AvaService))
