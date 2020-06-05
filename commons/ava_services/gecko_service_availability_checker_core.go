@@ -8,12 +8,6 @@ import (
 	"time"
 )
 
-
-const (
-	// Body to send to check liveness of this type of Gecko service
-	checkLivenessRpcBody = `{"jsonrpc": "2.0", "id": "1", "method": "admin.peers"}`
-)
-
 type GeckoServiceAvailabilityCheckerCore struct {}
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
 	castedService := toCheck.(GeckoService)
@@ -21,7 +15,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
 	healthInfo, err := client.HealthApi().GetLiveness()
 	if err != nil {
-		logrus.Trace(stacktrace.Propagate(err, "Error occurred in getting liveness"))
+		logrus.Trace(stacktrace.Propagate(err, "Error occurred in getting liveness info"))
 		return false
 	}
 

@@ -38,7 +38,7 @@ type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
-	// TODO want to make sure all nodes agree about the number of validators!
+	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
