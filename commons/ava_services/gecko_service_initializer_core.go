@@ -107,7 +107,6 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 	}
 	certFilePointer.Write(certPEM.Bytes())
 	keyFilePointer.Write(keyPEM.Bytes())
-	logrus.Debugf("Wrote certfile %s", certPEM.String())
 	return nil
 }
 
