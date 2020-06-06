@@ -32,6 +32,12 @@ func NewNNodeGeckoNetworkLoader(numNodes int, numBootNodes int, isStaking bool) 
 	if numBootNodes > numNodes {
 		return nil, stacktrace.NewError("Asked for %v boot nodes but network only has %v nodes", numBootNodes, numNodes)
 	}
+	/*
+	  TODO Implement more than one bootnode for staking.
+	 */
+	if isStaking && numBootNodes != 1 {
+		return nil, stacktrace.NewError("Staking networks currently require exactly one bootnode.")
+	}
 	return &NNodeGeckoNetworkLoader{
 		numNodes:     numNodes,
 		numBootNodes: numBootNodes,

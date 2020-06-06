@@ -29,7 +29,7 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 	}
 
 	func (s FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-		return ava_networks.NewNNodeGeckoNetworkLoader(5, 3, true)
+		return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 	}
 
 
@@ -68,6 +68,6 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(5, 3, true)
+	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 }
 

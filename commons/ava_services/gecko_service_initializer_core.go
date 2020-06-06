@@ -149,7 +149,7 @@ func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, servi
 			if g.stakingTlsEnabled {
 				// We hardcode the first bootstrapper ID from the TLS identities in gecko_service_tls_identities
 				commandList = append(commandList, "--bootstrap-ids=" + STAKER_1_NODE_ID)
-				// You only need one bootstrapper dependency, and we only currently have one cert -> ID mapping so break for loop here.
+				// We currently have one cert -> ID mapping so break the for loop here.
 				break
 			}
 		}
