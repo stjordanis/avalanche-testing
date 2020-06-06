@@ -77,7 +77,7 @@ func main() {
 		panic(error)
 	}
 
-	logrus.Info("=========== TEST RESULTS ============")
+	logrus.Info("================================== TEST RESULTS ================================")
 	allTestsSucceeded := true
 	for testName, result := range results {
 		// TODO get information about why stuff failed

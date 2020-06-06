@@ -1,14 +1,12 @@
 package ava_testsuite
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
+	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
+	"time"
 )
 
 // =============== Basic Test ==================================
@@ -16,38 +14,18 @@ type TenNodeGeckoNetworkBasicTest struct {}
 func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
-	service, err := castedNetwork.GetGeckoService(0)
+	// TODO check ALL nodes!
+	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
-		context.Fatal(err)
-	}
-	httpSocket := service.GetJsonRpcSocket()
-
-	requestBody, err := json.Marshal(map[string]string{
-		"jsonrpc": "2.0",
-		"id": "1",
-		"method": "admin.peers",
-	})
-	if err != nil {
-		context.Fatal(err)
+		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
 	}
 
-	resp, err := http.Post(
-		fmt.Sprintf("http://%v:%v/ext/admin", httpSocket.GetIpAddr(), httpSocket.GetPort().Int()),
-		"application/json",
-		bytes.NewBuffer(requestBody),
-	)
+	peers, err := client.AdminApi().GetPeers()
 	if err != nil {
-		context.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		context.Fatal(err)
+		context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
 	}
 
-	// TODO parse the response as JSON and assert that we get the expected number of peers
-	println(string(body))
+	context.AssertTrue(len(peers) == 9)
 }
 
 func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
@@ -60,41 +38,33 @@ type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
-	// TODO Move these into a better location
-	RPC_BODY := `{"jsonrpc": "2.0", "method": "platform.getCurrentValidators", "params":{},"id": 1}`
-
-	// Run RPC Test on PChain.
-	var jsonStr = []byte(RPC_BODY)
-	var jsonBuffer = bytes.NewBuffer(jsonStr)
-	logrus.Infof("Test request as string: %s", jsonBuffer.String())
-
-	var validatorList ValidatorList
-	service, err := castedNetwork.GetGeckoService(0)
+	// TODO we need to make sure ALL the nodes agree about validators!
+	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
-		panic(err)
-	}
-	jsonRpcSocket := service.GetJsonRpcSocket()
-	endpoint := fmt.Sprintf("http://%v:%v/%v", jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort().Int(), GetPChainEndpoint())
-
-	resp, err := http.Post(endpoint, "application/json", jsonBuffer)
-	if err != nil {
-		context.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logrus.Fatalln(err)
+		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
 	}
 
-	var validatorResponse ValidatorResponse
-	json.Unmarshal(body, &validatorResponse)
-
-	validatorList = validatorResponse.Result["validators"]
-	for _, validator := range validatorList {
-		logrus.Infof("Validator id: %s", validator.Id)
+	// TODO This retry logic is only necessary because there's not a way for Ava nodes to reliably report
+	//  bootstrapping as complete; remove it when Gecko can report successful bootstrapping
+	var validators []gecko_client.Validator
+	for i := 0; i < 5; i++ {
+		validators, err = client.PChainApi().GetCurrentValidators()
+		if err == nil {
+			break
+		}
+		logrus.Error(stacktrace.Propagate(err, "Could not get current validators; sleeping for 5 seconds..."))
+		time.Sleep(5 * time.Second)
 	}
-	context.AssertTrue(len(validatorList) >= 1)
+	// TODO This should go away as soon as Ava can reliably report bootstrapping as complete
+	if validators == nil {
+		context.Fatal(stacktrace.NewError("Could not get validators even after retrying!"))
+	}
+
+	for _, validator := range validators {
+		logrus.Infof("Validator ID: %s", validator.Id)
+	}
+	// TODO change this to be specific
+	context.AssertTrue(len(validators) >= 1)
 }
 
 func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {

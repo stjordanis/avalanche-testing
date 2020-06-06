@@ -43,10 +43,6 @@ const (
 	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
 	LOG_LEVEL_DEBUG   geckoLogLevel = "debug"
 	LOG_LEVEL_INFO    geckoLogLevel = "info"
-
-
-	// Body to send to check liveness of this type of Gecko service
-	CHECK_LIVENESS_RPC_BODY = `{"jsonrpc": "2.0", "id": "1", "method": "admin.peers"}`
 )
 
 type GeckoServiceInitializerCore struct {
