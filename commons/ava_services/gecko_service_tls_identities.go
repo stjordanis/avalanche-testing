@@ -1,5 +1,7 @@
 package ava_services
 
+const STAKER_1_NODE_ID = "7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"
+
 const STAKER_1_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
 MIIJKAIBAAKCAgEAymEkcP1tGKWB/zE0IYha0dJvPZesk7sy6Q7Y7na/+UZ4SD77
 apO2CBpv5vZdvccEeCea+0mRrPu9MgXrZG0voez8Cdq5lg8G63ciSr1QYan/JEp/

@@ -146,13 +146,15 @@ func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, servi
 		for _, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			break
+			if g.stakingTlsEnabled {
+				// We hardcode the first bootstrapper ID from the TLS identities in gecko_service_tls_identities
+				commandList = append(commandList, "--bootstrap-ids=" + STAKER_1_NODE_ID)
+				// You only need one bootstrapper dependency, and we only currently have one cert -> ID mapping so break for loop here.
+				break
+			}
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
-		if g.stakingTlsEnabled {
-			commandList = append(commandList, "--bootstrap-ids="+"7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg")
-		}
 	}
 	logrus.Debugf("Command list: %+v", commandList)
 	return commandList, nil
