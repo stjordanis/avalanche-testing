@@ -96,21 +96,26 @@ func (g GeckoServiceInitializerCore) GetFilepathsToMount() map[string]bool {
 	return make(map[string]bool)
 }
 
-func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File) (err error) {
+func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
 	certFilePointer := osFiles[stakingTlsCertPath]
 	keyFilePointer := osFiles[stakingTlsKeyPath]
-	rootCA := getRootCA()
-	serviceCert := getServiceCert()
-	certPEM, keyPEM, err := getServiceCertAndKeyFiles(serviceCert, rootCA)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to write files.")
+	if len(dependencies) == 0 {
+		certFilePointer.WriteString(STAKER_1_CERT)
+		keyFilePointer.WriteString(STAKER_1_PRIVATE_KEY)
+	} else {
+		rootCA := getRootCA()
+		serviceCert := getServiceCert()
+		certPEM, keyPEM, err := getServiceCertAndKeyFiles(serviceCert, rootCA)
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to write files.")
+		}
+		certFilePointer.Write(certPEM.Bytes())
+		keyFilePointer.Write(keyPEM.Bytes())
 	}
-	certFilePointer.Write(certPEM.Bytes())
-	keyFilePointer.Write(keyPEM.Bytes())
 	return nil
 }
 
-func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, serviceDataDir string, dependencies []services.Service) []string {
+func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, serviceDataDir string, dependencies []services.Service) ([]string, error) {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -141,41 +146,22 @@ func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, servi
 		for _, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
+			break
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
+		if g.stakingTlsEnabled {
+			commandList = append(commandList, "--bootstrap-ids="+"7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg")
+		}
 	}
 	logrus.Debugf("Command list: %+v", commandList)
-	return commandList
+	return commandList, nil
 }
 
 func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }
 
-// cert and key code from https://shaneutt.com/blog/golang-ca-and-signed-cert-go/
-/*
-func getRootCACertAndKeyFiles(ca *x509.Certificate) (certFile *bytes.Buffer, keyFile *bytes.Buffer, err error) {
-	caPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
-	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "")
-	}
-	caBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, &caPrivKey.PublicKey, caPrivKey)
-	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "")
-	}
-	caPEM := new(bytes.Buffer)
-	pem.Encode(caPEM, &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: caBytes,
-	})
-	caPrivKeyPEM := new(bytes.Buffer)
-	pem.Encode(caPrivKeyPEM, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(caPrivKey),
-	})
-	return caPEM, caPrivKeyPEM, nil
-}*/
 
 func getServiceCertAndKeyFiles(cert *x509.Certificate, ca *x509.Certificate) (certFile *bytes.Buffer, keyFile *bytes.Buffer, err error) {
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
@@ -223,7 +209,7 @@ func getRootCA() *x509.Certificate {
 
 func getServiceCert() *x509.Certificate {
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(1658),
+		SerialNumber: big.NewInt(1993),
 		Subject: pkix.Name{
 			Organization:  []string{"Kurtosis Technologies"},
 			Country:       []string{"USA"},

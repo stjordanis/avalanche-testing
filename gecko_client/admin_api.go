@@ -13,6 +13,10 @@ type AdminApi struct {
 	rpcRequester geckoJsonRpcRequester
 }
 
+type NodeID struct {
+	NodeID string
+}
+
 type Peer struct {
 	IP string	`json:"ip"`
 	PublicIP string 	`json:"publicIP"`
@@ -32,6 +36,12 @@ type GetPeersResponse struct {
 	Id int	`json:"id"`
 }
 
+type GetNodeIDResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result NodeID	`json:"result"`
+	Id int	`json:"id"`
+}
+
 // TODO Maybe parse the response into IPAddr:Port for the user?
 func (api AdminApi) GetPeers() ([]Peer, error) {
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers")
@@ -45,4 +55,18 @@ func (api AdminApi) GetPeers() ([]Peer, error) {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
 	return response.Result.Peers, nil
+}
+
+func (api AdminApi) GetNodeId() (string, error) {
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.getNodeID")
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetNodeIDResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.NodeID, nil
 }

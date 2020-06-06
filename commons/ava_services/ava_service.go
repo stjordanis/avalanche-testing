@@ -8,4 +8,5 @@ type AvaService interface {
 	services.Service
 
 	GetStakingSocket() services.ServiceSocket
+
 }
