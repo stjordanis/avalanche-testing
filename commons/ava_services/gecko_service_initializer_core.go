@@ -17,17 +17,12 @@ const (
 	stakingTlsKeyPath = "node.key"
 )
 
-// ================= Gecko Service ==================================
+// ================= Service ==================================
 
 type GeckoService struct {
 	ipAddr string
 }
 
-func NewGeckoService(ipAddr string) *GeckoService {
-	return &GeckoService{
-		ipAddr:      ipAddr,
-	}
-}
 func (g GeckoService) GetStakingSocket() services.ServiceSocket {
 	stakingPort, err := nat.NewPort("tcp", strconv.Itoa(stakingPort))
 	if err != nil {
@@ -45,7 +40,7 @@ func (g GeckoService) GetJsonRpcSocket() services.ServiceSocket {
 	return *services.NewServiceSocket(g.ipAddr, httpPort)
 }
 
-// ================ Gecko Service Factory =============================
+// ================ Initializer Core =============================
 type geckoLogLevel string
 const (
 	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
@@ -53,21 +48,19 @@ const (
 	LOG_LEVEL_INFO    geckoLogLevel = "info"
 )
 
-type GeckoServiceFactoryConfig struct {
-	dockerImage       string
+type GeckoServiceInitializerCore struct {
 	snowSampleSize    int
 	snowQuorumSize    int
 	stakingTlsEnabled bool
 	logLevel          geckoLogLevel
 }
 
-func NewGeckoServiceFactoryConfig(dockerImage string,
+func NewGeckoServiceInitializerCore(
 	snowSampleSize int,
 	snowQuorumSize int,
 	stakingTlsEnabled bool,
-	logLevel geckoLogLevel) *GeckoServiceFactoryConfig {
-	return &GeckoServiceFactoryConfig{
-		dockerImage:       dockerImage,
+	logLevel geckoLogLevel) *GeckoServiceInitializerCore {
+	return &GeckoServiceInitializerCore{
 		snowSampleSize:    snowSampleSize,
 		snowQuorumSize:    snowQuorumSize,
 		stakingTlsEnabled: stakingTlsEnabled,
@@ -75,32 +68,29 @@ func NewGeckoServiceFactoryConfig(dockerImage string,
 	}
 }
 
-func (g GeckoServiceFactoryConfig) GetDockerImage() string {
-	return g.dockerImage
-}
-
-func (g GeckoServiceFactoryConfig) GetUsedPorts() map[int]bool {
+func (g GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
 	return map[int]bool{
 		httpPort:    true,
 		stakingPort: true,
 	}
 }
 
-func (g GeckoServiceFactoryConfig) GetFilepathsToMount() map[string]bool {
+
+func (g GeckoServiceInitializerCore) GetFilepathsToMount() map[string]bool {
 	return map[string]bool{
 		stakingTlsCertPath: true,
 		stakingTlsKeyPath: true,
 	}
 }
 
-func (g GeckoServiceFactoryConfig) InitializeMountedFiles(osFiles map[string]*os.File) {
+func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File) {
 	for filePath, filePointer := range osFiles {
 		logrus.Debugf("Path: %s, Pointer: %v", filePath, filePointer)
 	}
 	logrus.Printf("Filepaths: %+v", g.GetFilepathsToMount())
 }
 
-func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
+func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, dependencies []services.Service) []string {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -117,7 +107,6 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 	// If bootstrap nodes are down then Gecko will wait until they are, so we don't actually need to busy-loop making
 	// requests to the nodes
 	if dependencies != nil && len(dependencies) > 0 {
-		// TODO realllllllly wish Go had generics, so we didn't have to do this!
 		avaDependencies := make([]AvaService, 0, len(dependencies))
 		for _, service := range dependencies {
 			avaDependencies = append(avaDependencies, service.(AvaService))
@@ -131,10 +120,10 @@ func (g GeckoServiceFactoryConfig) GetStartCommand(publicIpAddr string, dependen
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
 	}
-	logrus.Infof("Command List: %+v", commandList)
+	logrus.Debugf("Command list: %+v", commandList)
 	return commandList
 }
 
-func (g GeckoServiceFactoryConfig) GetServiceFromIp(ipAddr string) services.Service {
+func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }

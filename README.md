@@ -18,7 +18,7 @@ To view the results of your tests, open the logs of the stopped test controller 
 ## Developing Locally
 Some info:
 * The initializer binary is produced in `build/ava-e2e-tests` every time `scripts/rebuild_initializer_binary.sh` is run; you can run this binary with the `--help` flag to see detailed start options
-* The `run.sh` script is a convenience for calling the binary with sane default arguments
+* The `run.sh` script is a convenience for calling the binary with sane default arguments (**NOTE:** you can pass in a comma-separated list of test names as the argument to run just those tests)
 * The controller Docker image is produced to the Docker image tag `kurtosistech/ava-e2e-tests_controller:latest` (at time of writing) every time `scripts/rebuild_controller_image.sh` is run
 * Every time you change:
     1. The initializer you'll need to rerun `scripts/rebuild_initializer_binary.sh`

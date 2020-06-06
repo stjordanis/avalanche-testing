@@ -11,8 +11,7 @@ const TEST_IP="172.17.0.2"
 
 
 func TestGetContainerStartCommand(t *testing.T) {
-	factoryConfig := GeckoServiceFactoryConfig{
-		dockerImage:       "TEST",
+	initializerConfig := GeckoServiceInitializerCore{
 		snowSampleSize:    1,
 		snowQuorumSize:    1,
 		stakingTlsEnabled: false,
@@ -30,7 +29,7 @@ func TestGetContainerStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actualNoDeps := factoryConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
+	actualNoDeps := initializerConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
 	assert.DeepEqual(t, expectedNoDeps, actualNoDeps)
 
 	testDependency := GeckoService{ipAddr: "1.2.3.4"}
@@ -38,7 +37,7 @@ func TestGetContainerStartCommand(t *testing.T) {
 		testDependency,
 	}
 	expectedWithDeps := append(expectedNoDeps, "--bootstrap-ips=1.2.3.4:9651")
-	actualWithDeps := factoryConfig.GetStartCommand(TEST_IP, testDependencySlice)
+	actualWithDeps := initializerConfig.GetStartCommand(TEST_IP, testDependencySlice)
 	assert.DeepEqual(t, expectedWithDeps, actualWithDeps)
 
 }
