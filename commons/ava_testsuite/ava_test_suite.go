@@ -14,6 +14,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result["tenNodeGetValidatorsTest"] = TenNodeNetworkGetValidatorsTest{}
 	result["singleNodeBasicTest"] = SingleNodeGeckoNetworkBasicTest{}
 	result["singleNodeGetValidatorsTest"] = SingleNodeNetworkGetValidatorsTest{}
+	result["fiveStakingNodeGetValidatorsTest"] = FiveNodeStakingNetworkGetValidatorsTest{}
 
 	return result
 }
