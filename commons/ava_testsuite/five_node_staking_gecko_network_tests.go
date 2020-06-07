@@ -9,32 +9,36 @@ import (
 	"time"
 )
 
-// =============== Basic Test ==================================
-type SingleNodeGeckoNetworkBasicTest struct {}
-func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
+
+type FiveNodeStakingNetworkBasicTest struct{}
+func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
+	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+	context.Fatal(stacktrace.Propagate(err, "Could not get client"))
 	}
 
 	peers, err := client.AdminApi().GetPeers()
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
+	context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
 	}
 
-	context.AssertTrue(len(peers) == 0)
+	context.AssertTrue(len(peers) == 9)
 }
-func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
+
+func (s FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 }
+
 
 // =============== Get Validators Test ==================================
-type SingleNodeNetworkGetValidatorsTest struct{}
-func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
+type FiveNodeStakingNetworkGetValidatorsTest struct{}
+func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 
+	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
@@ -59,11 +63,10 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 	for _, validator := range validators {
 		logrus.Infof("Validator ID: %s", validator.Id)
 	}
-	// TODO figure out exactly how many validators this should actually have and set the value appropriately!
+	// TODO change this to be specific
 	context.AssertTrue(len(validators) >= 1)
 }
 
-func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
+func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 }
-
