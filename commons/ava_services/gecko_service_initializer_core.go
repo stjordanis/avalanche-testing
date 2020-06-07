@@ -13,6 +13,7 @@ import (
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"math/big"
+	mathrand "math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -24,6 +25,9 @@ const (
 	stakingPort = 9651
 	stakingTlsCertPath = "/data/service/node.crt"
 	stakingTlsKeyPath = "/data/service/node.key"
+	maxCerts = 4000
+	certificatePreamble = "CERTIFICATE"
+	privateKeyPreamble = "RSA PRIVATE KEY"
 )
 
 // ================= Service ==================================
@@ -97,6 +101,16 @@ func (g GeckoServiceInitializerCore) GetFilepathsToMount() map[string]bool {
 }
 
 func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
+	/*
+		TODO TODO TODO support >1 bootstrappers in staking mode by dynamically acquiring bootstrapper IDs instead of hardcoding one.
+		For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
+		This must be hardcoded because Gecko requires specifying the bootstrapperID
+		along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
+		knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
+		However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
+		inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
+	 */
+
 	certFilePointer := osFiles[stakingTlsCertPath]
 	keyFilePointer := osFiles[stakingTlsKeyPath]
 	if len(dependencies) == 0 {
@@ -168,21 +182,21 @@ func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Se
 func getServiceCertAndKeyFiles(cert *x509.Certificate, ca *x509.Certificate) (certFile *bytes.Buffer, keyFile *bytes.Buffer, err error) {
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "")
+		return nil, nil, stacktrace.Propagate(err, "Failed to generate random private key.")
 	}
-	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &certPrivKey.PublicKey, certPrivKey)
+	certBytes, err := x509.CreateCertificate(rand.Reader, cert, ca, &(certPrivKey.PublicKey), certPrivKey)
 	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "")
+		return nil, nil, stacktrace.Propagate(err, "Failed to sign service cert with cert authority.")
 	}
 	certPEM := new(bytes.Buffer)
 	pem.Encode(certPEM, &pem.Block{
-		Type:  "CERTIFICATE",
+		Type:  certificatePreamble,
 		Bytes: certBytes,
 	})
 
 	certPrivKeyPEM := new(bytes.Buffer)
 	pem.Encode(certPrivKeyPEM, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type: privateKeyPreamble,
 		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
 	})
 	return certPEM, certPrivKeyPEM, nil
@@ -211,7 +225,7 @@ func getRootCA() *x509.Certificate {
 
 func getServiceCert() *x509.Certificate {
 	cert := &x509.Certificate{
-		SerialNumber: big.NewInt(1993),
+		SerialNumber: big.NewInt(int64(mathrand.Intn(maxCerts))),
 		Subject: pkix.Name{
 			Organization:  []string{"Kurtosis Technologies"},
 			Country:       []string{"USA"},

@@ -14,7 +14,7 @@ type AdminApi struct {
 }
 
 type NodeID struct {
-	NodeID string
+	NodeID string `json:"nodeID"`
 }
 
 type Peer struct {

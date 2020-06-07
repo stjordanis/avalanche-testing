@@ -1,5 +1,17 @@
 package ava_services
 
+/*
+	TODO TODO TODO support  dynamically acquiring bootstrapper IDs instead of hardcoding.
+	For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
+	This must be hardcoded because Gecko requires specifying the bootstrapperID
+	along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
+	knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
+	However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
+	inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
+
+	The hardcoded ID in this file is the known Gecko ID for a node using the private key and cert in this file.
+*/
+
 const STAKER_1_NODE_ID = "7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"
 
 const STAKER_1_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
