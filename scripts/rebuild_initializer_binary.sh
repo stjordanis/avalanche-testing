@@ -13,8 +13,9 @@ echo "Running unit tests..."
 go test "${ROOT_DIRPATH}"/...
 echo "Building..."
 go build -o "${MAIN_BINARY_OUTPUT_PATH}" "${ROOT_DIRPATH}/initializer/main.go"
+EXIT_STATUS=$?
 
-if [ -f "${MAIN_BINARY_OUTPUT_PATH}" ]; then
+if [ "${EXIT_STATUS}" -eq "0" ]; then
         echo "Build Successful"
         echo "Built initializer binary at ${MAIN_BINARY_OUTPUT_PATH}"
         echo "Run '${MAIN_BINARY_OUTPUT_PATH} --help' for usage."
