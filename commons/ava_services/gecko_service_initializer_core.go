@@ -22,8 +22,8 @@ import (
 const (
 	httpPort = 9650
 	stakingPort = 9651
-	stakingTlsCertPath = "node.crt"
-	stakingTlsKeyPath = "node.key"
+	stakingTlsCertPath = "/data/service/node.crt"
+	stakingTlsKeyPath = "/data/service/node.key"
 )
 
 // ================= Service ==================================
@@ -115,7 +115,7 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 	return nil
 }
 
-func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, serviceDataDir string, dependencies []services.Service) ([]string, error) {
+func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, dependencies []services.Service) ([]string, error) {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -129,8 +129,8 @@ func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, servi
 		fmt.Sprintf("--staking-tls-enabled=%v", g.stakingTlsEnabled),
 	}
 	if g.stakingTlsEnabled {
-		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", serviceDataDir + stakingTlsCertPath))
-		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", serviceDataDir + stakingTlsKeyPath))
+		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", stakingTlsCertPath))
+		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", stakingTlsKeyPath))
 	}
 
 
