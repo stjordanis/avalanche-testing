@@ -5,7 +5,6 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
-// TODO this file is quickly going to get unwieldy, so probably good to move it to its own package
 const (
 	pchainEndpoint = "ext/P"
 )
