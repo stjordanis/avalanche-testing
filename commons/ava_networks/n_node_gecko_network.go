@@ -25,15 +25,23 @@ func (network NNodeGeckoNetwork) GetGeckoClient(i int) (gecko_client.GeckoClient
 type NNodeGeckoNetworkLoader struct{
 	numNodes int
 	numBootNodes int
+	isStaking bool
 }
 
-func NewNNodeGeckoNetworkLoader(numNodes int, numBootNodes int) (*NNodeGeckoNetworkLoader, error) {
+func NewNNodeGeckoNetworkLoader(numNodes int, numBootNodes int, isStaking bool) (*NNodeGeckoNetworkLoader, error) {
 	if numBootNodes > numNodes {
 		return nil, stacktrace.NewError("Asked for %v boot nodes but network only has %v nodes", numBootNodes, numNodes)
+	}
+	/*
+	  TODO Implement more than one bootnode for staking.
+	 */
+	if isStaking && numBootNodes != 1 {
+		return nil, stacktrace.NewError("Staking networks currently require exactly one bootnode.")
 	}
 	return &NNodeGeckoNetworkLoader{
 		numNodes:     numNodes,
 		numBootNodes: numBootNodes,
+		isStaking: isStaking,
 	}, nil
 }
 
@@ -41,7 +49,7 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 	initializerCore := ava_services.NewGeckoServiceInitializerCore(
 		2,
 		2,
-		false,
+		loader.isStaking,
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 	serviceCfg := builder.AddTestImageConfiguration(initializerCore, availabilityCheckerCore)

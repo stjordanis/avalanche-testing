@@ -29,7 +29,7 @@ func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite
 }
 
 func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3)
+	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
 }
 
 
@@ -68,6 +68,6 @@ func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context tes
 }
 
 func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3)
+	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
 }
 

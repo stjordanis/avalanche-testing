@@ -29,7 +29,10 @@ func TestGetContainerStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actualNoDeps := initializerConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
+	actualNoDeps, err := initializerConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
+	if err != nil {
+		panic(err)
+	}
 	assert.DeepEqual(t, expectedNoDeps, actualNoDeps)
 
 	testDependency := GeckoService{ipAddr: "1.2.3.4"}
@@ -37,7 +40,10 @@ func TestGetContainerStartCommand(t *testing.T) {
 		testDependency,
 	}
 	expectedWithDeps := append(expectedNoDeps, "--bootstrap-ips=1.2.3.4:9651")
-	actualWithDeps := initializerConfig.GetStartCommand(TEST_IP, testDependencySlice)
+	actualWithDeps, err := initializerConfig.GetStartCommand(TEST_IP, testDependencySlice)
+	if err != nil {
+		panic(err)
+	}
 	assert.DeepEqual(t, expectedWithDeps, actualWithDeps)
 
 }
