@@ -42,7 +42,6 @@ type GetNodeIDResponse struct {
 	Id int	`json:"id"`
 }
 
-// TODO Maybe parse the response into IPAddr:Port for the user?
 func (api AdminApi) GetPeers() ([]Peer, error) {
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers")
 	if err != nil {

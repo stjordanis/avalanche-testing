@@ -28,7 +28,6 @@ func main() {
 	logrus.Infof("Running test '%v'...", *testNameArg)
 
 	controller := controller.NewTestController(ava_testsuite.AvaTestSuite{})
-	// TODO replace the boolean result with detailed information about the test suite results
 	succeeded, err := controller.RunTests(*testNameArg, *networkInfoFilepathArg)
 	if err != nil {
 		logrus.Error(err)
