@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	logrus.SetLevel(logrus.DebugLevel)
+	// TODO make this configurable (passed from the initializer)
+	logrus.SetLevel(logrus.TraceLevel)
 
 	testNameArg := flag.String(
 		"test",
@@ -30,7 +31,8 @@ func main() {
 	// TODO replace the boolean result with detailed information about the test suite results
 	succeeded, err := controller.RunTests(*testNameArg, *networkInfoFilepathArg)
 	if err != nil {
-		panic(err)
+		logrus.Error(err)
+		succeeded = false
 	}
 
 	if !succeeded {
