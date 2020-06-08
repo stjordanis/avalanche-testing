@@ -71,3 +71,63 @@ func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNe
 	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
 }
 
+// =============== Get Peers Test ==================================
+type TenNodeNetworkGetPeersTest struct{}
+func (test TenNodeNetworkGetPeersTest) Run(network interface{}, context testsuite.TestContext) {
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+
+	clients := make([]gecko_client.GeckoClient, 10)
+	nodeIDs := map[string]struct{}{}
+	for i := 0; i < 10; i++ {
+		client, err := castedNetwork.GetGeckoClient(i)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+		}
+
+		logrus.Debug("Trying to get node id for node", i)
+		nodeID := ""
+		for j := 0; j < 5; j++ {
+			nodeID, err = client.AdminApi().GetNodeId()
+			if err == nil {
+				break
+			}
+
+			time.Sleep(5 * time.Second)
+		}
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get node id"))
+			return
+		}
+
+		logrus.Debug("Adding node ID: ", nodeID)
+		clients[i] = client
+		nodeIDs[nodeID] = struct{}{}
+	}
+
+	logrus.Debug("nodeIDs:")
+	logrus.Debug(nodeIDs)
+
+	// Test each client's peer list against the known nodes
+	for _, client := range clients {
+		peers, err := client.AdminApi().GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get current peers"))
+		}
+		logrus.Debug("Peers from node:")
+
+		// Assert that the returned peer list contains every node except this one
+		logrus.Debug("Asserting ", len(peers), " equals ",len(nodeIDs)-1 )
+		// context.AssertTrue(len(peers) == len(nodeIDs)-1)
+		for _, peer := range peers {
+			logrus.Infof("Peer ID: %s ", peer.Id)
+
+			_, ok := nodeIDs[peer.Id]
+			logrus.Debug("Asserting ", peer.Id, " is in nodeIDs ", ok)
+			// context.AssertTrue(ok)
+		}
+	}
+}
+
+func (test TenNodeNetworkGetPeersTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
+}
