@@ -14,4 +14,4 @@ RUN go build -o test-controller controller/main.go
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
-CMD ./test-controller --test=${TEST_NAME} --network-info-filepath=${NETWORK_DATA_FILEPATH} 2>&1 | tee ${LOG_FILEPATH}
+CMD ./test-controller --test=${TEST_NAME} --network-info-filepath=${NETWORK_DATA_FILEPATH} &> ${LOG_FILEPATH}
