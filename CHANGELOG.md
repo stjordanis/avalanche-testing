@@ -1,4 +1,5 @@
 # TBD
+* Fix tee suppressing exit code of the Docker image
 * Add parameters to `makeRpcRequest` on Gecko client
 * Add `GetBlockchainStatus` endpoint on Gecko client
 
