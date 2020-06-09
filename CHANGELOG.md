@@ -1,3 +1,6 @@
+# TBD
+* Fix tee suppressing exit code of the Docker image
+
 # 0.2.0
 * Updated code to use latest Kurtosis version that stops containers
 * Added convenience scripts for rebuilding and running to the `scripts` directory
