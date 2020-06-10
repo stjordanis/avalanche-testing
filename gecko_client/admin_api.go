@@ -43,7 +43,7 @@ type GetNodeIDResponse struct {
 }
 
 func (api AdminApi) GetPeers() ([]Peer, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers")
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -57,7 +57,7 @@ func (api AdminApi) GetPeers() ([]Peer, error) {
 }
 
 func (api AdminApi) GetNodeId() (string, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.getNodeID")
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.getNodeID", make(map[string]interface{}))
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
