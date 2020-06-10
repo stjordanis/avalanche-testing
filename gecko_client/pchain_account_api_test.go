@@ -21,3 +21,20 @@ func TestCreateAccount(t *testing.T) {
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, address, "Q4MzFZZDPHRPAHFeDs3NiyyaZDvxHKivf")
 }
+
+func TestImportKey(t *testing.T) {
+	resultStr := `{
+    "jsonrpc":"2.0",
+    "id"     :3,
+    "result" :{
+        "address":"7u5FQArVaMSgGZzeTE9ckheWtDhU5T3KS"
+    }
+}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	address, err := client.PChainApi().ImportKey(
+		"bob",
+		"loblaw",
+		"2w4XiXxPfQK4TypYqnohRL8DRNTz9cGiGmwQ1zmgEqD9c9KWLq")
+	assert.Nil(t, err, "Error message should be nil")
+	assert.Equal(t, address, "7u5FQArVaMSgGZzeTE9ckheWtDhU5T3KS")
+}

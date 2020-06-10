@@ -77,6 +77,25 @@ func (api PChainApi) CreateAccount(username string, password string, privateKey 
 	return response.Result.Address, nil
 }
 
+func (api PChainApi) ImportKey(username string, password string, privateKey string) (string, error) {
+	params := map[string]interface{}{
+		"username": username,
+		"password": password,
+		"privateKey": privateKey,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ImportKeyResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Address, nil
+}
+
 // ============= Validators ====================
 
 // Gets the list of current validators that the Gecko node knows about

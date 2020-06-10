@@ -32,6 +32,12 @@ type CreateAccountResponse struct {
 	Id int	`json:"id"`
 }
 
+type ImportKeyResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result AccountInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
 // ============= Validators ====================
 type Validator struct {
 	StartTime string `json:"startTime"`
