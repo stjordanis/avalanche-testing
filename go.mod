@@ -9,5 +9,6 @@ require (
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a // indirect
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.2.2
 	gotest.tools v2.2.0+incompatible
 )

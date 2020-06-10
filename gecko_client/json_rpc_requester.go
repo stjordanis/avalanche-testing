@@ -17,6 +17,10 @@ const (
 	JSON_RPC_VERSION = "2.0"
 )
 
+type jsonRpcRequester interface {
+	makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error)
+}
+
 type geckoJsonRpcRequester struct {
 	ipAddr string
 	port nat.Port

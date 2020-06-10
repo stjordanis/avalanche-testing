@@ -29,7 +29,7 @@ type GetLivenessResponse struct {
 }
 
 type HealthApi struct {
-	rpcRequester geckoJsonRpcRequester
+	rpcRequester jsonRpcRequester
 }
 
 func (api HealthApi) GetLiveness() (LivenessInfo, error) {
