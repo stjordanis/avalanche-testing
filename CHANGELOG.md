@@ -3,7 +3,7 @@
 * Add parameters to `makeRpcRequest` on Gecko client
 * Add `GetBlockchainStatus` endpoint on Gecko client
 * Added a mock JSON RPC requester for testing Gecko client methods
-* Used the mock requester to write tests for `GetCurrentValidators` and `GetBlockchainStatus`
+* Used the mock requester to write tests for all the Gecko client method calls we have right now
 
 # 0.2.0
 * Updated code to use latest Kurtosis version that stops containers
