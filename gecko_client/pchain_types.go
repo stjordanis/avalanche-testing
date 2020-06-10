@@ -21,6 +21,17 @@ type GetBlockchainStatusResponse struct {
 	Id int	`json:"id"`
 }
 
+// ============= Accounts ====================
+type AccountInfo struct {
+	Address string 	`json:"address"`
+}
+
+type CreateAccountResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result AccountInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
 // ============= Validators ====================
 type Validator struct {
 	StartTime string `json:"startTime"`
