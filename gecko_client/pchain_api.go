@@ -117,6 +117,25 @@ func (api PChainApi) ExportKey(username string, password string, address string)
 	return response.Result.PrivateKey, nil
 }
 
+// Gets information about the account specified by the given address
+func (api PChainApi) GetAccount(address string) (AccountInfo, error) {
+	params := map[string]interface{}{
+		"address": address,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getAccount", params)
+	if err != nil {
+		return AccountInfo{}, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetAccountResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return AccountInfo{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result, nil
+}
+
+
 
 
 // ============= Validators ====================

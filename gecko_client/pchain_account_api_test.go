@@ -56,3 +56,20 @@ func TestExportKey(t *testing.T) {
 	assert.Equal(t, address, "2w4XiXxPfQK4TypYqnohRL8DRNTz9cGiGmwQ1zmgEqD9c9KWLq")
 }
 
+func TestGetAccount(t *testing.T) {
+	resultStr := `{
+    "jsonrpc": "2.0",
+    "result": {
+        "address": "NcbCRXGMpHxukVmT8sirZcDnCLh1ykWp4",
+        "nonce": "0",
+        "balance": "0"
+    },
+    "id": 84
+}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	accountInfo, err := client.PChainApi().GetAccount("NcbCRXGMpHxukVmT8sirZcDnCLh1ykWp4")
+	assert.Nil(t, err, "Error message should be nil")
+	assert.Equal(t, accountInfo.Address, "NcbCRXGMpHxukVmT8sirZcDnCLh1ykWp4")
+	assert.Equal(t, accountInfo.Nonce, "0")
+	assert.Equal(t, accountInfo.Balance, "0")
+}

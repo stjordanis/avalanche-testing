@@ -22,20 +22,20 @@ type GetBlockchainStatusResponse struct {
 }
 
 // ============= Accounts ====================
-type AccountInfo struct {
+type AccountAddressInfo struct {
 	Address string 	`json:"address"`
 }
 
 type CreateAccountResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result AccountInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string             `json:"jsonrpc"`
+	Result         AccountAddressInfo `json:"result"`
+	Id             int                `json:"id"`
 }
 
 type ImportKeyResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result AccountInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string             `json:"jsonrpc"`
+	Result         AccountAddressInfo `json:"result"`
+	Id             int                `json:"id"`
 }
 
 type PrivateKeyInfo struct {
@@ -46,6 +46,18 @@ type ExportKeyResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result PrivateKeyInfo	`json:"result"`
 	Id int	`json:"id"`
+}
+
+type AccountInfo struct {
+	Address string 	`json:"address"`
+	Nonce string 	`json:"nonce"`
+	Balance string 	`json:"balance"`
+}
+
+type GetAccountResponse struct {
+	JsonRpcVersion string      `json:"jsonrpc"`
+	Result         AccountInfo `json:"result"`
+	Id             int         `json:"id"`
 }
 
 // ============= Validators ====================
