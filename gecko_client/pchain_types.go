@@ -1,5 +1,27 @@
 package gecko_client
 
+// ============= Blockchain ====================
+type BlockchainCreationInfo struct {
+	UnsignedTx string 	`json:"unsignedTx"`
+}
+
+type CreateBlockchainResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result BlockchainCreationInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type BlockchainStatus struct {
+	Status string	`json:"status"`
+}
+
+type GetBlockchainStatusResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result BlockchainStatus	`json:"result"`
+	Id int	`json:"id"`
+}
+
+// ============= Validators ====================
 type Validator struct {
 	StartTime string `json:"startTime"`
 	EndTime string	`json:"endTime"`
@@ -17,12 +39,3 @@ type GetValidatorsResponse struct {
 	Id int	`json:"id"`
 }
 
-type BlockchainStatus struct {
-	Status string	`json:"status"`
-}
-
-type GetBlockchainStatusResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result BlockchainStatus	`json:"result"`
-	Id int	`json:"id"`
-}
