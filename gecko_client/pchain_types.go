@@ -60,6 +60,16 @@ type GetAccountResponse struct {
 	Id             int         `json:"id"`
 }
 
+type AccountList struct {
+	Accounts	[]AccountInfo	`json:"accounts"`
+}
+
+type ListAccountsResponse struct {
+	JsonRpcVersion string      `json:"jsonrpc"`
+	Result         AccountList `json:"result"`
+	Id             int         `json:"id"`
+}
+
 // ============= Validators ====================
 type Validator struct {
 	StartTime string `json:"startTime"`

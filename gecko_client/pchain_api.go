@@ -135,6 +135,25 @@ func (api PChainApi) GetAccount(address string) (AccountInfo, error) {
 	return response.Result, nil
 }
 
+// List accounts controlled by the user identified by the given username and password
+func (api PChainApi) ListAccounts(username string, password string) ([]AccountInfo, error) {
+	params := map[string]interface{}{
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.listAccounts", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ListAccountsResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Accounts, nil
+}
+
 
 
 
