@@ -38,6 +38,16 @@ type ImportKeyResponse struct {
 	Id int	`json:"id"`
 }
 
+type PrivateKeyInfo struct {
+	PrivateKey string	`json:"privateKey"`
+}
+
+type ExportKeyResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result PrivateKeyInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
 // ============= Validators ====================
 type Validator struct {
 	StartTime string `json:"startTime"`

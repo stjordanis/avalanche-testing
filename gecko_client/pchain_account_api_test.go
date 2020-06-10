@@ -38,3 +38,21 @@ func TestImportKey(t *testing.T) {
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, address, "7u5FQArVaMSgGZzeTE9ckheWtDhU5T3KS")
 }
+
+func TestExportKey(t *testing.T) {
+	resultStr := `{
+    "jsonrpc":"2.0",
+    "id"     :3,
+    "result" :{
+        "privateKey":"2w4XiXxPfQK4TypYqnohRL8DRNTz9cGiGmwQ1zmgEqD9c9KWLq"
+    }
+}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	address, err := client.PChainApi().ExportKey(
+		"bob",
+		"loblaw",
+		"7u5FQArVaMSgGZzeTE9ckheWtDhU5T3KS")
+	assert.Nil(t, err, "Error message should be nil")
+	assert.Equal(t, address, "2w4XiXxPfQK4TypYqnohRL8DRNTz9cGiGmwQ1zmgEqD9c9KWLq")
+}
+

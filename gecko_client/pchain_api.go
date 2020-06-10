@@ -83,7 +83,7 @@ func (api PChainApi) ImportKey(username string, password string, privateKey stri
 		"password": password,
 		"privateKey": privateKey,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.importKey", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -95,6 +95,29 @@ func (api PChainApi) ImportKey(username string, password string, privateKey stri
 	}
 	return response.Result.Address, nil
 }
+
+// Returns the private key associated with the given username, password, and address
+func (api PChainApi) ExportKey(username string, password string, address string) (string, error) {
+	params := map[string]interface{}{
+		"username" : username,
+		"password": password,
+		"address": address,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportKey", params)
+
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ExportKeyResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.PrivateKey, nil
+}
+
+
 
 // ============= Validators ====================
 
