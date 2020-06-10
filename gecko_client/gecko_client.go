@@ -17,10 +17,15 @@ func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
 		port:   port,
 	}
 
+	return clientFromRequester(rpcRequester)
+}
+
+// This method is exposed for mocking the Gecko client
+func clientFromRequester(requester jsonRpcRequester) *GeckoClient {
 	return &GeckoClient{
-		pChainApi: PChainApi{rpcRequester: rpcRequester},
-		adminApi: AdminApi{rpcRequester: rpcRequester},
-		healthApi: HealthApi{rpcRequester: rpcRequester},
+		pChainApi: PChainApi{rpcRequester: requester},
+		adminApi: AdminApi{rpcRequester: requester},
+		healthApi: HealthApi{rpcRequester: requester},
 	}
 }
 

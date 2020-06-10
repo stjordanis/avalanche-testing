@@ -10,7 +10,7 @@ const (
 )
 
 type AdminApi struct {
-	rpcRequester geckoJsonRpcRequester
+	rpcRequester jsonRpcRequester
 }
 
 type NodeID struct {
