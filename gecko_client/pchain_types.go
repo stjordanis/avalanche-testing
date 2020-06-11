@@ -11,6 +11,12 @@ type CreateUnsignedTransactionResponse struct {
 	Id             int                     `json:"id"`
 }
 
+type CreateBlockchainResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
+}
+
 type BlockchainStatus struct {
 	Status string	`json:"status"`
 }

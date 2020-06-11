@@ -30,7 +30,7 @@ func (api PChainApi) CreateBlockchain(vmId string, subnetId string, name string,
 	}
 
 	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
-	var response CreateUnsignedTransactionResponse
+	var response CreateBlockchainResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
