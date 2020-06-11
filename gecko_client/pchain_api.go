@@ -197,3 +197,20 @@ func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonc
 	return response.Result.UnsignedTx, nil
 }
 
+
+func (api PChainApi) GetSubnets() ([]Subnet, error) {
+	params := map[string]interface{}{}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getSubnets", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetSubnetsResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Subnets, nil
+}
+
+
