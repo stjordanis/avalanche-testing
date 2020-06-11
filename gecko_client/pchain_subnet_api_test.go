@@ -46,7 +46,7 @@ func TestGetSubnets(t *testing.T) {
 
 	assert.Equal(t, 1, len(subnetList))
 	assert.Equal(t, 2, len(subnetList[0].ControlKeys))
-	assert.Equal(t, 2, subnetList[0].Threshold)
+	assert.Equal(t, "2", subnetList[0].Threshold)
 	assert.Equal(
 		t,
 		"hW8Ma7dLMA7o4xmJf3AXBbo17bXzE7xnThUd3ypM4VAWo1sNJ",
