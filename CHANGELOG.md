@@ -10,6 +10,7 @@
     * `exportKey`
     * `getAccount`
     * `listAccounts`
+    * `createSubnet`
 * Added tests for the following non-PChain endpoints:
     * `admin.getNodeID`
     * `admin.peers`
