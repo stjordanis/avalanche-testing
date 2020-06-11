@@ -1,9 +1,19 @@
 # TBD
 * Fix tee suppressing exit code of the Docker image
 * Add parameters to `makeRpcRequest` on Gecko client
-* Add `GetBlockchainStatus` endpoint on Gecko client
 * Added a mock JSON RPC requester for testing Gecko client methods
-* Used the mock requester to write tests for all the Gecko client method calls we have right now
+* Add method calls on the Gecko client and tests for the following PChain endpoints:
+    * `createBlockhain`
+    * `getBlockchainStatus`
+    * `createAccount`
+    * `importKey`
+    * `exportKey`
+    * `getAccount`
+    * `listAccounts`
+* Added tests for the following non-PChain endpoints:
+    * `admin.getNodeID`
+    * `admin.peers`
+    * `health.getLiveness`
 
 # 0.2.0
 * Updated code to use latest Kurtosis version that stops containers
