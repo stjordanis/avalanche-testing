@@ -23,4 +23,34 @@ func TestCreateSubnet(t *testing.T) {
 		unsignedTxn)
 }
 
+func TestGetSubnets(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"subnets": [
+				{
+					"id": "hW8Ma7dLMA7o4xmJf3AXBbo17bXzE7xnThUd3ypM4VAWo1sNJ",
+					"controlKeys": [
+						"KNjXsaA1sZsaKCD1cd85YXauDuxshTes2",
+						"Aiz4eEt5xv9t4NCnAWaQJFNz5ABqLtJkR"
+					],
+					"threshold": "2"
+				}
+			]
+		},
+		"id": 6
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	subnetList, err := client.PChainApi().GetSubnets()
+	assert.Nil(t, err, "Error message should be nil")
+
+	assert.Equal(t, 1, len(subnetList))
+	assert.Equal(t, 2, len(subnetList[0].ControlKeys))
+	assert.Equal(t, 2, subnetList[0].Threshold)
+	assert.Equal(
+		t,
+		"hW8Ma7dLMA7o4xmJf3AXBbo17bXzE7xnThUd3ypM4VAWo1sNJ",
+		subnetList[0].Id)
+}
+
 
