@@ -30,7 +30,7 @@ func (api PChainApi) CreateBlockchain(vmId string, subnetId string, name string,
 	}
 
 	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
-	var response CreateBlockchainResponse
+	var response CreateUnsignedTransactionResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
@@ -173,3 +173,27 @@ func (api PChainApi) GetCurrentValidators() ([]Validator, error) {
 	}
 	return response.Result.Validators, nil
 }
+
+// =============== Subnets =====================
+
+
+// Create an unsigned transaction to create a new Subnet.
+func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"controlKeys": controlKeys,
+		"threshold": threshold,
+		"payerNonce": payerNonce,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createSubnet", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response CreateUnsignedTransactionResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.UnsignedTx, nil
+}
+

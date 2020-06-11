@@ -1,14 +1,14 @@
 package gecko_client
 
 // ============= Blockchain ====================
-type BlockchainCreationInfo struct {
+type UnsignedTransaction struct {
 	UnsignedTx string 	`json:"unsignedTx"`
 }
 
-type CreateBlockchainResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result BlockchainCreationInfo	`json:"result"`
-	Id int	`json:"id"`
+type CreateUnsignedTransactionResponse struct {
+	JsonRpcVersion string              `json:"jsonrpc"`
+	Result         UnsignedTransaction `json:"result"`
+	Id             int                 `json:"id"`
 }
 
 type BlockchainStatus struct {
