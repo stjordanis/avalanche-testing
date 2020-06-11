@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestTODO(t *testing.T) {
+func TestCreateSubnet(t *testing.T) {
 	testUnsignedTransactionResult := "1112LA7e8GvkGHDkxZa9Q7kszqvWHooumX5PhqA9NJG7erwXYcwQUPRQyukYX1ncu1DmWvvPNMuivUqvGp1t9M3wys5joqXrXtV2jescQ5AWaUKHiSBUWBRHseMLhGxWNT4Bv6LNVvaaA1ZW33avQBAzz7V84KpKGW7fD3Fz1okxknLgoG"
 	resultStr := fmt.Sprintf(`{
 		"jsonrpc": "2.0",
