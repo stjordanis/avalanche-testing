@@ -213,7 +213,17 @@ func TestSign(t *testing.T) {
 		signTx)
 }
 
+func TestIssueTx(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"txID": "G3BuH6ytQ2averrLxJJugjWZHTRubzCrUZEXoheG5JMqL5ccY"
+		},
+		"id": 1
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	txnId, err := client.PChainApi().IssueTx("111Bit5JNASbJyTLrd2kWkYRoc96swEWoWdmEhuGAFK3rCAyTnTzomuFwgx1SCUdUE71KbtXPnqj93KGr3CeftpPN37kVyqBaAQ5xaDjr7wVBTUYi9iV7kYJnHF61yovViJF74mJJy7WWQKeRMDRTiPuii5gsd11gtNahCCsKbm9seJtk2h1wAPZn9M1eL84CGVPnLUiLP")
+	assert.Nil(t, err, "Error message should be nil")
 
-
-
-
+	assert.Equal(t, txnId, "G3BuH6ytQ2averrLxJJugjWZHTRubzCrUZEXoheG5JMqL5ccY")
+}
