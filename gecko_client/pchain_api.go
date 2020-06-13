@@ -250,3 +250,59 @@ func (api PChainApi) AddDefaultSubnetValidator(
 	return response.Result.UnsignedTx, nil
 }
 
+func (api PChainApi) AddNonDefaultSubnetValidator(
+		id string,
+		subnetID string,
+		startTime int64,
+		endTime int64,
+		weight int,
+		payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"id": id,
+		"subnetID": subnetID,
+		"startTime": startTime,
+		"endTime": endTime,
+		"weight": weight,
+		"payerNonce": payerNonce,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.addNonDefaultSubnetValidator", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response AddNonDefaultSubnetValidatorResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.UnsignedTx, nil
+}
+
+func (api PChainApi) AddDefaultSubnetDelegator(
+		id string,
+		startTime int64,
+		endTime int64,
+		stakeAmount int64,
+		payerNonce int,
+		destination string) (string, error) {
+	params := map[string]interface{}{
+		"id": id,
+		"payerNonce": payerNonce,
+		"destination": destination,
+		"startTime": startTime,
+		"endTime": endTime,
+		"stakeAmount": stakeAmount,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, TODO, params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response AddDefaultSubnetDelegator
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.UnsignedTx, nil
+}
+

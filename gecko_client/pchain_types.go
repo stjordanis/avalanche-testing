@@ -103,3 +103,15 @@ type AddDefaultSubnetValidatorResponse struct {
 	Result UnsignedTransactionInfo	`json:"result"`
 	Id int	`json:"id"`
 }
+
+type AddNonDefaultSubnetValidatorResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type AddDefaultSubnetDelegator struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
