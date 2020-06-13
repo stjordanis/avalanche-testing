@@ -11,6 +11,10 @@
     * `getAccount`
     * `listAccounts`
     * `createSubnet`
+    * `platform.getSubnets`
+    * `platform.validatedBy`
+    * `platform.validates`
+    * `platform.getBlockchains`
 * Added tests for the following non-PChain endpoints:
     * `admin.getNodeID`
     * `admin.peers`
