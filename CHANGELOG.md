@@ -10,6 +10,11 @@
     * `exportKey`
     * `getAccount`
     * `listAccounts`
+    * `createSubnet`
+    * `platform.getSubnets`
+    * `platform.validatedBy`
+    * `platform.validates`
+    * `platform.getBlockchains`
     * `getPendingValidators`
     * `sampleValidators`
     * `addDefaultSubnetValidator`
