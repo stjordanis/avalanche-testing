@@ -150,5 +150,3 @@ func TestGetBlockchains(t *testing.T) {
 	assert.Equal(t, "jvYyfQTxGMJLuGWa55kdP2p2zSUYsQ5Raupu4TW34ZAUBAbtq", blockchains[0].VmID)
 }
 
-
-

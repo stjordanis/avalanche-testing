@@ -4,7 +4,20 @@ type UnsignedTransactionInfo struct {
 	UnsignedTx string 	`json:"unsignedTx"`
 }
 
+type TransactionInfo struct {
+	Tx string 	`json:"tx"`
+}
+
+type SignTransactionInfo struct {
+	Tx string 	`json:"Tx"`
+}
+
+type TransactionIDInfo struct {
+	TxID string 	`json:"txID"`
+}
+
 // ============= Blockchain ====================
+
 type CreateUnsignedTransactionResponse struct {
 	JsonRpcVersion string                  `json:"jsonrpc"`
 	Result         UnsignedTransactionInfo `json:"result"`
@@ -173,5 +186,32 @@ type ValidatedByResponse struct {
 type ValidatesResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result BlockchainIDList	`json:"result"`
+	Id int	`json:"id"`
+}
+
+
+// ============= AVA Transfers ========================
+
+type ExportAVAResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ImportAVAResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result TransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type SignResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result SignTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type IssueTxResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result TransactionIDInfo	`json:"result"`
 	Id int	`json:"id"`
 }

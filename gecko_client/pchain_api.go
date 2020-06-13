@@ -397,3 +397,82 @@ func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 	}
 	return response.Result.Blockchains, nil
 }
+
+
+func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"amount": amount,
+		"to": to,
+		"payerNonce": payerNonce,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportAVA", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ExportAVAResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.UnsignedTx, nil
+}
+
+
+func (api PChainApi) ImportAVA(username string, password string, to string, payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"username": username,
+		"password": password,
+		"to": to,
+		"payerNonce": payerNonce,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.importAVA", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ImportAVAResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Tx, nil
+}
+
+func (api PChainApi) Sign(tx string, signer string, username string, password string) (string, error) {
+	params := map[string]interface{}{
+		"tx": tx,
+		"signer": signer,
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.sign", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response SignResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Tx, nil
+}
+
+
+func (api PChainApi) IssueTx(tx string) (string, error) {
+	params := map[string]interface{}{
+		"tx": tx,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.issueTx", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response IssueTxResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.TxID, nil
+}

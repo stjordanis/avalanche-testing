@@ -15,6 +15,10 @@
     * `platform.validatedBy`
     * `platform.validates`
     * `platform.getBlockchains`
+    * `platform.exportAVA`
+    * `platform.importAVA`
+    * `platform.sign`
+    * `platform.issueTx`
     * `getPendingValidators`
     * `sampleValidators`
     * `addDefaultSubnetValidator`
