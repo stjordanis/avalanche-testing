@@ -173,3 +173,95 @@ func (api PChainApi) GetCurrentValidators() ([]Validator, error) {
 	}
 	return response.Result.Validators, nil
 }
+
+// =============== Subnets =====================
+
+
+// Create an unsigned transaction to create a new Subnet.
+func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"controlKeys": controlKeys,
+		"threshold": threshold,
+		"payerNonce": payerNonce,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createSubnet", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response CreateUnsignedTransactionResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.UnsignedTx, nil
+}
+
+
+func (api PChainApi) GetSubnets() ([]Subnet, error) {
+	params := map[string]interface{}{}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getSubnets", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetSubnetsResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Subnets, nil
+}
+
+
+func (api PChainApi) ValidatedBy(blockchainId string) (string, error) {
+	params := map[string]interface{}{
+		"blockchainID": blockchainId,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.validatedBy", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ValidatedByResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.SubnetID, nil
+}
+
+
+
+func (api PChainApi) Validates(subnetId string) ([]string, error) {
+	params := map[string]interface{}{
+		"subnetID": subnetId,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.validates", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ValidatesResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.BlockchainIDs, nil
+}
+
+
+func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
+	params := map[string]interface{}{}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getBlockchains", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetBlockchainsResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Blockchains, nil
+}

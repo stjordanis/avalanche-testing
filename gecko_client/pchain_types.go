@@ -1,24 +1,51 @@
 package gecko_client
 
 // ============= Blockchain ====================
-type BlockchainCreationInfo struct {
+type UnsignedTransactionInfo struct {
 	UnsignedTx string 	`json:"unsignedTx"`
 }
 
+type CreateUnsignedTransactionResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
+}
+
 type CreateBlockchainResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result BlockchainCreationInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 type BlockchainStatus struct {
 	Status string	`json:"status"`
 }
 
+type BlockchainIDList struct {
+	BlockchainIDs []string `json:"blockchainIDs"`
+}
+
+type BlockchainList struct {
+	Blockchains []Blockchain `json:"blockchains"`
+}
+
 type GetBlockchainStatusResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result BlockchainStatus	`json:"result"`
 	Id int	`json:"id"`
+}
+
+type Blockchain struct {
+	Id string `json: "id"`
+	Name string `json: "name"`
+	SubnetID string `json: "subnetID"`
+	VmID string `json: "vmID"`
+}
+
+type GetBlockchainsResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         BlockchainList `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 // ============= Accounts ====================
@@ -88,3 +115,35 @@ type GetValidatorsResponse struct {
 	Id int	`json:"id"`
 }
 
+// ============= Subnets ========================
+type Subnet struct {
+	Id string `json:"id"`
+	ControlKeys []string `json:"controlKeys"`
+	Threshold string `json:"threshold"`
+}
+
+type SubnetID struct {
+	SubnetID string `json:"subnetID"`
+}
+
+type SubnetList struct {
+	Subnets []Subnet	`json:"subnets"`
+}
+
+type GetSubnetsResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result SubnetList	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ValidatedByResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result SubnetID	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ValidatesResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result BlockchainIDList	`json:"result"`
+	Id int	`json:"id"`
+}
