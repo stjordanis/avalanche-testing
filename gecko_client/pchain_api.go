@@ -307,4 +307,23 @@ func (api PChainApi) ImportAVA(username string, password string, to string, paye
 	return response.Result.Tx, nil
 }
 
+func (api PChainApi) Sign(tx string, signer string, username string, password string) (string, error) {
+	params := map[string]interface{}{
+		"tx": tx,
+		"signer": signer,
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.sign", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response SignResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Tx, nil
+}
 

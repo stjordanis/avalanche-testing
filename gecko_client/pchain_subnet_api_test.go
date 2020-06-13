@@ -191,6 +191,29 @@ func TestImportAVA(t *testing.T) {
 }
 
 
+func TestSign(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"Tx": "111Bit5JNASbJyTLrd2kWkYRoc96swEWoWdmEhuGAFK3rCAyTnTzomuFwgx1SCUdUE71KbtXPnqj93KGr3CeftpPN37kVyqBaAQ5xaDjr7wVBTUYi9iV7kYJnHF61yovViJF74mJJy7WWQKeRMDRTiPuii5gsd11gtNahCCsKbm9seJtk2h1wAPZn9M1eL84CGVPnLUiLP"
+		},
+		"id": 1
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	signTx, err := client.PChainApi().Sign(
+		"111Bit5JNASbJyTLrd2kWkYRoc96swEWoWdmEhuGAFK3rCAyTnTzomuFwgx1SCUdUE71KbtXPnqj93KGr3CeftpPN37kVyqBaAQ5xaDjr7wU8riGS89NDJ8AwVgZgnFkgF3uMfwCiCuPvvubGyQxNHE4TM9iDgj6h3URdGQ4JntP44wokCEP3ADn7sMM8kUTbmcNo84U87",
+		"6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV",
+		"bob",
+		"loblaw")
+	assert.Nil(t, err, "Error message should be nil")
+
+	assert.Equal(
+		t,
+		"111Bit5JNASbJyTLrd2kWkYRoc96swEWoWdmEhuGAFK3rCAyTnTzomuFwgx1SCUdUE71KbtXPnqj93KGr3CeftpPN37kVyqBaAQ5xaDjr7wVBTUYi9iV7kYJnHF61yovViJF74mJJy7WWQKeRMDRTiPuii5gsd11gtNahCCsKbm9seJtk2h1wAPZn9M1eL84CGVPnLUiLP",
+		signTx)
+}
+
+
 
 
 
