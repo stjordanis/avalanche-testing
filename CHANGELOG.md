@@ -10,6 +10,9 @@
     * `exportKey`
     * `getAccount`
     * `listAccounts`
+    * `getPendingValidators`
+    * `sampleValidators`
+    * `addDefaultSubnetValidator`
 * Added tests for the following non-PChain endpoints:
     * `admin.getNodeID`
     * `admin.peers`

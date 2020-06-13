@@ -44,7 +44,7 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 	//  bootstrapping as complete; remove it when Gecko can report successful bootstrapping
 	var validators []gecko_client.Validator
 	for i := 0; i < 5; i++ {
-		validators, err = client.PChainApi().GetCurrentValidators()
+		validators, err = client.PChainApi().GetCurrentValidators(nil)
 		if err == nil {
 			break
 		}
