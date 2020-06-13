@@ -60,7 +60,7 @@ func TestGetPendingValidators(t *testing.T) {
                 "endtime": "1604102400",
                 "stakeAmount": "20000000000000",
                 "id": "MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ"
-            },
+            }
         ]
     },
     "id": 1
@@ -101,7 +101,10 @@ func TestAddDefaultSubnetValidator(t *testing.T) {
 		"ARCLrphAHZ28xZEBfUL7SVAmzkTZNe1LK",
 		1591837350,
 		1591920000,
-
+		1000000,
+		1,
+		"Q4MzFZZDPHRPAHFeDs3NiyyaZDvxHKivf",
+		100000)
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(
 		t,
