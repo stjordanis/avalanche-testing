@@ -28,6 +28,7 @@
     * `admin.getNodeID`
     * `admin.peers`
     * `health.getLiveness`
+* Removed unnecessary docker pull command in ci script.
 
 # 0.2.0
 * Updated code to use latest Kurtosis version that stops containers
