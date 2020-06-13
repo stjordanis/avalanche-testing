@@ -25,10 +25,27 @@ type BlockchainIDList struct {
 	BlockchainIDs []string `json:"blockchainIDs"`
 }
 
+type BlockchainList struct {
+	Blockchains []Blockchain `json:"blockchains"`
+}
+
 type GetBlockchainStatusResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result BlockchainStatus	`json:"result"`
 	Id int	`json:"id"`
+}
+
+type Blockchain struct {
+	Id string `json: "id"`
+	Name string `json: "name"`
+	SubnetID string `json: "subnetID"`
+	VmID string `json: "vmID"`
+}
+
+type GetBlockchainsResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         BlockchainList `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 // ============= Accounts ====================

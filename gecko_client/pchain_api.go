@@ -249,3 +249,19 @@ func (api PChainApi) Validates(subnetId string) ([]string, error) {
 	}
 	return response.Result.BlockchainIDs, nil
 }
+
+
+func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
+	params := map[string]interface{}{}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getBlockchains", params)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response GetBlockchainsResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Blockchains, nil
+}

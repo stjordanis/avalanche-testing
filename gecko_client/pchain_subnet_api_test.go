@@ -88,5 +88,67 @@ func TestValidates(t *testing.T) {
 	assert.Equal(t, "2TtHFqEAAJ6b33dromYMqfgavGPF3iCpdG3hwNMiart2aB5QHi", blockchainIds[1])
 }
 
+func TestGetBlockchains(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"blockchains": [
+				{
+					"id": "mnihvmrJ4MiojP7qhnF3sKR43RJvJbHrbkM8yFoLdwc4nwEqV",
+					"name": "AVM",
+					"subnetID": "11111111111111111111111111111111LpoYY",
+					"vmID": "jvYyfQTxGMJLuGWa55kdP2p2zSUYsQ5Raupu4TW34ZAUBAbtq"
+				},
+				{
+					"id": "2rWWhAMu2NyNPEHrDNnTfhtdV9MZWKkp1L5D6ANWnhAkJAkosN",
+					"name": "Athereum",
+					"subnetID": "11111111111111111111111111111111LpoYY",
+					"vmID": "mgj786NP7uDwBCcq6YwThhaN8FLyybkCa4zBWTQbNgmK6k9A6"
+				},
+				{
+					"id": "CqhF97NNugqYLiGaQJ2xckfmkEr8uNeGG5TQbyGcgnZ5ahQwa",
+					"name": "Simple DAG Payments",
+					"subnetID": "11111111111111111111111111111111LpoYY",
+					"vmID": "sqjdyTKUSrQs1YmKDTUbdUhdstSdtRTGRbUn8sqK8B6pkZkz1"
+				},
+				{
+					"id": "VcqKNBJsYanhVFxGyQE5CyNVYxL3ZFD7cnKptKWeVikJKQkjv",
+					"name": "Simple Chain Payments",
+					"subnetID": "11111111111111111111111111111111LpoYY",
+					"vmID": "sqjchUjzDqDfBPGjfQq2tXW1UCwZTyvzAWHsNzF2cb1eVHt6w"
+				},
+				{
+					"id": "2SMYrx4Dj6QqCEA3WjnUTYEFSnpqVTwyV3GPNgQqQZbBbFgoJX",
+					"name": "Simple Timestamp Server",
+					"subnetID": "11111111111111111111111111111111LpoYY",
+					"vmID": "tGas3T58KzdjLHhBDMnH2TvrddhqTji5iZAMZ3RXs2NLpSnhH"
+				},
+				{
+					"id": "KDYHHKjM4yTJTT8H8qPs5KXzE6gQH5TZrmP1qVr1P6qECj3XN",
+					"name": "My new timestamp",
+					"subnetID": "2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r",
+					"vmID": "tGas3T58KzdjLHhBDMnH2TvrddhqTji5iZAMZ3RXs2NLpSnhH"
+				},
+				{
+					"id": "2TtHFqEAAJ6b33dromYMqfgavGPF3iCpdG3hwNMiart2aB5QHi",
+					"name": "My new AVM",
+					"subnetID": "2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r",
+					"vmID": "jvYyfQTxGMJLuGWa55kdP2p2zSUYsQ5Raupu4TW34ZAUBAbtq"
+				}
+			]
+		},
+		"id": 85
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	blockchains, err := client.PChainApi().GetBlockchains()
+	assert.Nil(t, err, "Error message should be nil")
+
+	assert.Equal(t, 7, len(blockchains))
+	assert.Equal(t, "My new AVM", blockchains[6].Name)
+	assert.Equal(t, "KDYHHKjM4yTJTT8H8qPs5KXzE6gQH5TZrmP1qVr1P6qECj3XN", blockchains[5].Id)
+	assert.Equal(t, "11111111111111111111111111111111LpoYY", blockchains[4].SubnetID)
+	assert.Equal(t, "jvYyfQTxGMJLuGWa55kdP2p2zSUYsQ5Raupu4TW34ZAUBAbtq", blockchains[0].VmID)
+}
+
 
 
