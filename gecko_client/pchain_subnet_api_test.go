@@ -68,5 +68,25 @@ func TestValidatedBy(t *testing.T) {
 	assert.Equal(t,"2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r", subnetId)
 }
 
+func TestValidates(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"blockchainIDs": [
+				"KDYHHKjM4yTJTT8H8qPs5KXzE6gQH5TZrmP1qVr1P6qECj3XN",
+				"2TtHFqEAAJ6b33dromYMqfgavGPF3iCpdG3hwNMiart2aB5QHi"
+			]
+		},
+		"id": 1
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	blockchainIds, err := client.PChainApi().Validates("2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r")
+	assert.Nil(t, err, "Error message should be nil")
+
+	assert.Equal(t, 2, len(blockchainIds))
+	assert.Equal(t, "KDYHHKjM4yTJTT8H8qPs5KXzE6gQH5TZrmP1qVr1P6qECj3XN", blockchainIds[0])
+	assert.Equal(t, "2TtHFqEAAJ6b33dromYMqfgavGPF3iCpdG3hwNMiart2aB5QHi", blockchainIds[1])
+}
+
 
 

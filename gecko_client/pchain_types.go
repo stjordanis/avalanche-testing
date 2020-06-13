@@ -21,6 +21,10 @@ type BlockchainStatus struct {
 	Status string	`json:"status"`
 }
 
+type BlockchainIDList struct {
+	BlockchainIDs []string `json:"blockchainIDs"`
+}
+
 type GetBlockchainStatusResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result BlockchainStatus	`json:"result"`
@@ -118,5 +122,11 @@ type GetSubnetsResponse struct {
 type ValidatedByResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result SubnetID	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ValidatesResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result BlockchainIDList	`json:"result"`
 	Id int	`json:"id"`
 }
