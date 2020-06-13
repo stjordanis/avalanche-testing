@@ -15,6 +15,11 @@
     * `platform.validatedBy`
     * `platform.validates`
     * `platform.getBlockchains`
+    * `getPendingValidators`
+    * `sampleValidators`
+    * `addDefaultSubnetValidator`
+    * `addNonDefaultSubnetValidator`
+    * `addNonDefaultSubnetDelegator`
 * Added tests for the following non-PChain endpoints:
     * `admin.getNodeID`
     * `admin.peers`
