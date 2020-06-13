@@ -53,4 +53,20 @@ func TestGetSubnets(t *testing.T) {
 		subnetList[0].Id)
 }
 
+func TestValidatedBy(t *testing.T) {
+	resultStr := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"subnetID": "2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r"
+		},
+		"id": 1
+	}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	subnetId, err := client.PChainApi().ValidatedBy("KDYHHKjM4yTJTT8H8qPs5KXzE6gQH5TZrmP1qVr1P6qECj3XN")
+	assert.Nil(t, err, "Error message should be nil")
+
+	assert.Equal(t,"2bRCr6B4MiEfSjidDwxDpdCyviwnfUVqB2HGwhm947w9YYqb7r", subnetId)
+}
+
+
 

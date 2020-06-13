@@ -94,11 +94,15 @@ type GetValidatorsResponse struct {
 	Id int	`json:"id"`
 }
 
-// ============= Subnet ========================
+// ============= Subnets ========================
 type Subnet struct {
 	Id string `json:"id"`
 	ControlKeys []string `json:"controlKeys"`
 	Threshold string `json:"threshold"`
+}
+
+type SubnetID struct {
+	SubnetID string `json:"subnetID"`
 }
 
 type SubnetList struct {
@@ -108,5 +112,11 @@ type SubnetList struct {
 type GetSubnetsResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result SubnetList	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ValidatedByResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result SubnetID	`json:"result"`
 	Id int	`json:"id"`
 }

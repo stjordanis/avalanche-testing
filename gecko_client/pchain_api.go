@@ -214,3 +214,19 @@ func (api PChainApi) GetSubnets() ([]Subnet, error) {
 }
 
 
+func (api PChainApi) ValidatedBy(blockchainId string) (string, error) {
+	params := map[string]interface{}{
+		"blockchainID": blockchainId,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.validatedBy", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ValidatedByResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.SubnetID, nil
+}
