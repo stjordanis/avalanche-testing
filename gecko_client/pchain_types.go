@@ -1,6 +1,5 @@
 package gecko_client
 
-// ============= Blockchain ====================
 type UnsignedTransactionInfo struct {
 	UnsignedTx string 	`json:"unsignedTx"`
 }
@@ -16,6 +15,8 @@ type SignTransactionInfo struct {
 type TransactionIDInfo struct {
 	TxID string 	`json:"txID"`
 }
+
+// ============= Blockchain ====================
 
 type CreateUnsignedTransactionResponse struct {
 	JsonRpcVersion string                  `json:"jsonrpc"`
@@ -124,6 +125,34 @@ type ValidatorList struct {
 type GetValidatorsResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result ValidatorList	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ValidatorIdsList struct {
+	Validators []string	`json:"validators"`
+}
+
+type SampleValidatorsResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result ValidatorIdsList	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type AddDefaultSubnetValidatorResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type AddNonDefaultSubnetValidatorResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type AddDefaultSubnetDelegator struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
 	Id int	`json:"id"`
 }
 
