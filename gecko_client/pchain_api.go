@@ -265,3 +265,24 @@ func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 	}
 	return response.Result.Blockchains, nil
 }
+
+
+func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, error) {
+	params := map[string]interface{}{
+		"amount": amount,
+		"to": to,
+		"payerNonce": payerNonce
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportAVA", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
+	var response ExportAVAResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return TODO, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return TODO, nil
+}
+

@@ -147,3 +147,12 @@ type ValidatesResponse struct {
 	Result BlockchainIDList	`json:"result"`
 	Id int	`json:"id"`
 }
+
+
+// ============= AVA Transfers ========================
+
+type ExportAVAResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
