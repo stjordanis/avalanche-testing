@@ -293,7 +293,7 @@ func (api PChainApi) AddDefaultSubnetDelegator(
 		"endTime": endTime,
 		"stakeAmount": stakeAmount,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, TODO, params)
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.addDefaultSubnetDelegator", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
