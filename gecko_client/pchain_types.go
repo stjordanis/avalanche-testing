@@ -5,6 +5,10 @@ type UnsignedTransactionInfo struct {
 	UnsignedTx string 	`json:"unsignedTx"`
 }
 
+type TransactionInfo struct {
+	Tx string 	`json:"tx"`
+}
+
 type CreateUnsignedTransactionResponse struct {
 	JsonRpcVersion string                  `json:"jsonrpc"`
 	Result         UnsignedTransactionInfo `json:"result"`
@@ -154,5 +158,11 @@ type ValidatesResponse struct {
 type ExportAVAResponse struct {
 	JsonRpcVersion string	`json:"jsonrpc"`
 	Result UnsignedTransactionInfo	`json:"result"`
+	Id int	`json:"id"`
+}
+
+type ImportAVAResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result TransactionInfo	`json:"result"`
 	Id int	`json:"id"`
 }
