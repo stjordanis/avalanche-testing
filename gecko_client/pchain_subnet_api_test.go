@@ -160,10 +160,13 @@ func TestExportAVA(t *testing.T) {
 		"id": 1
 	}`
 	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
-	TODO, err := client.PChainApi().TODO(TODO)
+	unsignedTx, err := client.PChainApi().ExportAVA(1,"G5ZGXEfoWYNFZH5JF9C4QPKAbPTKwRbyB", 2)
 	assert.Nil(t, err, "Error message should be nil")
 
-	TODO detailed assertions about your response object
+	assert.Equal(
+		t,
+		"1112Y8Y5ibRqMDtby9NSdpK9u3n1yGywybAAVYnhCkFYcRzEYbR7J5Ci6SX98PmgS2LpRf5pcu6YAgLYGiTuQpiSucRcX4dv7HbVnEsrQnjcieGbgkf9PFS126hC8xce4pEZUzr9jReVdfXe3g9BSUsXLj2XcWrnD6iTgHpiC18jjyjg1wjm1Vs4TcXhG472MRvGspucJ8LuUE91WV7353Kxdc2e7Trw2Sd6iV",
+		unsignedTx)
 }
 
 

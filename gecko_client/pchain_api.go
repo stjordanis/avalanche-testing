@@ -271,7 +271,7 @@ func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, e
 	params := map[string]interface{}{
 		"amount": amount,
 		"to": to,
-		"payerNonce": payerNonce
+		"payerNonce": payerNonce,
 	}
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportAVA", params)
 	if err != nil {
@@ -281,8 +281,8 @@ func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, e
 	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ExportAVAResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
-		return TODO, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
-	return TODO, nil
+	return response.Result.UnsignedTx, nil
 }
 
