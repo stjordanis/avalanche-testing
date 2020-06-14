@@ -57,7 +57,7 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 	bootNodeIds := make(map[int]bool)
 	for i := 0; i < loader.numBootNodes; i++ {
 		// TODO ID-choosing needs to be deterministic!!
-		serviceId, err := builder.AddService(serviceCfg, bootNodeIds)
+		serviceId, err := builder.AddService(serviceCfg, i, bootNodeIds)
 		if err != nil {
 			return stacktrace.Propagate(err, "Error occurred when adding a boot node")
 		}
@@ -65,7 +65,7 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 	}
 	for i := loader.numBootNodes; i < loader.numNodes; i++ {
 		// TODO ID-choosing needs to be deterministic!!
-		_, err := builder.AddService(serviceCfg, bootNodeIds)
+		_, err := builder.AddService(serviceCfg, i, bootNodeIds)
 		if err != nil {
 			return stacktrace.Propagate(err, "Error occurred when adding a dependent node")
 		}

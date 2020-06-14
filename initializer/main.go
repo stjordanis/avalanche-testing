@@ -80,7 +80,6 @@ func main() {
 	logrus.Info("================================== TEST RESULTS ================================")
 	allTestsSucceeded := true
 	for testName, result := range results {
-		// TODO get information about why stuff failed
 		logrus.Infof("- %v: %v", testName, result)
 		allTestsSucceeded = allTestsSucceeded && result == initializer.PASSED
 	}

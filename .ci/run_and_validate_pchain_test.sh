@@ -3,10 +3,7 @@ SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 
 DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
-
-# TODO do we even need to pull here? Kurtosis should pull this image automatically
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
-docker pull "${DEFAULT_GECKO_IMAGE}"
 
 return_code=0
 if ! bash "${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh" "tenNodeGetValidatorsTest"; then
