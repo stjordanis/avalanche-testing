@@ -1,4 +1,6 @@
 # TBD
+
+# 0.2.1
 * Fix tee suppressing exit code of the Docker image
 * Add parameters to `makeRpcRequest` on Gecko client
 * Added a mock JSON RPC requester for testing Gecko client methods
