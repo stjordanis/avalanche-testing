@@ -35,5 +35,5 @@ func main() {
 		logrus.Error(err)
 		os.Exit(1)
 	}
-	logrus.Info("Test %v succeeded", *testNameArg)
+	logrus.Infof("Test %v succeeded", *testNameArg)
 }
