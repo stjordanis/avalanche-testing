@@ -32,6 +32,9 @@ func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkL
 	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
 }
 
+func (s TenNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
 
 // =============== Get Validators Test ==================================
 type TenNodeNetworkGetValidatorsTest struct{}
@@ -69,5 +72,9 @@ func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context tes
 
 func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
+}
+
+func (test TenNodeNetworkGetValidatorsTest) GetTimeout() time.Duration {
+	return 30 * time.Second
 }
 
