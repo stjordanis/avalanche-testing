@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -16,6 +17,7 @@ const (
 	DEFAULT_ENDING_PORT = 10650
 
 	TEST_NAME_ARG_SEPARATOR = ","
+
 )
 
 func main() {
@@ -53,7 +55,34 @@ func main() {
 		"",
 		"Comma-separated list of test names to run (default or empty: run all tests)",
 	)
+
+	initializerLogLevelArg := flag.String(
+		"initializer-log-level",
+		"info",
+		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
+	)
+
+	controllerLogLevelArg := flag.String(
+		"controller-log-level",
+		"info",
+		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
+	)
 	flag.Parse()
+
+	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
+	if initializerLevelPtr == nil {
+		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
+		//  level so that whatever the default the user should see it
+		logrus.Fatal("Invalid initializer log level %v", *initializerLogLevelArg)
+		os.Exit(1)
+	}
+	logrus.SetLevel(*initializerLevelPtr)
+
+	controllerLevelPtr := logging.LevelFromString(*controllerLogLevelArg)
+	if controllerLevelPtr == nil {
+		logrus.Fatal("Invalid controller log level %v", *controllerLogLevelArg)
+		os.Exit(1)
+	}
 
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
