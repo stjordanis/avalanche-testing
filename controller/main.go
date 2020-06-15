@@ -31,7 +31,9 @@ func main() {
 	err := controller.RunTest(*testNameArg, *networkInfoFilepathArg)
 
 	if err != nil {
+		logrus.Errorf("Test %v failed:", *testNameArg)
 		logrus.Error(err)
 		os.Exit(1)
 	}
+	logrus.Info("Test %v succeeded", *testNameArg)
 }
