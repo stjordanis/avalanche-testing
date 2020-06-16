@@ -32,6 +32,9 @@ func (s FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetwo
 	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 }
 
+func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
 
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}
@@ -70,3 +73,8 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
 }
+
+func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
+

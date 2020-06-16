@@ -30,6 +30,10 @@ func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNe
 	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
 }
 
+func (test SingleNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
+
 // =============== Get Validators Test ==================================
 type SingleNodeNetworkGetValidatorsTest struct{}
 func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
@@ -65,5 +69,9 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 
 func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
+}
+
+func (test SingleNodeNetworkGetValidatorsTest) GetTimeout() time.Duration {
+	return 30 * time.Second
 }
 
