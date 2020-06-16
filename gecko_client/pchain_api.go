@@ -464,15 +464,11 @@ func (api PChainApi) IssueTx(tx string) (string, error) {
 	params := map[string]interface{}{
 		"tx": tx,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.issueTx", params)
+	var response interface{}
+	err := api.rpcRequester.makeUnmarshalledRpcRequest(pchainEndpoint, "platform.issueTx", params, &response)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
-
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
-	var response IssueTxResponse
-	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
-		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
-	}
-	return response.Result.TxID, nil
+	castedResponse := response.(IssueTxResponse)
+	return castedResponse.Result.TxID, nil
 }
