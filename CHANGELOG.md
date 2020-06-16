@@ -1,4 +1,5 @@
 # TBD
+* Removed startPortRange and endPortRange CLI args
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
