@@ -215,3 +215,9 @@ type IssueTxResponse struct {
 	Result TransactionIDInfo	`json:"result"`
 	Id int	`json:"id"`
 }
+
+type RpcResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result interface{}	`json:"result"`
+	Id int	`json:"id"`
+}
