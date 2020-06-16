@@ -28,13 +28,12 @@ func main() {
 	logrus.Infof("Running test '%v'...", *testNameArg)
 
 	controller := controller.NewTestController(ava_testsuite.AvaTestSuite{})
-	succeeded, err := controller.RunTests(*testNameArg, *networkInfoFilepathArg)
-	if err != nil {
-		logrus.Error(err)
-		succeeded = false
-	}
+	err := controller.RunTest(*testNameArg, *networkInfoFilepathArg)
 
-	if !succeeded {
+	if err != nil {
+		logrus.Errorf("Test %v failed:", *testNameArg)
+		logrus.Error(err)
 		os.Exit(1)
 	}
+	logrus.Infof("Test %v succeeded", *testNameArg)
 }

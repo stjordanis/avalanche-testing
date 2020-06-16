@@ -1,5 +1,6 @@
 # TBD
 * Removed startPortRange and endPortRange CLI args
+* Declare timeouts for tests
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image

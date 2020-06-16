@@ -133,6 +133,8 @@ github.com/kurtosis-tech/kurtosis v0.0.0-20200616093902-2526f4119e40 h1:LknT24qG
 github.com/kurtosis-tech/kurtosis v0.0.0-20200616093902-2526f4119e40/go.mod h1:F4w1Bu8OQLhptvL+iMHlnXIjf7jerW7pIfAI3QBeaCM=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200616095347-97c69cfac6f1 h1:P4/OAg7751oRzaHuaWi/pEo9GCQxvReRq42to0tfEmw=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200616095347-97c69cfac6f1/go.mod h1:F4w1Bu8OQLhptvL+iMHlnXIjf7jerW7pIfAI3QBeaCM=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200615104302-fd450a1de108 h1:WLLr/8wPPNqA4m0kMusUBHDUMXWumPhKLGieTePqNhI=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200615104302-fd450a1de108/go.mod h1:F4w1Bu8OQLhptvL+iMHlnXIjf7jerW7pIfAI3QBeaCM=
 github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a h1:DGFy/362j92vQRE3ThU1yqg9TuJS8YJOSbQuB7BP9cA=
 github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a/go.mod h1:jVntzcUU+2BtVohZBQmSHWUmh8B55LCNfPhcNCIvvIg=
 github.com/moby/term v0.0.0-20200507201656-73f35e472e8f/go.mod h1:uF4OSdW39LLr+K/v/iL6dOm257SGdQJGiyMU1QlNd6s=
