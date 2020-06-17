@@ -1,6 +1,7 @@
 # TBD
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
+* After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.
 * Make initializer & controller log levels independently configurable
 
 # 0.2.1
