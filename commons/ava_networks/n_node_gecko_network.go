@@ -21,6 +21,10 @@ func (network NNodeGeckoNetwork) GetGeckoClient(i int) (gecko_client.GeckoClient
 	return client, nil
 }
 
+func (network NNodeGeckoNetwork) GetNumberOfNodes() int {
+	return len(network.geckoClients)
+}
+
 // ============== Loader ======================
 type NNodeGeckoNetworkLoader struct{
 	numNodes int
