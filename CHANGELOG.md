@@ -2,6 +2,7 @@
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
 * Make initializer & controller log levels independently configurable
+* Split `admin` and `health` endpoint types into their own files, for readability
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
