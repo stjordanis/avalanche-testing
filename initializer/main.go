@@ -21,11 +21,6 @@ const (
 )
 
 func main() {
-	// TODO make this configurable
-	logrus.SetLevel(logrus.TraceLevel)
-
-	logrus.Info("Welcome to Kurtosis E2E Testing for Ava.")
-
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
 		"gecko-image-name", 
@@ -78,6 +73,17 @@ func main() {
 	}
 	logrus.SetLevel(*initializerLevelPtr)
 
+	// Technically this validation should be done only in the controller (the initializer shouldn't know anything about
+	//  what logging the controller uses) but we do this here to save the user from needing to wait for a controller to
+	//  start up to find out they typo'd the log level
+	controllerLevelPtr := logging.LevelFromString(*controllerLogLevelArg)
+	if controllerLevelPtr == nil {
+		logrus.Fatalf("Invalid controller log level %v", *controllerLogLevelArg)
+		os.Exit(1)
+	}
+
+
+	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
 	if len(testNamesArgStr) == 0 {

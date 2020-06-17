@@ -11,9 +11,6 @@ import (
 )
 
 func main() {
-	// TODO make this configurable (passed from the initializer)
-	logrus.SetLevel(logrus.TraceLevel)
-
 	testNameArg := flag.String(
 		"test",
 		"",
