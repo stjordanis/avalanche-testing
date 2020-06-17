@@ -1,6 +1,7 @@
 # TBD
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
+* Make initializer & controller log levels independently configurable
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
