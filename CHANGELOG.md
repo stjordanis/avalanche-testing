@@ -1,5 +1,6 @@
 # TBD
 * Declare timeouts for tests
+* After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
