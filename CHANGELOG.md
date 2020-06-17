@@ -1,4 +1,5 @@
 # TBD
+* Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
 * Make initializer & controller log levels independently configurable
 
