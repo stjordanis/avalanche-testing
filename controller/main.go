@@ -10,15 +10,6 @@ import (
 	"os"
 )
 
-const (
-	TRACE_LOGLEVEL_ARG = "trace"
-	DEBUG_LOGLEVEL_ARG = "debug"
-	INFO_LOGLEVEL_ARG = "info"
-	WARN_LOGLEVEL_ARG = "warn"
-	ERROR_LOGLEVEL_ARG = "error"
-	FATAL_LOGLEVEL_ARG = "fatal"
-)
-
 func main() {
 	// TODO make this configurable (passed from the initializer)
 	logrus.SetLevel(logrus.TraceLevel)
@@ -46,7 +37,7 @@ func main() {
 	if logLevelPtr == nil {
 		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
 		//  level so that whatever the default the user should see it
-		logrus.Fatal("Invalid initializer log level %v", *logLevelArg)
+		logrus.Fatalf("Invalid initializer log level %v", *logLevelArg)
 		os.Exit(1)
 	}
 	logrus.SetLevel(*logLevelPtr)
@@ -60,5 +51,5 @@ func main() {
 		logrus.Error(err)
 		os.Exit(1)
 	}
-	logrus.Info("Test %v succeeded", *testNameArg)
+	logrus.Infof("Test %v succeeded", *testNameArg)
 }

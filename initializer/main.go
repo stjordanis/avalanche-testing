@@ -24,7 +24,7 @@ func main() {
 	// TODO make this configurable
 	logrus.SetLevel(logrus.TraceLevel)
 
-	fmt.Println("Welcome to Kurtosis E2E Testing for Ava.")
+	logrus.Info("Welcome to Kurtosis E2E Testing for Ava.")
 
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
@@ -73,7 +73,7 @@ func main() {
 	if initializerLevelPtr == nil {
 		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
 		//  level so that whatever the default the user should see it
-		logrus.Fatal("Invalid initializer log level %v", *initializerLogLevelArg)
+		logrus.Fatalf("Invalid initializer log level %v", *initializerLogLevelArg)
 		os.Exit(1)
 	}
 	logrus.SetLevel(*initializerLevelPtr)
@@ -95,7 +95,6 @@ func main() {
 		*portRangeEndArg)
 
 	// Create the container based on the configurations, but don't start it yet.
-	fmt.Println("I'm going to run a Gecko testnet, and hang while it's running! Kill me and then clear your docker containers.")
 	results, error := testSuiteRunner.RunTests(testNames)
 	if error != nil {
 		panic(error)
