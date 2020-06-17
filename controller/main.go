@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -37,25 +38,23 @@ func main() {
 	logLevelArg := flag.String(
 		"log-level",
 		"info",
-		fmt.Sprintf(
-			"Log level to use (%v, %v, %v, %v, %v, %v)",
-			TRACE_LOGLEVEL_ARG,
-			DEBUG_LOGLEVEL_ARG,
-			INFO_LOGLEVEL_ARG,
-			WARN_LOGLEVEL_ARG,
-			ERROR_LOGLEVEL_ARG,
-			FATAL_LOGLEVEL_ARG)
+		fmt.Sprintf("Log level to use for the controller (%v)", logging.GetAcceptableStrings()),
 	)
 	flag.Parse()
 
-
-
-
-	logrus.Infof("Running test '%v'...", *testNameArg)
+	logLevelPtr := logging.LevelFromString(*logLevelArg)
+	if logLevelPtr == nil {
+		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
+		//  level so that whatever the default the user should see it
+		logrus.Fatal("Invalid initializer log level %v", *logLevelArg)
+		os.Exit(1)
+	}
+	logrus.SetLevel(*logLevelPtr)
 
 	controller := controller.NewTestController(ava_testsuite.AvaTestSuite{})
-	err := controller.RunTest(*testNameArg, *networkInfoFilepathArg)
 
+	logrus.Infof("Running test '%v'...", *testNameArg)
+	err := controller.RunTest(*testNameArg, *networkInfoFilepathArg)
 	if err != nil {
 		logrus.Errorf("Test %v failed:", *testNameArg)
 		logrus.Error(err)

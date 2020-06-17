@@ -78,12 +78,6 @@ func main() {
 	}
 	logrus.SetLevel(*initializerLevelPtr)
 
-	controllerLevelPtr := logging.LevelFromString(*controllerLogLevelArg)
-	if controllerLevelPtr == nil {
-		logrus.Fatal("Invalid controller log level %v", *controllerLogLevelArg)
-		os.Exit(1)
-	}
-
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
 	if len(testNamesArgStr) == 0 {
@@ -96,6 +90,7 @@ func main() {
 		ava_testsuite.AvaTestSuite{},
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
+		*controllerLogLevelArg,
 		*portRangeStartArg,
 		*portRangeEndArg)
 
