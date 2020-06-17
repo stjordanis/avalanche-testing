@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -16,14 +17,10 @@ const (
 	DEFAULT_ENDING_PORT = 10650
 
 	TEST_NAME_ARG_SEPARATOR = ","
+
 )
 
 func main() {
-	// TODO make this configurable
-	logrus.SetLevel(logrus.TraceLevel)
-
-	fmt.Println("Welcome to Kurtosis E2E Testing for Ava.")
-
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
 		"gecko-image-name", 
@@ -53,8 +50,40 @@ func main() {
 		"",
 		"Comma-separated list of test names to run (default or empty: run all tests)",
 	)
+
+	initializerLogLevelArg := flag.String(
+		"initializer-log-level",
+		"info",
+		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
+	)
+
+	controllerLogLevelArg := flag.String(
+		"controller-log-level",
+		"info",
+		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
+	)
 	flag.Parse()
 
+	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
+	if initializerLevelPtr == nil {
+		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
+		//  level so that whatever the default the user should see it
+		logrus.Fatalf("Invalid initializer log level %v", *initializerLogLevelArg)
+		os.Exit(1)
+	}
+	logrus.SetLevel(*initializerLevelPtr)
+
+	// Technically this validation should be done only in the controller (the initializer shouldn't know anything about
+	//  what logging the controller uses) but we do this here to save the user from needing to wait for a controller to
+	//  start up to find out they typo'd the log level
+	controllerLevelPtr := logging.LevelFromString(*controllerLogLevelArg)
+	if controllerLevelPtr == nil {
+		logrus.Fatalf("Invalid controller log level %v", *controllerLogLevelArg)
+		os.Exit(1)
+	}
+
+
+	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
 	if len(testNamesArgStr) == 0 {
@@ -67,11 +96,11 @@ func main() {
 		ava_testsuite.AvaTestSuite{},
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
+		*controllerLogLevelArg,
 		*portRangeStartArg,
 		*portRangeEndArg)
 
 	// Create the container based on the configurations, but don't start it yet.
-	fmt.Println("I'm going to run a Gecko testnet, and hang while it's running! Kill me and then clear your docker containers.")
 	results, error := testSuiteRunner.RunTests(testNames)
 	if error != nil {
 		panic(error)
