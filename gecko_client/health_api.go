@@ -38,7 +38,6 @@ func (api HealthApi) GetLiveness() (LivenessInfo, error) {
 		return LivenessInfo{}, stacktrace.Propagate(err, "Error getting liveness")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetLivenessResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return LivenessInfo{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")

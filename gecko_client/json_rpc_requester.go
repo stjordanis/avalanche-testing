@@ -43,7 +43,6 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 		JsonRpc: JSON_RPC_VERSION,
 		Method: method,
 		Params:  params,
-		// TODO let the user set this?
 		Id: 1,
 	}
 

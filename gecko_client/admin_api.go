@@ -48,7 +48,6 @@ func (api AdminApi) GetPeers() ([]Peer, error) {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetPeersResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -62,7 +61,6 @@ func (api AdminApi) GetNodeId() (string, error) {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetNodeIDResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
