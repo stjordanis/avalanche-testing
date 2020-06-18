@@ -12,8 +12,6 @@ LATEST_TAG="latest"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 DOCKER="${DOCKER:-docker}"
 
-# TODO also use the COMMIT to tag our Docker images with the exact commit name for future reference
-#  We don't do this now while we're developing though, so as not to create a billion images on Dockerhub
 COMMIT="$(git --git-dir="${ROOT_DIRPATH}/.git" rev-parse --short HEAD)"
 
 LATEST_CONTROLLER_TAG="${DOCKER_ORG}/${CONTROLLER_REPO}:${LATEST_TAG}"
