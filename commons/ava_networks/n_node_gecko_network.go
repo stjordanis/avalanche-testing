@@ -16,9 +16,12 @@ func (network NNodeGeckoNetwork) GetGeckoClient(i int) (gecko_client.GeckoClient
 	if i < 0 || i >= len(network.geckoClients) {
 		return gecko_client.GeckoClient{}, stacktrace.NewError("Invalid Gecko client ID")
 	}
-	// TODO if we're just getting ava_services back from the ServiceConfigBuilder, then how can we make assumptions here??
 	client := network.geckoClients[i]
 	return client, nil
+}
+
+func (network NNodeGeckoNetwork) GetNumberOfNodes() int {
+	return len(network.geckoClients)
 }
 
 // ============== Loader ======================
@@ -56,7 +59,6 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 
 	bootNodeIds := make(map[int]bool)
 	for i := 0; i < loader.numBootNodes; i++ {
-		// TODO ID-choosing needs to be deterministic!!
 		serviceId, err := builder.AddService(serviceCfg, i, bootNodeIds)
 		if err != nil {
 			return stacktrace.Propagate(err, "Error occurred when adding a boot node")
@@ -64,7 +66,6 @@ func (loader NNodeGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 		bootNodeIds[serviceId] = true
 	}
 	for i := loader.numBootNodes; i < loader.numNodes; i++ {
-		// TODO ID-choosing needs to be deterministic!!
 		_, err := builder.AddService(serviceCfg, i, bootNodeIds)
 		if err != nil {
 			return stacktrace.Propagate(err, "Error occurred when adding a dependent node")

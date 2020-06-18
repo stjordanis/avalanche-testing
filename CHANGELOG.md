@@ -1,7 +1,10 @@
 # TBD
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
+* After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.
 * Make initializer & controller log levels independently configurable
+* Adding test for full connectivity based on Peers API.
+* Split `admin` and `health` endpoint types into their own files, for readability
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
