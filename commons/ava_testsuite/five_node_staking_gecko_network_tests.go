@@ -9,6 +9,53 @@ import (
 	"time"
 )
 
+type FiveNodeStakingNetworkFullyConnectedTest struct{}
+func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
+	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	networkIdSet := map[string]bool{}
+	numNodes := castedNetwork.GetNumberOfNodes()
+
+	// collect set of IDs in network
+	for i := 0; i < numNodes; i++ {
+		client, err := castedNetwork.GetGeckoClient(i)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+		}
+		id, err := client.AdminApi().GetNodeId()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+		}
+		networkIdSet[id] = true
+	}
+	logrus.Debugf("Network ID Set: %+v", networkIdSet)
+	// verify peer lists have set of IDs in network, except their own
+	for i := 0; i < numNodes; i++ {
+		client, err := castedNetwork.GetGeckoClient(i)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+		}
+		peers, err := client.AdminApi().GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
+		}
+		peerSet := map[string]bool{}
+		for _, peer := range peers {
+			peerSet[peer.Id] = true
+			// verify that peer is inside the networkIdSet
+			context.AssertTrue(networkIdSet[peer.Id])
+		}
+		// verify that every other peer (besides the node itself) is represented in the peer list.
+		context.AssertTrue(len(peerSet) == numNodes - 1)
+	}
+}
+
+func (s FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
+}
+
+func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
 
 type FiveNodeStakingNetworkBasicTest struct{}
 func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
