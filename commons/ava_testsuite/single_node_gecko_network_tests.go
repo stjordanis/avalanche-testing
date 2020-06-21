@@ -2,7 +2,6 @@ package ava_testsuite
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/mutable_gecko_network"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -13,7 +12,7 @@ import (
 // =============== Basic Test ==================================
 type SingleNodeGeckoNetworkBasicTest struct {}
 func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
@@ -38,7 +37,7 @@ func (test SingleNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type SingleNodeNetworkGetValidatorsTest struct{}
 func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {

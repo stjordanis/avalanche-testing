@@ -2,7 +2,6 @@ package ava_testsuite
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/mutable_gecko_network"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -13,7 +12,7 @@ import (
 // =============== Basic Test ==================================
 type TenNodeGeckoNetworkBasicTest struct {}
 func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -40,7 +39,7 @@ func (s TenNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)

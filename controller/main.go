@@ -48,6 +48,7 @@ func main() {
 	)
 	flag.Parse()
 
+
 	logLevelPtr := logging.LevelFromString(*logLevelArg)
 	if logLevelPtr == nil {
 		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
@@ -56,6 +57,13 @@ func main() {
 		os.Exit(1)
 	}
 	logrus.SetLevel(*logLevelPtr)
+
+	logrus.Debugf(
+		"Controller CLI arguments: subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
+		*subnetMaskArg,
+		*gatewayIpArg,
+		*testControllerIpArg,
+		*testImageNameArg)
 
 	controller := controller.NewTestController(
 		*subnetMaskArg,
