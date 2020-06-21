@@ -17,10 +17,28 @@ func main() {
 		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
 	)
 
-	networkInfoFilepathArg := flag.String(
-		"network-info-filepath",
+	testImageNameArg := flag.String(
+		"test-image-name",
 		"",
-		"Filepath of file containing JSON-serialized representation of the network of service Docker containers",
+		"Name of Docker image of the service being tested",
+	)
+
+	subnetMaskArg := flag.String(
+		"subnet-mask",
+		"",
+		"Subnet mask of the Docker network that the test controller is running in",
+	)
+
+	testControllerIpArg := flag.String(
+		"test-controller-ip",
+		"",
+		"IP address of the Docker container running this test controller",
+	)
+
+	gatewayIpArg := flag.String(
+		"gateway-ip",
+		"",
+		"IP address of the gateway address on the Docker network that the test controller is running in",
 	)
 
 	logLevelArg := flag.String(
@@ -39,13 +57,23 @@ func main() {
 	}
 	logrus.SetLevel(*logLevelPtr)
 
-	controller := controller.NewTestController(ava_testsuite.AvaTestSuite{})
+	controller := controller.NewTestController(
+		*subnetMaskArg,
+		*gatewayIpArg,
+		*testControllerIpArg,
+		ava_testsuite.AvaTestSuite{},
+		*testImageNameArg)
 
 	logrus.Infof("Running test '%v'...", *testNameArg)
-	err := controller.RunTest(*testNameArg, *networkInfoFilepathArg)
-	if err != nil {
+	setupErr, testErr := controller.RunTest(*testNameArg)
+	if setupErr != nil {
+		logrus.Errorf("Test %v encountered an error during setup (test did not run):", *testNameArg)
+		logrus.Error(setupErr)
+		os.Exit(1)
+	}
+	if testErr != nil {
 		logrus.Errorf("Test %v failed:", *testNameArg)
-		logrus.Error(err)
+		logrus.Error(testErr)
 		os.Exit(1)
 	}
 	logrus.Infof("Test %v succeeded", *testNameArg)

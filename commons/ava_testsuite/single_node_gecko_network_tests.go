@@ -1,7 +1,8 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/mutable_gecko_network"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -12,7 +13,7 @@ import (
 // =============== Basic Test ==================================
 type SingleNodeGeckoNetworkBasicTest struct {}
 func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
 
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
@@ -27,7 +28,7 @@ func (test SingleNodeGeckoNetworkBasicTest) Run(network interface{}, context tes
 	context.AssertTrue(len(peers) == 0)
 }
 func (test SingleNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(1, 1, false)
 }
 
 func (test SingleNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
@@ -37,7 +38,7 @@ func (test SingleNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type SingleNodeNetworkGetValidatorsTest struct{}
 func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(mutable_gecko_network.MutableGeckoNetwork)
 
 	client, err := castedNetwork.GetGeckoClient(0)
 	if err != nil {
@@ -68,7 +69,7 @@ func (test SingleNodeNetworkGetValidatorsTest) Run(network interface{}, context 
 }
 
 func (test SingleNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(1, 1, false)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(1, 1, false)
 }
 
 func (test SingleNodeNetworkGetValidatorsTest) GetTimeout() time.Duration {
