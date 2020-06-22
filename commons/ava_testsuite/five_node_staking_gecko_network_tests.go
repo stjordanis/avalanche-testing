@@ -49,7 +49,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	}
 }
 
-func (s FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
 }
 
@@ -75,7 +75,7 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 	context.AssertTrue(len(peers) == 9)
 }
 
-func (s FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
 }
 

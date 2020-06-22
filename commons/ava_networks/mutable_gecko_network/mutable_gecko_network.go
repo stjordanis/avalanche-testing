@@ -77,6 +77,7 @@ func (loader MutableGeckoNetworkLoader) InitializeNetwork(network *networks.Serv
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding boot node with ID %v", i)
 		}
+		bootNodeIds[i] = true
 		availabilityCheckers[i] = *checker
 	}
 	for i := loader.numBootNodes; i < loader.numNodes; i++ {
