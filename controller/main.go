@@ -11,6 +11,18 @@ import (
 )
 
 func main() {
+	testVolumeArg := flag.String(
+		"test-volume",
+		"",
+		"The name of the volume that will have been created by the initializer and mounted on this controller, which can also be mounted on other nodes in the network",
+	)
+
+	testVolumeMountpointArg := flag.String(
+		"test-volume-mountpoint",
+		"",
+		"The filepath in the test controller's filesystem where the test volume will have been mounted by the initializer",
+	)
+
 	testNameArg := flag.String(
 		"test",
 		"",
@@ -66,6 +78,8 @@ func main() {
 		*testImageNameArg)
 
 	controller := controller.NewTestController(
+		*testVolumeArg,
+		*testVolumeMountpointArg,
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,

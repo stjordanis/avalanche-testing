@@ -21,13 +21,15 @@ import (
 )
 
 const (
-	httpPort = 9650
-	stakingPort = 9651
-	stakingTlsCertPath = "/data/service/node.crt"
-	stakingTlsKeyPath = "/data/service/node.key"
-	maxCerts = 4000
-	certificatePreamble = "CERTIFICATE"
-	privateKeyPreamble = "RSA PRIVATE KEY"
+	httpPort             = 9650
+	stakingPort          = 9651
+	stakingTlsCertFileId = "staking-tls-cert"
+	stakingTlsKeyFileId  = "staking-tls-key"
+	maxCerts             = 4000
+	certificatePreamble  = "CERTIFICATE"
+	privateKeyPreamble   = "RSA PRIVATE KEY"
+
+	testVolumeMountpoint = "/shared"
 )
 
 // ================= Service ==================================
@@ -89,12 +91,11 @@ func (g GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
 	}
 }
 
-
-func (g GeckoServiceInitializerCore) GetFilepathsToMount() map[string]bool {
+func (g GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 	if g.stakingTlsEnabled {
 		return map[string]bool{
-			stakingTlsCertPath: true,
-			stakingTlsKeyPath: true,
+			stakingTlsCertFileId: true,
+			stakingTlsKeyFileId:  true,
 		}
 	}
 	return make(map[string]bool)
@@ -111,8 +112,8 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 		inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
 	 */
 
-	certFilePointer := osFiles[stakingTlsCertPath]
-	keyFilePointer := osFiles[stakingTlsKeyPath]
+	certFilePointer := osFiles[stakingTlsCertFileId]
+	keyFilePointer := osFiles[stakingTlsKeyFileId]
 	if len(dependencies) == 0 {
 		certFilePointer.WriteString(STAKER_1_CERT)
 		keyFilePointer.WriteString(STAKER_1_PRIVATE_KEY)
@@ -129,7 +130,7 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 	return nil
 }
 
-func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, dependencies []services.Service) ([]string, error) {
+func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr string, dependencies []services.Service) ([]string, error) {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -142,9 +143,18 @@ func (g  GeckoServiceInitializerCore) GetStartCommand(publicIpAddr string, depen
 		fmt.Sprintf("--snow-quorum-size=%d", g.snowQuorumSize),
 		fmt.Sprintf("--staking-tls-enabled=%v", g.stakingTlsEnabled),
 	}
+
 	if g.stakingTlsEnabled {
-		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", stakingTlsCertPath))
-		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", stakingTlsKeyPath))
+		certFilepath, found := mountedFileFilepaths[stakingTlsCertFileId]
+		if !found {
+			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsCertFileId)
+		}
+		keyFilepath, found := mountedFileFilepaths[stakingTlsKeyFileId]
+		if !found {
+			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsKeyFileId)
+		}
+		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", certFilepath))
+		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", keyFilepath))
 	}
 
 
@@ -178,6 +188,9 @@ func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Se
 	return GeckoService{ipAddr: ipAddr}
 }
 
+func (g GeckoServiceInitializerCore) GetTestVolumeMountpoint() string {
+	return testVolumeMountpoint
+}
 
 func getServiceCertAndKeyFiles(cert *x509.Certificate, ca *x509.Certificate) (certFile *bytes.Buffer, keyFile *bytes.Buffer, err error) {
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)

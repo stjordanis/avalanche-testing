@@ -21,7 +21,9 @@ COPY --from=builder /build/test-controller .
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
-CMD ./test-controller \
+CMD ls $(dirname ${LOG_FILEPATH}) && ./test-controller \
+    --test-volume=${TEST_VOLUME} \
+    --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
     --test-image-name=${TEST_IMAGE_NAME} \
     --subnet-mask=${SUBNET_MASK} \
