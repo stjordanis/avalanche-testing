@@ -57,10 +57,18 @@ func (api PChainApi) GetBlockchainStatus(blockchainId string) (string, error) {
 
 // Creates an account with the given parameters, returning the account address
 func (api PChainApi) CreateAccount(username string, password string, privateKey string) (string, error) {
-	params := map[string]interface{}{
-		"username": username,
-		"password": password,
-		"privateKey": privateKey,
+	var params map[string]interface{}
+	if len(privateKey) == 0 {
+		params = map[string]interface{}{
+			"username": username,
+			"password": password,
+		}
+	} else {
+		params = map[string]interface{}{
+			"username": username,
+			"password": password,
+			"privateKey": privateKey,
+		}
 	}
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
 	if err != nil {
