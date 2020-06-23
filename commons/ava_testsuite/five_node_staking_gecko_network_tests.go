@@ -14,6 +14,10 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
 	networkIdSet := map[string]bool{}
 	numNodes := castedNetwork.GetNumberOfNodes()
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(0)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
+	}
 
 	// collect set of IDs in network
 	for i := 0; i < numNodes; i++ {
@@ -24,6 +28,10 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		id, err := client.AdminApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+		}
+		_, err = referenceNodeClient.PChainApi().AddDefaultSubnetValidator(id, 0, 9999999999, 1, 1, "", 0.1)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not add subnet validator %s", id))
 		}
 		networkIdSet[id] = true
 	}
