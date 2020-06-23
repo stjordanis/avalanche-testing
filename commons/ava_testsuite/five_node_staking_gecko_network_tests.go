@@ -18,7 +18,10 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	testAccountAddress, err := referenceNodeClient.PChainApi().CreateAccount("test", "test", "")
+	testAccountAddress, err := referenceNodeClient.PChainApi().CreateAccount(
+		"test",
+		"test34test!23",
+		"24jUJ9vZexUM6expyMcT48LBx27k1m7xpraoV62oSQAHdziao5")
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to create a test account on the network."))
 	}
