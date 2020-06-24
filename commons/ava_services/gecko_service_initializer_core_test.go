@@ -29,7 +29,7 @@ func TestGetContainerStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actualNoDeps, err := initializerConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
+	actualNoDeps, err := initializerConfig.GetStartCommand(make(map[string]string), TEST_IP, make([]services.Service, 0))
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +40,7 @@ func TestGetContainerStartCommand(t *testing.T) {
 		testDependency,
 	}
 	expectedWithDeps := append(expectedNoDeps, "--bootstrap-ips=1.2.3.4:9651")
-	actualWithDeps, err := initializerConfig.GetStartCommand(TEST_IP, testDependencySlice)
+	actualWithDeps, err := initializerConfig.GetStartCommand(make(map[string]string), TEST_IP, testDependencySlice)
 	if err != nil {
 		panic(err)
 	}

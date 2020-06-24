@@ -5,7 +5,10 @@
 * Make initializer & controller log levels independently configurable
 * Adding test for full connectivity based on Peers API.
 * Split `admin` and `health` endpoint types into their own files, for readability
+* Provide functionality for tests to add & stop nodes in the network dynamically
+* Split Gecko networks into MutableGeckoNetwork and FixedGeckoNetwork
 * Fix bug with tests passing when they shouldn't
+* Catch RPC-level errors in MakeRPCRequest
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image

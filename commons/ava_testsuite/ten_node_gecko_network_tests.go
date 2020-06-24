@@ -1,7 +1,7 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -12,7 +12,7 @@ import (
 // =============== Basic Test ==================================
 type TenNodeGeckoNetworkBasicTest struct {}
 func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -29,7 +29,7 @@ func (s TenNodeGeckoNetworkBasicTest) Run(network interface{}, context testsuite
 }
 
 func (s TenNodeGeckoNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(10, 3, false)
 }
 
 func (s TenNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
@@ -39,7 +39,7 @@ func (s TenNodeGeckoNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type TenNodeNetworkGetValidatorsTest struct{}
 func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -71,7 +71,7 @@ func (test TenNodeNetworkGetValidatorsTest) Run(network interface{}, context tes
 }
 
 func (test TenNodeNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(10, 3, false)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(10, 3, false)
 }
 
 func (test TenNodeNetworkGetValidatorsTest) GetTimeout() time.Duration {
