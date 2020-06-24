@@ -3,6 +3,7 @@ package gecko_client
 import (
 	"encoding/json"
 	"github.com/palantir/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -75,10 +76,12 @@ func (api PChainApi) CreateAccount(username string, password string, privateKey 
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
+	logrus.Debugf("Response: %s", string(responseBodyBytes))
 	var response CreateAccountResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
+	logrus.Debugf("Response: %+v", response)
 	return response.Result.Address, nil
 }
 
