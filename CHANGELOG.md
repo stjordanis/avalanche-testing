@@ -7,6 +7,7 @@
 * Split `admin` and `health` endpoint types into their own files, for readability
 * Provide functionality for tests to add & stop nodes in the network dynamically
 * Split Gecko networks into MutableGeckoNetwork and FixedGeckoNetwork
+* Fix bug with tests passing when they shouldn't
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
