@@ -8,14 +8,12 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"math/big"
 	mathrand "math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -32,31 +30,7 @@ const (
 	testVolumeMountpoint = "/shared"
 )
 
-// ================= Service ==================================
-
-type GeckoService struct {
-	ipAddr string
-}
-
-func (g GeckoService) GetStakingSocket() services.ServiceSocket {
-	stakingPort, err := nat.NewPort("tcp", strconv.Itoa(stakingPort))
-	if err != nil {
-		// Realllllly don't think we should deal with propagating this one.... it means the user mistyped an integer
-		panic(err)
-	}
-	return *services.NewServiceSocket(g.ipAddr, stakingPort)
-}
-
-func (g GeckoService) GetJsonRpcSocket() services.ServiceSocket {
-	httpPort, err := nat.NewPort("tcp", strconv.Itoa(httpPort))
-	if err != nil {
-		panic(err)
-	}
-	return *services.NewServiceSocket(g.ipAddr, httpPort)
-}
-
-
-// ================ Initializer Core =============================
+// ========= Loglevel Enum ========================
 type geckoLogLevel string
 const (
 	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
@@ -64,35 +38,57 @@ const (
 	LOG_LEVEL_INFO    geckoLogLevel = "info"
 )
 
+// ========= Initializer Core ========================
 type GeckoServiceInitializerCore struct {
 	snowSampleSize    int
 	snowQuorumSize    int
 	stakingTlsEnabled bool
+	bootstrapperNodeIds []string
 	logLevel          geckoLogLevel
 }
 
+/*
+Creates a new Gecko service initializer core with the following parameters:
+
+Args:
+	snowSampleSize: Sample size for Snow consensus protocol
+	snowQuroumSize: Quorum size for Snow consensus protocol
+	stakingTlsEnabled: Whether this node will use staking & TLS
+	bootstrapperNodeIds: The node IDs of the bootstrapper nodes that this node will connect to. While this *seems* unintuitive
+		why this would be required, it's because Gecko doesn't actually use certs. So, to prevent against man-in-the-middle attacks,
+		the user is required to manually specify the node IDs of the nodese it's connecting to.
+	logLevel: The loglevel that the Gecko node should output at.
+
+Returns:
+	An intializer core for creating Gecko nodes with the specified parameers.
+ */
 func NewGeckoServiceInitializerCore(
-	snowSampleSize int,
-	snowQuorumSize int,
-	stakingTlsEnabled bool,
-	logLevel geckoLogLevel) *GeckoServiceInitializerCore {
+			snowSampleSize int,
+			snowQuorumSize int,
+			stakingTlsEnabled bool,
+			bootstrapperNodeIds []string,
+			logLevel geckoLogLevel) *GeckoServiceInitializerCore {
+	// Defensive copy
+	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
+	copy(bootstrapperIdsCopy, bootstrapperNodeIds)
 	return &GeckoServiceInitializerCore{
 		snowSampleSize:    snowSampleSize,
 		snowQuorumSize:    snowQuorumSize,
 		stakingTlsEnabled: stakingTlsEnabled,
+		bootstrapperNodeIds: bootstrapperIdsCopy,
 		logLevel:          logLevel,
 	}
 }
 
-func (g GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
+func (core GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
 	return map[int]bool{
 		httpPort:    true,
 		stakingPort: true,
 	}
 }
 
-func (g GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
-	if g.stakingTlsEnabled {
+func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
+	if core.stakingTlsEnabled {
 		return map[string]bool{
 			stakingTlsCertFileId: true,
 			stakingTlsKeyFileId:  true,
@@ -101,17 +97,7 @@ func (g GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 	return make(map[string]bool)
 }
 
-func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
-	/*
-		TODO TODO TODO support >1 bootstrappers in staking mode by dynamically acquiring bootstrapper IDs instead of hardcoding one.
-		For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
-		This must be hardcoded because Gecko requires specifying the bootstrapperID
-		along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
-		knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
-		However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
-		inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
-	 */
-
+func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
 	if len(dependencies) == 0 {
@@ -130,7 +116,7 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 	return nil
 }
 
-func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr string, dependencies []services.Service) ([]string, error) {
+func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr string, dependencies []services.Service) ([]string, error) {
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -138,13 +124,13 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort),
 		fmt.Sprintf("--staking-port=%d", stakingPort),
-		fmt.Sprintf("--log-level=%s", g.logLevel),
-		fmt.Sprintf("--snow-sample-size=%d", g.snowSampleSize),
-		fmt.Sprintf("--snow-quorum-size=%d", g.snowQuorumSize),
-		fmt.Sprintf("--staking-tls-enabled=%v", g.stakingTlsEnabled),
+		fmt.Sprintf("--log-level=%s", core.logLevel),
+		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
+		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
+		fmt.Sprintf("--staking-tls-enabled=%v", core.stakingTlsEnabled),
 	}
 
-	if g.stakingTlsEnabled {
+	if core.stakingTlsEnabled {
 		certFilepath, found := mountedFileFilepaths[stakingTlsCertFileId]
 		if !found {
 			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsCertFileId)
@@ -170,9 +156,14 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 		for _, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			if g.stakingTlsEnabled {
-				// We hardcode the first bootstrapper ID from the TLS identities in gecko_service_tls_identities
-				commandList = append(commandList, "--bootstrap-ids=" + STAKER_1_NODE_ID)
+			if core.stakingTlsEnabled {
+				bootstrapperIdsList := strings.Join(core.bootstrapperNodeIds, ",")
+
+				// NOTE: This seems weird, BUT there's a reason for it: Gecko doesn't use certs, and instead relies on
+				//  the user explicitly passing in the node ID of the bootstrapper it wants. This prevents man-in-the-middle
+				//  attacks, just like using a cert would. Us hardcoding this bootstrapper ID here is the equivalent
+				//  of a user knowing the node ID in advance, which provides the same level of protection.
+				commandList = append(commandList, "--bootstrap-ids=" + bootstrapperIdsList)
 				// We currently have one cert -> ID mapping so break the for loop here.
 				break
 			}
@@ -184,11 +175,11 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 	return commandList, nil
 }
 
-func (g GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
+func (core GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{ipAddr: ipAddr}
 }
 
-func (g GeckoServiceInitializerCore) GetTestVolumeMountpoint() string {
+func (core GeckoServiceInitializerCore) GetTestVolumeMountpoint() string {
 	return testVolumeMountpoint
 }
 
