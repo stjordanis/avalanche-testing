@@ -1,7 +1,7 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -11,7 +11,7 @@ import (
 
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 	networkIdSet := map[string]bool{}
 	numNodes := castedNetwork.GetNumberOfNodes()
 
@@ -49,8 +49,8 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	}
 }
 
-func (s FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
+func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
@@ -59,7 +59,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration 
 
 type FiveNodeStakingNetworkBasicTest struct{}
 func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -75,8 +75,8 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 	context.AssertTrue(len(peers) == 9)
 }
 
-func (s FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
+func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
@@ -86,7 +86,7 @@ func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}
 func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.NNodeGeckoNetwork)
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 
 	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -118,7 +118,7 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewNNodeGeckoNetworkLoader(5, 1, true)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {

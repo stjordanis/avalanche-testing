@@ -1,5 +1,5 @@
-FROM golang:1.13-alpine
-
+# ============= Build Stage ======================
+FROM golang:1.13-alpine AS builder
 WORKDIR /build
 # Copy and download dependencies using go mod
 COPY go.mod .
@@ -10,8 +10,23 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o test-controller controller/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o test-controller controller/main.go
+
+# ============= Execution Stage ================
+FROM docker:stable AS execution
+WORKDIR /run
+
+# Copy the code into the container
+COPY --from=builder /build/test-controller .
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
-CMD ./test-controller --test=${TEST_NAME} --network-info-filepath=${NETWORK_DATA_FILEPATH} --log-level=${LOG_LEVEL} &> ${LOG_FILEPATH}
+CMD ls $(dirname ${LOG_FILEPATH}) && ./test-controller \
+    --test-volume=${TEST_VOLUME} \
+    --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
+    --test=${TEST_NAME} \
+    --test-image-name=${TEST_IMAGE_NAME} \
+    --subnet-mask=${SUBNET_MASK} \
+    --test-controller-ip=${TEST_CONTROLLER_IP} \
+    --gateway-ip=${GATEWAY_IP} \
+    --log-level=${LOG_LEVEL} &> ${LOG_FILEPATH}
