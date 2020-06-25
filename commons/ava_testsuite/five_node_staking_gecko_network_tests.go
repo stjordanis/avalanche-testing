@@ -50,7 +50,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
@@ -76,7 +76,7 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
@@ -118,7 +118,7 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 1, true)
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
