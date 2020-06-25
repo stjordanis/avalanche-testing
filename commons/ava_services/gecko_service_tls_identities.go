@@ -10,9 +10,23 @@ package ava_services
 	inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
 
 	The hardcoded ID in this file is the known Gecko ID for a node using the private key and cert in this file.
+
+	These TLS Identities are the 5 default stakers hardcoded in the default Gecko subnet
 */
 
-const STAKER_1_NODE_ID = "7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"
+type StakerIdentity struct {
+	NodeID string
+	PrivateKey string
+	TlsCert string
+}
+
+const (
+	STAKER_1_NODE_ID = "7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"
+	STAKER_2_NODE_ID = "MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ"
+	STAKER_3_NODE_ID = "NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN"
+	STAKER_4_NODE_ID = "GWPcbFJZFfZreETSoWjPimr846mXEKCtu"
+	STAKER_5_NODE_ID = "P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5"
+)
 
 const STAKER_1_PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
 MIIJKAIBAAKCAgEAymEkcP1tGKWB/zE0IYha0dJvPZesk7sy6Q7Y7na/+UZ4SD77
