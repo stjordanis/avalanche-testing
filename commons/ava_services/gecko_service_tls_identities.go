@@ -1,23 +1,26 @@
 package ava_services
 
 /*
-	TODO TODO TODO support  dynamically acquiring bootstrapper IDs instead of hardcoding.
-	For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
+	For the default testnet, there are five bootstrappers. They have hardcoded bootstrapperIDs that correspond to their TLS certs.
 	This must be hardcoded because Gecko requires specifying the bootstrapperID
-	along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
-	knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
-	However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
-	inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
+	along with the bootstrapperIP when connecting to bootstrappers in TLS mode.
 
-	The hardcoded ID in this file is the known Gecko ID for a node using the private key and cert in this file.
-
-	These TLS Identities are the 5 default stakers hardcoded in the default Gecko subnet
+	The hardcoded IDs in this file are the known Gecko ID for a node using the private key and cert in this file.
+	They are also hardcoded in the gecko source code as the IDs for the initial stakers of the default testnet.
 */
 
 type StakerIdentity struct {
 	NodeID string
 	PrivateKey string
 	TlsCert string
+}
+
+var DefaultStakers = []StakerIdentity{
+	Staker1,
+	Staker2,
+	Staker3,
+	Staker4,
+	Staker5,
 }
 
 var Staker1 = StakerIdentity{
@@ -48,14 +51,6 @@ var Staker5 = StakerIdentity{
 	STAKER_5_NODE_ID,
 	STAKER_5_PRIVATE_KEY,
 	STAKER_5_CERT,
-}
-
-var DefaultStakers = []StakerIdentity{
-	Staker1,
-	Staker2,
-	Staker3,
-	Staker4,
-	Staker5,
 }
 
 const (
