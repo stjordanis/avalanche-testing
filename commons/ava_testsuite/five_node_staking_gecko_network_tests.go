@@ -35,6 +35,7 @@ func addNodeAsValidator(client *gecko_client.GeckoClient) (string, error) {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
 	logrus.Debugf("Adding Node %s as a validator.", nodeId)
+	logrus.Debugf("Genesis Address: %s.", genesisAccountAddress)
 	testAccountAddress, err := client.PChainApi().CreateAccount(USERNAME, PASSWORD, nil)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create account on PChain.")
@@ -46,8 +47,8 @@ func addNodeAsValidator(client *gecko_client.GeckoClient) (string, error) {
 	}
 	txnStatus := ""
 	tries := 0
-	for txnStatus != gecko_client.TXN_ACCEPTED && tries < 10 {
-		time.Sleep(3*time.Second)
+	for txnStatus != gecko_client.TXN_ACCEPTED && tries < 30 {
+		time.Sleep(5*time.Second)
 		tries++
 		txnStatus, err := client.XChainApi().GetTxStatus(unsignedTxnId)
 		if err != nil {
@@ -138,7 +139,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsui
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 30 * time.Minute
 }
 
 type FiveNodeStakingNetworkBasicTest struct{}

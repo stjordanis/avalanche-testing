@@ -57,8 +57,8 @@ func NewFixedGeckoNetworkLoader(numNodes int, numBootNodes int, isStaking bool) 
 
 func (loader FixedGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkBuilder) error {
 	initializerCore := ava_services.NewGeckoServiceInitializerCore(
-		2,
-		2,
+		1,
+		1,
 		loader.isStaking,
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
