@@ -47,8 +47,8 @@ func addNodeAsValidator(client *gecko_client.GeckoClient) (string, error) {
 	}
 	txnStatus := ""
 	tries := 0
-	for txnStatus != gecko_client.TXN_ACCEPTED && tries < 30 {
-		time.Sleep(5*time.Second)
+	for txnStatus != gecko_client.TXN_ACCEPTED && tries < 10 {
+		time.Sleep(1*time.Second)
 		tries++
 		txnStatus, err := client.XChainApi().GetTxStatus(unsignedTxnId)
 		if err != nil {
@@ -103,6 +103,16 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
 		}
+		validators, err := client.PChainApi().GetCurrentValidators(nil)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get current validators."))
+		}
+		logrus.Debugf("Current validators: %+v", validators)
+		peers, err := client.AdminApi().GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get current peers."))
+		}
+		logrus.Debugf("Current peers: %+v", peers)
 		id, err := addNodeAsValidator(client)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not add node as validator."))
@@ -139,7 +149,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsui
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 30 * time.Minute
+	return 30 * time.Second
 }
 
 type FiveNodeStakingNetworkBasicTest struct{}
