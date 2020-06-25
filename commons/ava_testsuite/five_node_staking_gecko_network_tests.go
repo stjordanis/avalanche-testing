@@ -14,12 +14,10 @@ import (
 const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
-	PRIVATE_KEY = "24jUJ9vZexUM6expyMcT48LBx27k1m7xpraoV62oSQAHdziao5"
 	// defined in Gecko codebase for default genesis block
 	// PREFUNDED_ADDRESS = "6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV"
 	GENESIS_USERNAME = "genesis"
 	GENESIS_PASSWORD = "genesis34!23"
-	PREFUNDED_ADDRESS_PRIVATE_KEY = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
 	ACCEPTED_STATUS = "Accepted"
 )
 
