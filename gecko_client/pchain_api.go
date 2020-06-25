@@ -3,7 +3,6 @@ package gecko_client
 import (
 	"encoding/json"
 	"github.com/palantir/stacktrace"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -57,9 +56,9 @@ func (api PChainApi) GetBlockchainStatus(blockchainId string) (string, error) {
 // ============= Accounts ====================
 
 // Creates an account with the given parameters, returning the account address
-func (api PChainApi) CreateAccount(username string, password string, privateKey string) (string, error) {
+func (api PChainApi) CreateAccount(username string, password string, privateKeyPtr *string) (string, error) {
 	var params map[string]interface{}
-	if len(privateKey) == 0 {
+	if privateKeyPtr == nil {
 		params = map[string]interface{}{
 			"username": username,
 			"password": password,
@@ -68,7 +67,7 @@ func (api PChainApi) CreateAccount(username string, password string, privateKey 
 		params = map[string]interface{}{
 			"username": username,
 			"password": password,
-			"privateKey": privateKey,
+			"privateKey": &privateKeyPtr,
 		}
 	}
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
@@ -76,12 +75,10 @@ func (api PChainApi) CreateAccount(username string, password string, privateKey 
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	logrus.Debugf("Response: %s", string(responseBodyBytes))
 	var response CreateAccountResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
-	logrus.Debugf("Response: %+v", response)
 	return response.Result.Address, nil
 }
 

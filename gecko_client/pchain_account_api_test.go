@@ -14,10 +14,11 @@ func TestCreateAccount(t *testing.T) {
     "id": 1
 }`
 	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	privateKey := "24jUJ9vZexUM6expyMcT48LBx27k1m7xpraoV62oSQAHdziao5"
 	address, err := client.PChainApi().CreateAccount(
 		"bob",
 		"loblaw",
-		"24jUJ9vZexUM6expyMcT48LBx27k1m7xpraoV62oSQAHdziao5")
+		&privateKey)
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, "Q4MzFZZDPHRPAHFeDs3NiyyaZDvxHKivf", address)
 }
