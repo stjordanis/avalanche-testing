@@ -167,19 +167,14 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 		}
 
 		socketStrs := make([]string, 0, len(avaDependencies))
-		for _, service := range avaDependencies {
+		bootstrapIds := make([]string, 0, len(avaDependencies))
+		for i, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			bootstrapIds := make([]string, 0)
-			for _, defaultStaker := range DefaultStakers[:len(dependencies)] {
-				bootstrapIds = append(bootstrapIds, defaultStaker.NodeID)
-			}
-			if g.stakingTlsEnabled {
-				// We hardcode the first bootstrapper ID from the TLS identities in gecko_service_tls_identities
-				commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
-				// We currently have one cert -> ID mapping so break the for loop here.
-				break
-			}
+			bootstrapIds = append(bootstrapIds, DefaultStakers[i].NodeID)
+		}
+		if g.stakingTlsEnabled {
+			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
