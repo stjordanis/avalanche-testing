@@ -46,7 +46,7 @@ func NewFixedGeckoNetworkLoader(numNodes int, numBootNodes int, isStaking bool) 
 	  TODO Implement more than one bootnode for staking.
 	*/
 	if isStaking && numBootNodes > 5 {
-		return nil, stacktrace.NewError("Staking networks require less than five bootnodes.")
+		return nil, stacktrace.NewError("Staking networks require five or fewer bootnodes.")
 	}
 	return &FixedGeckoNetworkLoader{
 		numNodes:     numNodes,
