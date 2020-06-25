@@ -37,3 +37,19 @@ type XChainExportAVAResponse struct {
 	Result         XChainTxnInfo `json:"result"`
 	Id             int                     `json:"id"`
 }
+
+type SendResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         XChainTxnInfo `json:"result"`
+	Id             int                     `json:"id"`
+}
+
+type AddressInfo struct {
+	Address string `json:"address"`
+}
+
+type CreateAddressResponse struct {
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         AddressInfo `json:"result"`
+	Id             int                     `json:"id"`
+}

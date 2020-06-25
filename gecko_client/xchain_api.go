@@ -82,3 +82,56 @@ func (api XChainApi) GetBalance(address string, assetId string) (*AccountWithUtx
 	}
 	return &response.Result, nil
 }
+
+func (api XChainApi) Send(amount int, assetId string, to string, username string, password string) (string, error) {
+	params := map[string]interface{}{
+		"amount": amount,
+		"assetID": assetId,
+		"to": to,
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.send", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	var response SendResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.TxID, nil
+}
+
+func (api XChainApi) CreateAddress(username string, password string) (string, error) {
+	params := map[string]interface{}{
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.createAddress", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	var response CreateAddressResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.Address, nil
+}
+
+func (api XChainApi) IssueTx(tx string) (string, error) {
+	params := map[string]interface{}{
+		"tx": tx,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.issueTx", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	var response IssueTxResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.TxID, nil
+}

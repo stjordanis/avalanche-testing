@@ -26,12 +26,12 @@ func createAndSeedXChainAccountFromGenesis(client *gecko_client.GeckoClient, use
 	}
 	logrus.Debugf("Adding Node %s as a validator.", nodeId)
 	logrus.Debugf("Genesis Address: %s.", genesisAccountAddress)
-	testAccountAddress, err := client.PChainApi().CreateAccount(username, password, nil)
+	testAccountAddress, err := client.XChainApi().CreateAddress(username, password)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create account on PChain.")
 	}
 	logrus.Debugf("Test account address: %s", testAccountAddress)
-	unsignedTxnId, err := client.XChainApi().ExportAVA(testAccountAddress, 500, username, password)
+	unsignedTxnId, err := client.XChainApi().Send(500, "AVA", testAccountAddress, username, password)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA.")
 	}
