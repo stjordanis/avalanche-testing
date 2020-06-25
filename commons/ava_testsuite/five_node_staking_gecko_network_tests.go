@@ -38,6 +38,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
 		}
+		logrus.Debugf("Peer set: %+v", peers)
 		peerSet := map[string]bool{}
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
