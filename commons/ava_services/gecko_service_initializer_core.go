@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/docker/go-connections/nat"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -115,8 +116,8 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
 	if len(dependencies) < 5 {
-		certFilePointer.WriteString(DefaultStakers[len(dependencies)].TlsCert)
-		keyFilePointer.WriteString(DefaultStakers[len(dependencies)].PrivateKey)
+		certFilePointer.WriteString(ava_default_testnet.DefaultStakers[len(dependencies)].TlsCert)
+		keyFilePointer.WriteString(ava_default_testnet.DefaultStakers[len(dependencies)].PrivateKey)
 	} else {
 		rootCA := getRootCA()
 		serviceCert := getServiceCert()
@@ -171,7 +172,7 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 		for i, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			bootstrapIds = append(bootstrapIds, DefaultStakers[i].NodeID)
+			bootstrapIds = append(bootstrapIds, ava_default_testnet.DefaultStakers[i].NodeID)
 		}
 		if g.stakingTlsEnabled {
 			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))

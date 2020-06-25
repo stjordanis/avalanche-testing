@@ -1,4 +1,4 @@
-package ava_services
+package ava_default_testnet
 
 /*
 	For the default testnet, there are five bootstrappers. They have hardcoded bootstrapperIDs that correspond to their TLS certs.
