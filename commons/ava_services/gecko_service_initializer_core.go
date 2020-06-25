@@ -115,9 +115,10 @@ func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*
 
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
+	defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
 	if len(dependencies) < 5 {
-		certFilePointer.WriteString(ava_default_testnet.DefaultStakers[len(dependencies)].TlsCert)
-		keyFilePointer.WriteString(ava_default_testnet.DefaultStakers[len(dependencies)].PrivateKey)
+		certFilePointer.WriteString(defaultStakers[len(dependencies)].TlsCert)
+		keyFilePointer.WriteString(defaultStakers[len(dependencies)].PrivateKey)
 	} else {
 		rootCA := getRootCA()
 		serviceCert := getServiceCert()
@@ -167,12 +168,13 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 			avaDependencies = append(avaDependencies, service.(AvaService))
 		}
 
+		defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
 		socketStrs := make([]string, 0, len(avaDependencies))
 		bootstrapIds := make([]string, 0, len(avaDependencies))
 		for i, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			bootstrapIds = append(bootstrapIds, ava_default_testnet.DefaultStakers[i].NodeID)
+			bootstrapIds = append(bootstrapIds, defaultStakers[i].NodeID)
 		}
 		if g.stakingTlsEnabled {
 			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
