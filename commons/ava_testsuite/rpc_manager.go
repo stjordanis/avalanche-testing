@@ -54,7 +54,6 @@ func (rpcUser RpcUser) incrementNonce() int {
  */
 func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	amount int) (string, error) {
-	time.Sleep(time.Second * 30)
 	client := rpcManager.client
 	username := rpcManager.rpcUser.username
 	password := rpcManager.rpcUser.password
