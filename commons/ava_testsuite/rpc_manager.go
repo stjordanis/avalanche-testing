@@ -53,11 +53,11 @@ func (rpcUser RpcUser) incrementNonce() int {
 	Returns the new, funded XChain account address.
  */
 func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
-	username string,
-	password string,
 	amount int) (string, error) {
 	time.Sleep(time.Second * 30)
 	client := rpcManager.client
+	username := rpcManager.rpcUser.username
+	password := rpcManager.rpcUser.password
 	_, err := client.KeystoreApi().CreateUser(username, password)
 	if err != nil {
 		stacktrace.Propagate(err, "Could not create user.")
@@ -101,10 +101,10 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	Returns the new, funded PChain account address.
 */
 func (rpcManager RpcManager) TransferAvaXChainToPChain(
-		username string,
-		password string,
 		amount int) (string, error) {
 	client := rpcManager.client
+	username := rpcManager.rpcUser.username
+	password := rpcManager.rpcUser.password
 	pchainAddress, err := client.PChainApi().CreateAccount(username, password, nil)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create new account on PChain")

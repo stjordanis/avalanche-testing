@@ -18,6 +18,37 @@ const (
 	// PREFUNDED_ADDRESS = "6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV"
 )
 
+type FiveNodeStakingNetworkPChainImportTest struct{}
+func (test FiveNodeStakingNetworkPChainImportTest) Run(network interface{}, context testsuite.TestContext) {
+	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
+	testAmount := 10000
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(4)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
+	}
+	rpcManager := NewRpcManager(
+		referenceNodeClient,
+		&ava_default_testnet.DefaultTestNet,
+		USERNAME,
+		PASSWORD)
+	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(testAmount)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
+	}
+	pchainAddress, err := rpcManager.TransferAvaXChainToPChain(testAmount)
+	pchainAccount, err := referenceNodeClient.PChainApi().GetAccount(pchainAddress)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get PChain account information"))
+	}
+	balance := pchainAccount.Balance
+	context.AssertTrue(balance == strconv.Itoa(testAmount))
+}
+func (test FiveNodeStakingNetworkPChainImportTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
+}
+func (test FiveNodeStakingNetworkPChainImportTest) GetTimeout() time.Duration {
+	return 60 * time.Second
+}
 
 type FiveNodeStakingNetworkXChainTransferTest struct{}
 func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, context testsuite.TestContext) {
@@ -32,7 +63,7 @@ func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, co
 		&ava_default_testnet.DefaultTestNet,
 		USERNAME,
 		PASSWORD)
-	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(USERNAME, PASSWORD, testAmount)
+	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(testAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
