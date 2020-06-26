@@ -31,7 +31,7 @@ func (api XChainApi) ImportKey(username string, password string, privateKey stri
 	return response.Result.Address, nil
 }
 
-func (api XChainApi) ExportAVA(to string, amount int, username string, password string) (string, error) {
+func (api XChainApi) ExportAVA(to string, amount int64, username string, password string) (string, error) {
 	params := map[string]interface{}{
 		"to": to,
 		"amount": amount,
@@ -83,7 +83,7 @@ func (api XChainApi) GetBalance(address string, assetId string) (*AccountWithUtx
 	return &response.Result, nil
 }
 
-func (api XChainApi) Send(amount int, assetId string, to string, username string, password string) (string, error) {
+func (api XChainApi) Send(amount int64, assetId string, to string, username string, password string) (string, error) {
 	params := map[string]interface{}{
 		"amount": amount,
 		"assetID": assetId,

@@ -12,6 +12,7 @@ const (
 	GENESIS_USERNAME            = "genesis"
 	GENESIS_PASSWORD            = "genesis34!23"
 	TRANSACTION_ACCEPTED_STATUS = "Accepted"
+	AVA_ASSET_ID = "AVA"
 )
 
 type RpcManager struct {
@@ -53,7 +54,7 @@ func (rpcUser RpcUser) incrementNonce() int {
 	Returns the new, funded XChain account address.
  */
 func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
-	amount int) (string, error) {
+	amount int64) (string, error) {
 	client := rpcManager.client
 	username := rpcManager.rpcUser.username
 	password := rpcManager.rpcUser.password
@@ -83,7 +84,7 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 		return "", stacktrace.Propagate(err, "Failed to create address on XChain.")
 	}
 	logrus.Debugf("Test account address: %s", testAccountAddress)
-	txnId, err := client.XChainApi().Send(amount, "AVA", testAccountAddress, GENESIS_USERNAME, GENESIS_PASSWORD)
+	txnId, err := client.XChainApi().Send(amount, AVA_ASSET_ID, testAccountAddress, GENESIS_USERNAME, GENESIS_PASSWORD)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
@@ -100,7 +101,7 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	Returns the new, funded PChain account address.
 */
 func (rpcManager RpcManager) TransferAvaXChainToPChain(
-		amount int) (string, error) {
+		amount int64) (string, error) {
 	client := rpcManager.client
 	username := rpcManager.rpcUser.username
 	password := rpcManager.rpcUser.password
