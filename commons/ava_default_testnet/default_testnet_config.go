@@ -27,9 +27,14 @@ type StakerIdentity struct {
 
 var DefaultTestNet = TestNet{
 	DefaultStakers: defaultStakers,
-	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in tests
+	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in test net
 	FundedAddresses: FundedAddress{
 		"6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV",
+		/*
+		 	It's okay to have privateKey here because its a hardcoded value available in the Gecko codebase.
+			It is necessary to have this privateKey in order to transfer funds to test accounts in the test net.
+			This privateKey only applies to local test nets, it has nothing to do with the public test net or main net.
+		*/
 		"ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN",
 	},
 }
