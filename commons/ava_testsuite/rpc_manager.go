@@ -126,9 +126,12 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 
 func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
 	client := rpcManager.client
-	status := ""
+	status, err := client.XChainApi().GetTxStatus(txnId)
+	if err != nil {
+		return stacktrace.Propagate(err,"Failed to get status.")
+	}
 	for status != ACCEPTED_STATUS {
-		status, err := client.XChainApi().GetTxStatus(txnId)
+		status, err = client.XChainApi().GetTxStatus(txnId)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get status.")
 		}
