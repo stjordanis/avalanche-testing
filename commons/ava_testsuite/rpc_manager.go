@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	GENESIS_USERNAME = "genesis"
-	GENESIS_PASSWORD = "genesis34!23"
-	ACCEPTED_STATUS = "Accepted"
+	GENESIS_USERNAME            = "genesis"
+	GENESIS_PASSWORD            = "genesis34!23"
+	TRANSACTION_ACCEPTED_STATUS = "Accepted"
 )
 
 type RpcManager struct {
@@ -135,7 +135,7 @@ func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get status.")
 	}
-	for status != ACCEPTED_STATUS {
+	for status != TRANSACTION_ACCEPTED_STATUS {
 		status, err = client.XChainApi().GetTxStatus(txnId)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get status.")
