@@ -14,15 +14,17 @@ import (
 const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
-	// defined in Gecko codebase for default genesis block
-	// PREFUNDED_ADDRESS = "6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV"
+	SEED_AMOUNT = 1000000
+	// Use 4 as a reference node for now, because it appears to handle bootstrapping more quickly than the first node.
+	// If we use 0, we get intermittent test timeouts.
+	// TODO TODO TODO When bootstrapping API is available, use that to make sure testnet is ready.
+	REFERENCE_NODE_INDEX = 4
 )
 
 type FiveNodeStakingNetworkPChainImportTest struct{}
 func (test FiveNodeStakingNetworkPChainImportTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
-	testAmount := 10000
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(4)
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
@@ -31,17 +33,17 @@ func (test FiveNodeStakingNetworkPChainImportTest) Run(network interface{}, cont
 		&ava_default_testnet.DefaultTestNet,
 		USERNAME,
 		PASSWORD)
-	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(testAmount)
+	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	pchainAddress, err := rpcManager.TransferAvaXChainToPChain(testAmount)
+	pchainAddress, err := rpcManager.TransferAvaXChainToPChain(SEED_AMOUNT)
 	pchainAccount, err := referenceNodeClient.PChainApi().GetAccount(pchainAddress)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get PChain account information"))
 	}
 	balance := pchainAccount.Balance
-	context.AssertTrue(balance == strconv.Itoa(testAmount))
+	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT))
 }
 func (test FiveNodeStakingNetworkPChainImportTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
@@ -53,8 +55,7 @@ func (test FiveNodeStakingNetworkPChainImportTest) GetTimeout() time.Duration {
 type FiveNodeStakingNetworkXChainTransferTest struct{}
 func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
-	testAmount := 10000
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(4)
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
@@ -63,12 +64,12 @@ func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, co
 		&ava_default_testnet.DefaultTestNet,
 		USERNAME,
 		PASSWORD)
-	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(testAmount)
+	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
 	balance, err := referenceNodeClient.XChainApi().GetBalance(address, "AVA")
-	context.AssertTrue(balance.Balance == strconv.Itoa(testAmount))
+	context.AssertTrue(balance.Balance == strconv.Itoa(SEED_AMOUNT))
 }
 func (test FiveNodeStakingNetworkXChainTransferTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
