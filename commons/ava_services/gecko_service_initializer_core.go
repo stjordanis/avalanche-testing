@@ -103,19 +103,14 @@ func (g GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 }
 
 func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
-	/*
-		TODO TODO TODO support >1 bootstrappers in staking mode by dynamically acquiring bootstrapper IDs instead of hardcoding one.
-		For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
-		This must be hardcoded because Gecko requires specifying the bootstrapperID
-		along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
-		knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
-		However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
-		inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
-	 */
-
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
 	defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
+	/*
+		TODO TODO TODO use a TlsCertKeyProvider in order to inject identities properly
+		This is a huge hack because if someone defines a dependency chain rather than
+		accumulating dependencies, this whole thing breaks.
+	 */
 	if len(dependencies) < 5 {
 		certFilePointer.WriteString(defaultStakers[len(dependencies)].TlsCert)
 		keyFilePointer.WriteString(defaultStakers[len(dependencies)].PrivateKey)
