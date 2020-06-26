@@ -169,7 +169,9 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 		for i, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			bootstrapIds = append(bootstrapIds, defaultStakers[i].NodeID)
+			if i < 5 {
+				bootstrapIds = append(bootstrapIds, defaultStakers[i].NodeID)
+			}
 		}
 		if g.stakingTlsEnabled {
 			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
