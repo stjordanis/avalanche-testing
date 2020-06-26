@@ -121,11 +121,11 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
-	_, err = client.PChainApi().IssueTx(txnId)
+	txnId, err = client.PChainApi().IssueTx(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
-	time.Sleep(time.Second * 5)
+	rpcManager.waitForTransactionAcceptance(txnId)
 	return pchainAddress, nil
 }
 
