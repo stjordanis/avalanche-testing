@@ -16,9 +16,6 @@ const (
 	PASSWORD = "test34test!23"
 	// defined in Gecko codebase for default genesis block
 	// PREFUNDED_ADDRESS = "6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV"
-	GENESIS_USERNAME = "genesis"
-	GENESIS_PASSWORD = "genesis34!23"
-	ACCEPTED_STATUS = "Accepted"
 )
 
 
@@ -30,7 +27,11 @@ func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	address, err := createAndSeedXChainAccountFromGenesis(referenceNodeClient, USERNAME, PASSWORD, testAmount)
+	rpcManager := RpcManager{
+		client: referenceNodeClient,
+		testNet: ava_default_testnet.DefaultTestNet,
+	}
+	address, err := rpcManager.createAndSeedXChainAccountFromGenesis(USERNAME, PASSWORD, testAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
