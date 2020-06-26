@@ -16,7 +16,35 @@ const (
 
 type RpcManager struct {
 	client *gecko_client.GeckoClient
-	testNet ava_default_testnet.TestNet
+	testNet *ava_default_testnet.TestNet
+	rpcUser *RpcUser
+}
+
+func NewRpcManager(
+		client *gecko_client.GeckoClient,
+		testNet *ava_default_testnet.TestNet,
+		username string,
+		password string) *RpcManager {
+	return &RpcManager{
+		client: client,
+		testNet: testNet,
+		rpcUser: NewRpcUser(username, password),
+	}
+}
+
+type RpcUser struct {
+	username string
+	password string
+	payerNonce int
+}
+
+func NewRpcUser(username string, password string) *RpcUser {
+	return &RpcUser{username: username, password: password, payerNonce: 0}
+}
+
+func (rpcUser RpcUser) incrementNonce() int {
+	rpcUser.payerNonce++
+	return rpcUser.payerNonce
 }
 
 /*
@@ -24,7 +52,7 @@ type RpcManager struct {
 	Transfers funds from the genesis account to the new XChain account using the Genesis private key.
 	Returns the new, funded XChain account address.
  */
-func (rpcManager RpcManager) createAndSeedXChainAccountFromGenesis(
+func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	username string,
 	password string,
 	amount int) (string, error) {
@@ -60,15 +88,10 @@ func (rpcManager RpcManager) createAndSeedXChainAccountFromGenesis(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
-	status := ""
-	for status != ACCEPTED_STATUS {
-		status, err = client.XChainApi().GetTxStatus(txnId)
-		if err != nil {
-			return "", stacktrace.Propagate(err,"Failed to get status.")
-		}
-		time.Sleep(time.Second)
+	err = rpcManager.waitForTransactionAcceptance(txnId)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to wait for transaction acceptance.")
 	}
-	logrus.Debugf("Transaction status for send transaction: %s", status)
 	return testAccountAddress, nil
 }
 
@@ -77,11 +100,40 @@ func (rpcManager RpcManager) createAndSeedXChainAccountFromGenesis(
 	Transfers funds from an XChain account owned by that username and password to the new PChain account.
 	Returns the new, funded PChain account address.
 */
-func (rpcManager RpcManager) transferAvaXChainToPChain(
-	username string,
-	password string,
-	from string,
-	to string,
-	amount int) (string, error) {
-	return "", nil
+func (rpcManager RpcManager) TransferAvaXChainToPChain(
+		username string,
+		password string,
+		amount int) (string, error) {
+	client := rpcManager.client
+	pchainAddress, err := client.PChainApi().CreateAccount(username, password, nil)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to create new account on PChain")
+	}
+	txnId, err := client.XChainApi().ExportAVA(pchainAddress, amount, username, password)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed pchainAddress export AVA pchainAddress %s", pchainAddress)
+	}
+	err = rpcManager.waitForTransactionAcceptance(txnId)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	txnId, err = client.PChainApi().ImportAVA(username, password, pchainAddress, rpcManager.rpcUser.incrementNonce())
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed pchainAddress import AVA pchainAddress %s", pchainAddress)
+	}
+	return pchainAddress, nil
+}
+
+func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
+	client := rpcManager.client
+	status := ""
+	for status != ACCEPTED_STATUS {
+		status, err := client.XChainApi().GetTxStatus(txnId)
+		if err != nil {
+			return stacktrace.Propagate(err,"Failed to get status.")
+		}
+		logrus.Debugf("Status for transaction %s: %s", txnId, status)
+		time.Sleep(time.Second)
+	}
+	return nil
 }

@@ -27,11 +27,12 @@ func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := RpcManager{
-		client: referenceNodeClient,
-		testNet: ava_default_testnet.DefaultTestNet,
-	}
-	address, err := rpcManager.createAndSeedXChainAccountFromGenesis(USERNAME, PASSWORD, testAmount)
+	rpcManager := NewRpcManager(
+		referenceNodeClient,
+		&ava_default_testnet.DefaultTestNet,
+		USERNAME,
+		PASSWORD)
+	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(USERNAME, PASSWORD, testAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
