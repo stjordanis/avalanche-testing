@@ -111,7 +111,7 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	}
 	txnId, err := client.XChainApi().ExportAVA(pchainAddress, amount, username, password)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed pchainAddress export AVA pchainAddress %s", pchainAddress)
+		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
 	err = rpcManager.waitForTransactionAcceptance(txnId)
 	if err != nil {
@@ -119,8 +119,13 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	}
 	txnId, err = client.PChainApi().ImportAVA(username, password, pchainAddress, rpcManager.rpcUser.incrementNonce())
 	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed pchainAddress import AVA pchainAddress %s", pchainAddress)
+		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
+	_, err = client.PChainApi().IssueTx(txnId)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
+	}
+	time.Sleep(time.Second * 5)
 	return pchainAddress, nil
 }
 
