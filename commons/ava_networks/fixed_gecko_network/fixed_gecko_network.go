@@ -60,6 +60,7 @@ func (loader FixedGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 		2,
 		2,
 		loader.isStaking,
+		[]string{ava_services.STAKER_1_NODE_ID},
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 	err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore)

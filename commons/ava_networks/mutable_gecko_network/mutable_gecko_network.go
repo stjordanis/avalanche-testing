@@ -32,7 +32,7 @@ const (
 	geckoServiceConfigId = iota
 )
 
-type MutableGeckoNetworkLoader struct{
+type MutableGeckoNetworkLoader struct {
 	numNodes int
 	numBootNodes int
 	isStaking bool
@@ -60,6 +60,7 @@ func (loader MutableGeckoNetworkLoader) ConfigureNetwork(builder *networks.Servi
 		2,
 		2,
 		loader.isStaking,
+		[]string{ava_services.STAKER_1_NODE_ID},
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 	err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore)
