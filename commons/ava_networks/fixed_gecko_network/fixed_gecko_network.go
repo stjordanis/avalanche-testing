@@ -42,11 +42,8 @@ func NewFixedGeckoNetworkLoader(numNodes int, numBootNodes int, isStaking bool) 
 	if numBootNodes > numNodes {
 		return nil, stacktrace.NewError("Asked for %v boot nodes but svcNetwork only has %v nodes", numBootNodes, numNodes)
 	}
-	/*
-	  TODO Implement more than one bootnode for staking.
-	*/
-	if isStaking && numBootNodes != 1 {
-		return nil, stacktrace.NewError("Staking networks currently require exactly one bootnode.")
+	if isStaking && numBootNodes > 5 {
+		return nil, stacktrace.NewError("Staking networks require five or fewer bootnodes.")
 	}
 	return &FixedGeckoNetworkLoader{
 		numNodes:     numNodes,

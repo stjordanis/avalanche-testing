@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/docker/go-connections/nat"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -102,21 +103,17 @@ func (g GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 }
 
 func (g GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
-	/*
-		TODO TODO TODO support >1 bootstrappers in staking mode by dynamically acquiring bootstrapper IDs instead of hardcoding one.
-		For a staking network, there is only one bootstrapper. It has a hardcoded bootstrapperID that corresponds to its TLS cert.
-		This must be hardcoded because Gecko requires specifying the bootstrapperID
-		along with the bootstrapperIP when connecting to bootstrappers in TLS mode. There are two ways to get this, by
-		knowing the ID ahead of time (hardcoding) and pinging the bootstrapper API once its up to get the IP.
-		However we can not currently do this because the GetStartCommand code runs inside the initializer rather than
-		inside the controller, therefore it is not in Docker, therefore it does not have network access to the bootstrapped node.
-	 */
-
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
-	if len(dependencies) == 0 {
-		certFilePointer.WriteString(STAKER_1_CERT)
-		keyFilePointer.WriteString(STAKER_1_PRIVATE_KEY)
+	defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
+	/*
+		TODO TODO TODO use a TlsCertKeyProvider in order to inject identities properly
+		This is a huge hack because if someone defines a dependency chain rather than
+		accumulating dependencies, this whole thing breaks.
+	 */
+	if len(dependencies) < 5 {
+		certFilePointer.WriteString(defaultStakers[len(dependencies)].TlsCert)
+		keyFilePointer.WriteString(defaultStakers[len(dependencies)].PrivateKey)
 	} else {
 		rootCA := getRootCA()
 		serviceCert := getServiceCert()
@@ -166,16 +163,18 @@ func (g GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[st
 			avaDependencies = append(avaDependencies, service.(AvaService))
 		}
 
+		defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
 		socketStrs := make([]string, 0, len(avaDependencies))
-		for _, service := range avaDependencies {
+		bootstrapIds := make([]string, 0, len(avaDependencies))
+		for i, service := range avaDependencies {
 			socket := service.GetStakingSocket()
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			if g.stakingTlsEnabled {
-				// We hardcode the first bootstrapper ID from the TLS identities in gecko_service_tls_identities
-				commandList = append(commandList, "--bootstrap-ids=" + STAKER_1_NODE_ID)
-				// We currently have one cert -> ID mapping so break the for loop here.
-				break
+			if i < len(defaultStakers) {
+				bootstrapIds = append(bootstrapIds, defaultStakers[i].NodeID)
 			}
+		}
+		if g.stakingTlsEnabled {
+			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
