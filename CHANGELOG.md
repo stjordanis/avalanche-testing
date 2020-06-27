@@ -8,6 +8,8 @@
 * Provide functionality for tests to add & stop nodes in the network dynamically
 * Split Gecko networks into MutableGeckoNetwork and FixedGeckoNetwork
 * Fix bug with tests passing when they shouldn't
+* Catch RPC-level errors in MakeRPCRequest
+* Add all five default stakers to staking network bootstrapping
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
