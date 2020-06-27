@@ -125,7 +125,7 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
-	rpcManager.waitForTransactionAcceptance(txnId)
+	rpcManager.waitForNonZeroBalance(pchainAddress)
 	return pchainAddress, nil
 }
 
@@ -141,6 +141,28 @@ func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
 			return stacktrace.Propagate(err,"Failed to get status.")
 		}
 		logrus.Debugf("Status for transaction %s: %s", txnId, status)
+		time.Sleep(time.Second)
+	}
+	return nil
+}
+
+func (rpcManager RpcManager) waitForNonZeroBalance(pchainAddress string) error {
+	client := rpcManager.client
+	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not get PChain account information")
+	}
+	balance := pchainAccount.Balance
+	if err != nil {
+		return stacktrace.Propagate(err,"Failed to get balance.")
+	}
+	for balance == "0" {
+		pchainAccount, err = client.PChainApi().GetAccount(pchainAddress)
+		if err != nil {
+			return stacktrace.Propagate(err,"Failed to get account information.")
+		}
+		balance = pchainAccount.Balance
+		logrus.Debugf("Balance for account %s: %s", pchainAddress, balance)
 		time.Sleep(time.Second)
 	}
 	return nil
