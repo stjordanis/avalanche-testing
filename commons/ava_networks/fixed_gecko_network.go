@@ -2,6 +2,7 @@ package ava_networks
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
@@ -58,7 +59,7 @@ func (loader FixedGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 		2,
 		loader.isStaking,
 		[]string{ava_services.STAKER_1_NODE_ID},
-		*ava_services.NewGeckoCertProvider(true),
+		*cert_providers.NewDynamicGeckoCertProvider(true),
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 	err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore)

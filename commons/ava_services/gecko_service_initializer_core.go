@@ -2,7 +2,7 @@ package ava_services
 
 import (
 	"fmt"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -33,7 +33,7 @@ type GeckoServiceInitializerCore struct {
 	snowQuorumSize      int
 	stakingTlsEnabled   bool
 	bootstrapperNodeIds []string
-	certProvider        GeckoCertProvider
+	certProvider        cert_providers.GeckoCertProvider
 	logLevel            GeckoLogLevel
 }
 
@@ -58,7 +58,7 @@ func NewGeckoServiceInitializerCore(
 			snowQuorumSize int,
 			stakingTlsEnabled bool,
 			bootstrapperNodeIds []string,
-			certProvider GeckoCertProvider,
+			certProvider cert_providers.GeckoCertProvider,
 			logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
@@ -93,28 +93,25 @@ func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
-	defaultStakers := ava_default_testnet.LocalTestNet.Stakers
-	/*
-		TODO TODO TODO use a TlsCertKeyProvider in order to inject identities properly
-		This is a huge hack because if someone defines a dependency chain rather than
-		accumulating dependencies, this whole thing breaks.
-	 */
-	if len(dependencies) < 5 {
-		certFilePointer.WriteString(defaultStakers[len(dependencies)].TlsCert)
-		keyFilePointer.WriteString(defaultStakers[len(dependencies)].PrivateKey)
-	} else {
-
-		certPEM, keyPEM, err := core.certProvider.GetCertAndKey()
-		if err != nil {
-			return stacktrace.Propagate(err, "Failed to write files.")
-		}
-		certFilePointer.Write(certPEM.Bytes())
-		keyFilePointer.Write(keyPEM.Bytes())
+	certPEM, keyPEM, err := core.certProvider.GetCertAndKey()
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not get cert & key when initializing service")
 	}
+	certFilePointer.Write(certPEM.Bytes())
+	keyFilePointer.Write(keyPEM.Bytes())
 	return nil
 }
 
 func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr string, dependencies []services.Service) ([]string, error) {
+	numBootNodeIds := len(core.bootstrapperNodeIds)
+	numDependencies := len(dependencies)
+	if numDependencies != numBootNodeIds {
+		return nil, stacktrace.NewError(
+			"Gecko service is being started with %v dependencies but only %v boot node IDs have been configured",
+			numDependencies,
+			numBootNodeIds)
+	}
+
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
 	commandList := []string{
 		"/gecko/build/ava",
@@ -139,38 +136,27 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		}
 		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", certFilepath))
 		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", keyFilepath))
+
+		// NOTE: This seems weird, BUT there's a reason for it: Gecko doesn't use certs, and instead relies on
+		//  the user explicitly passing in the node ID of the bootstrapper it wants. This prevents man-in-the-middle
+		//  attacks, just like using a cert would. Us hardcoding this bootstrapper ID here is the equivalent
+		//  of a user knowing the node ID in advance, which provides the same level of protection.
+		commandList = append(commandList, "--bootstrap-ids=" + strings.Join(core.bootstrapperNodeIds, ","))
 	}
 
-
-	// If bootstrap nodes are down then Gecko will wait until they are, so we don't actually need to busy-loop making
-	// requests to the nodes
-	if dependencies != nil && len(dependencies) > 0 {
-		avaDependencies := make([]AvaService, 0, len(dependencies))
-		for _, service := range dependencies {
-			avaDependencies = append(avaDependencies, service.(AvaService))
-		}
-
-		defaultStakers := ava_default_testnet.LocalTestNet.Stakers
-		socketStrs := make([]string, 0, len(avaDependencies))
-		bootstrapIds := make([]string, 0, len(avaDependencies))
-		// TODO Use cert provider to do this properly!!!
-		for i, service := range avaDependencies {
-			socket := service.GetStakingSocket()
-			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
-			if i < len(defaultStakers) {
-				bootstrapIds = append(bootstrapIds, defaultStakers[i].NodeID)
-			}
-		}
-		if core.stakingTlsEnabled {
-			// NOTE: This seems weird, BUT there's a reason for it: Gecko doesn't use certs, and instead relies on
-			//  the user explicitly passing in the node ID of the bootstrapper it wants. This prevents man-in-the-middle
-			//  attacks, just like using a cert would. Us hardcoding this bootstrapper ID here is the equivalent
-			//  of a user knowing the node ID in advance, which provides the same level of protection.
-			commandList = append(commandList, "--bootstrap-ids=" + strings.Join(bootstrapIds, ","))
-		}
-		joinedSockets := strings.Join(socketStrs, ",")
-		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
+	avaDependencies := make([]AvaService, 0, len(dependencies))
+	for _, service := range dependencies {
+		avaDependencies = append(avaDependencies, service.(AvaService))
 	}
+
+	socketStrs := make([]string, 0, len(avaDependencies))
+	for _, service := range avaDependencies {
+		socket := service.GetStakingSocket()
+		socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
+	}
+	joinedSockets := strings.Join(socketStrs, ",")
+	commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
+
 	logrus.Debugf("Command list: %+v", commandList)
 	return commandList, nil
 }

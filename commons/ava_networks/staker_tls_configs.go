@@ -1,4 +1,4 @@
-package ava_default_testnet
+package ava_networks
 
 const (
 	STAKER_1_NODE_ID = "7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"

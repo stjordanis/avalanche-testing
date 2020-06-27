@@ -1,4 +1,4 @@
-package ava_services
+package cert_providers
 
 import (
 	"bytes"
@@ -39,7 +39,7 @@ var rootCert = x509.Certificate{
 /*
 A provider for Gecko service certs, with all certs signed by the same root CA
  */
-type GeckoCertProvider struct {
+type DynamicGeckoCertProvider struct {
 	nextSerialNumber int64
 	varyCerts bool
 }
@@ -50,14 +50,14 @@ Creates a new cert provider that can optionally return either the same cert ever
 Args:
 	varyCerts: Whether to produce a different cert on each call to GetCertAndKey
  */
-func NewGeckoCertProvider(varyCerts bool) *GeckoCertProvider {
-	return &GeckoCertProvider{
+func NewDynamicGeckoCertProvider(varyCerts bool) *DynamicGeckoCertProvider {
+	return &DynamicGeckoCertProvider{
 		nextSerialNumber: mathrand.Int63(),
 		varyCerts: varyCerts,
 	}
 }
 
-func (r *GeckoCertProvider) GetCertAndKey() (certPemBytes *bytes.Buffer, keyPemBytes *bytes.Buffer, err error) {
+func (r *DynamicGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
 	if (r.varyCerts) {
 		r.nextSerialNumber = mathrand.Int63()
@@ -66,11 +66,11 @@ func (r *GeckoCertProvider) GetCertAndKey() (certPemBytes *bytes.Buffer, keyPemB
 
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "Failed to generate random private key.")
+		return bytes.Buffer{}, bytes.Buffer{}, stacktrace.Propagate(err, "Failed to generate random private key.")
 	}
 	certBytes, err := x509.CreateCertificate(rand.Reader, serviceCert, &rootCert, &(certPrivKey.PublicKey), certPrivKey)
 	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "Failed to sign service cert with cert authority.")
+		return bytes.Buffer{}, bytes.Buffer{}, stacktrace.Propagate(err, "Failed to sign service cert with cert authority.")
 	}
 	certPEM := new(bytes.Buffer)
 	pem.Encode(certPEM, &pem.Block{
@@ -83,7 +83,7 @@ func (r *GeckoCertProvider) GetCertAndKey() (certPemBytes *bytes.Buffer, keyPemB
 		Type:  privateKeyPreamble,
 		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
 	})
-	return certPEM, certPrivKeyPEM, nil
+	return *certPEM, *certPrivKeyPEM, nil
 }
 
 // ================= Helper functions ===================

@@ -1,4 +1,4 @@
-package ava_default_testnet
+package ava_networks
 
 /*
 	For the default testnet, there are five bootstrappers. They have hardcoded bootstrapperIDs that correspond to their TLS certs.
@@ -9,24 +9,10 @@ package ava_default_testnet
 	They are also hardcoded in the gecko source code as the IDs for the initial stakers of the default testnet.
 */
 
-type TestNet struct {
-	Stakers         []StakerIdentity
-	FundedAddresses FundedAddress
-}
 
-type FundedAddress struct {
-	Address string
-	PrivateKey string
-}
-
-type StakerIdentity struct {
-	NodeID string
-	PrivateKey string
-	TlsCert string
-}
-
-// TODO Rename this to DefaultLocalGenesisConfig
-var LocalTestNet = TestNet{
+// Genesis information about the network when running in 'local' mode, which comes from hardcodeed information in
+//  the Gecko source
+var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 	Stakers: defaultStakers,
 	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in tests
 	FundedAddresses: FundedAddress{
