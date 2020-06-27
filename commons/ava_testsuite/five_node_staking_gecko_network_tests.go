@@ -61,41 +61,46 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkIdSet := map[string]bool{}
-	numNodes := castedNetwork.GetNumberOfNodes()
+
+	bootServiceIds := castedNetwork.GetAllBootServiceIds()
+	allServiceIds := append(bootServiceIds, NODE_SERVICE_ID)
 
 	// collect set of IDs in network
-	for i := 0; i < numNodes; i++ {
-		client, err := castedNetwork.GetGeckoClient(i)
+	nodeIdSet := map[string]bool{}
+	for _, serviceId := range allServiceIds {
+		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		id, err := client.AdminApi().GetNodeId()
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get node ID of service with ID %v", serviceId))
 		}
-		networkIdSet[id] = true
+		nodeIdSet[id] = true
 	}
-	logrus.Debugf("Network ID Set: %+v", networkIdSet)
+
+	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
+
 	// verify peer lists have set of IDs in network, except their own
-	for i := 0; i < numNodes; i++ {
-		client, err := castedNetwork.GetGeckoClient(i)
+	for _, serviceId := range allServiceIds {
+		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		peers, err := client.AdminApi().GetPeers()
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
 		}
 		logrus.Debugf("Peer set: %+v", peers)
+
 		peerSet := map[string]bool{}
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
-			// verify that peer is inside the networkIdSet
-			context.AssertTrue(networkIdSet[peer.Id])
+			// verify that peer is inside the nodeIdSet
+			context.AssertTrue(nodeIdSet[peer.Id])
 		}
 		// verify that every other peer (besides the node itself) is represented in the peer list.
-		context.AssertTrue(len(peerSet) == numNodes - 1)
+		context.AssertTrue(len(peerSet) == len(allServiceIds) - 1)
 	}
 }
 

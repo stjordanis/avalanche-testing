@@ -10,6 +10,13 @@ import (
 	"github.com/palantir/stacktrace"
 )
 
+const (
+	// The config ID that the first boot node will have, with successive boot nodes being incrementally higher
+	bootNodeConfigIdStart int = 987654
+
+	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
+	bootNodeServiceIdStart int = 987654
+)
 
 // ============== Network ======================
 type TestGeckoNetwork struct{
@@ -25,8 +32,13 @@ func (network TestGeckoNetwork) GetGeckoClient(clientId int) (*gecko_client.Geck
 	return gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort()), nil
 }
 
-func (network TestGeckoNetwork) GetNumberOfNodes() int {
-	return network.svcNetwork.GetSize()
+func (network TestGeckoNetwork) GetAllBootServiceIds() []int {
+	genesisStakers := DefaultLocalNetGenesisConfig.Stakers
+	result := make([]int, 0, len(genesisStakers))
+	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
+		result = append(result, bootNodeServiceIdStart + i)
+	}
+	return result
 }
 
 // ============= Loader Service Config ====================================
@@ -46,13 +58,6 @@ func NewTestGeckoNetworkServiceConfig(
 }
 
 // ============== Loader ======================
-const (
-	// The config ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeConfigIdStart int = 987654
-
-	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeServiceIdStart int = 987654
-)
 
 type TestGeckoNetworkLoader struct{
 	bootNodeLogLevel ava_services.GeckoLogLevel
