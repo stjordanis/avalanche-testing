@@ -1,7 +1,6 @@
-package ava_services
+package ava_networks
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -66,7 +65,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromG
 	genesisAccountAddress, err := client.XChainApi().ImportKey(
 		GENESIS_USERNAME,
 		GENESIS_PASSWORD,
-		ava_default_testnet.DefaultTestNet.FundedAddresses.PrivateKey)
+		DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}

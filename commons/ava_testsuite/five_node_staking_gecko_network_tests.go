@@ -1,7 +1,12 @@
 package ava_testsuite
 
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+//  Rename this entire file and everything in it to emphasize the "staking" aspect, not the number of nodes (because the
+//  number of nodes doesn't really matter)
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
@@ -15,20 +20,18 @@ const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
 	SEED_AMOUNT = 1000000
-	// Use 4 as a reference node for now, because it appears to handle bootstrapping more quickly than the first node.
-	// If we use 0, we get intermittent test timeouts.
-	// TODO TODO TODO When bootstrapping API is available, use that to make sure testnet is ready.
-	REFERENCE_NODE_INDEX = 4
+	NODE_SERVICE_ID = 0
+	NODE_CONFIG_ID = 0
 )
 
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
 func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := ava_services.NewHighLevelGeckoClient(
+	rpcManager := ava_networks.NewHighLevelGeckoClient(
 		referenceNodeClient,
 		USERNAME,
 		PASSWORD)
@@ -48,7 +51,7 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, conte
 	// TODO TODO TODO Test transferring staking rewards back to XChain
 }
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 60 * time.Second
@@ -57,47 +60,52 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
-	networkIdSet := map[string]bool{}
-	numNodes := castedNetwork.GetNumberOfNodes()
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+
+	bootServiceIds := castedNetwork.GetAllBootServiceIds()
+	allServiceIds := append(bootServiceIds, NODE_SERVICE_ID)
 
 	// collect set of IDs in network
-	for i := 0; i < numNodes; i++ {
-		client, err := castedNetwork.GetGeckoClient(i)
+	nodeIdSet := map[string]bool{}
+	for _, serviceId := range allServiceIds {
+		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		id, err := client.AdminApi().GetNodeId()
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get node ID of service with ID %v", serviceId))
 		}
-		networkIdSet[id] = true
+		nodeIdSet[id] = true
 	}
-	logrus.Debugf("Network ID Set: %+v", networkIdSet)
+
+	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
+
 	// verify peer lists have set of IDs in network, except their own
-	for i := 0; i < numNodes; i++ {
-		client, err := castedNetwork.GetGeckoClient(i)
+	for _, serviceId := range allServiceIds {
+		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		peers, err := client.AdminApi().GetPeers()
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
+			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
 		}
 		logrus.Debugf("Peer set: %+v", peers)
+
 		peerSet := map[string]bool{}
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
-			// verify that peer is inside the networkIdSet
-			context.AssertTrue(networkIdSet[peer.Id])
+			// verify that peer is inside the nodeIdSet
+			context.AssertTrue(nodeIdSet[peer.Id])
 		}
 		// verify that every other peer (besides the node itself) is represented in the peer list.
-		context.AssertTrue(len(peerSet) == numNodes - 1)
+		context.AssertTrue(len(peerSet) == len(allServiceIds) - 1)
 	}
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
@@ -106,7 +114,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration 
 
 type FiveNodeStakingNetworkBasicTest struct{}
 func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -123,7 +131,7 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
@@ -133,7 +141,7 @@ func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}
 func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -165,9 +173,26 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 	return 30 * time.Second
+}
+
+// =============== Helper functions =============================
+
+func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
+	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+		NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+	}
+	return ava_networks.NewTestGeckoNetworkLoader(
+		ava_services.LOG_LEVEL_DEBUG,
+		true,
+		serviceConfigs,
+		map[int]int{
+			NODE_SERVICE_ID: NODE_CONFIG_ID,
+		},
+		2,
+		2)
 }
