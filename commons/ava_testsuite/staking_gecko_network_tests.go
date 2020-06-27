@@ -16,12 +16,14 @@ import (
 )
 
 const (
-	USERNAME = "test"
-	PASSWORD = "test34test!23"
-	SEED_AMOUNT = 50000000000000
-	STAKE_AMOUNT = 20000000000000
-	NODE_SERVICE_ID = 0
-	NODE_CONFIG_ID = 0
+	USERNAME                  = "test"
+	PASSWORD                  = "test34test!23"
+	SEED_AMOUNT               = 50000000000000
+	STAKE_AMOUNT              = 20000000000000
+	NODE_SERVICE_ID           = 0
+	NODE_CONFIG_ID            = 0
+	DELEGATOR_NODE_SERVICE_ID = 1
+	DELEGATOR_NODE_CONFIG_ID  = 1
 )
 
 type StakingNetworkRpcWorkflowTest struct{}
@@ -196,14 +198,16 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 // TODO TODO TODO Rename this
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+		NODE_CONFIG_ID:           *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+		DELEGATOR_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
 		serviceConfigs,
 		map[int]int{
-			NODE_SERVICE_ID: NODE_CONFIG_ID,
+			NODE_SERVICE_ID:           NODE_CONFIG_ID,
+			DELEGATOR_NODE_SERVICE_ID: DELEGATOR_NODE_CONFIG_ID,
 		},
 		2,
 		2)

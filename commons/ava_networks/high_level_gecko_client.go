@@ -42,6 +42,9 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
+/*func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
+	delegatedNodeId string,
+	)*/
 
 func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 	nodeId string,
