@@ -38,8 +38,6 @@ type TestGeckoNetworkServiceConfig struct {
 
 func NewTestGeckoNetworkServiceConfig(
 			varyCerts bool,
-			snowQuorumSize int,
-			snowSampleSize int,
 			serviceLogLevel ava_services.GeckoLogLevel) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
 		varyCerts: varyCerts,
@@ -66,8 +64,11 @@ type TestGeckoNetworkLoader struct{
 }
 
 /*
-Creates a new loader to create a TestGeckoNetwork with the specified parameters; this is probably the loader that most
-tests will use
+Creates a new loader to create a TestGeckoNetwork with the specified parameters, transparently handling the creation
+of bootstrapper nodes.
+
+NOTE: Bootstrapper nodes will be created automatically, and will show up in the AvailabilityChecker map that gets returned
+upon initialization.
 
 Args:
 	numNonBootNodes: The number of nodes that the network will start with on top of the boot nodes
@@ -78,7 +79,6 @@ Args:
 	snowSampleSize: The Snow consensus quorum size used for nodes in the network
  */
 func NewTestGeckoNetworkLoader(
-			numNonBootNodes int,
 			bootNodeLogLevel ava_services.GeckoLogLevel,
 			isStaking bool,
 			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
@@ -86,8 +86,7 @@ func NewTestGeckoNetworkLoader(
 			snowQuorumSize int,
 			snowSampleSize int,
 			) (*TestGeckoNetworkLoader, error) {
-
-	if numNonBootNodes == 0 {
+	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
 	}
 
@@ -153,7 +152,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 
 	// Add user-custom configs
 	for configId, configParams := range loader.serviceConfigs {
-		certProvider := cert_providers.NewDynamicGeckoCertProvider(configParams.varyCerts)
+		certProvider := cert_providers.NewRandomGeckoCertProvider(configParams.varyCerts)
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(
 			loader.snowSampleSize,
 			loader.snowQuorumSize,
@@ -169,6 +168,12 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 	return nil
 }
 
+/*
+Initializes the Gecko test network, spinning up the correct number of bootstrapper nodes and then the user-requested nodes.
+
+NOTE: The resulting AvailabilityChecker map will contain more IDs than the user requested as it will contain boot nodes. The IDs
+that these boot nodes are an unspecified implementation detail.
+ */
 func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.ServiceNetwork) (map[int]services.ServiceAvailabilityChecker, error) {
 	availabilityCheckers := make(map[int]services.ServiceAvailabilityChecker)
 

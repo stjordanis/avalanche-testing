@@ -39,7 +39,7 @@ var rootCert = x509.Certificate{
 /*
 A provider for Gecko service certs, with all certs signed by the same root CA
  */
-type DynamicGeckoCertProvider struct {
+type RandomGeckoCertProvider struct {
 	nextSerialNumber int64
 	varyCerts bool
 }
@@ -48,16 +48,16 @@ type DynamicGeckoCertProvider struct {
 Creates a new cert provider that can optionally return either the same cert every time, or different ones
 
 Args:
-	varyCerts: Whether to produce a different cert on each call to GetCertAndKey
+	varyCerts: Whether to produce a different cert on each call to GetCertAndKey, or the same randomly-generated cert
  */
-func NewDynamicGeckoCertProvider(varyCerts bool) *DynamicGeckoCertProvider {
-	return &DynamicGeckoCertProvider{
+func NewRandomGeckoCertProvider(varyCerts bool) *RandomGeckoCertProvider {
+	return &RandomGeckoCertProvider{
 		nextSerialNumber: mathrand.Int63(),
 		varyCerts: varyCerts,
 	}
 }
 
-func (r *DynamicGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
+func (r *RandomGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
 	if (r.varyCerts) {
 		r.nextSerialNumber = mathrand.Int63()

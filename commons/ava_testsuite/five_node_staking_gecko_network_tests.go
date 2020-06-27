@@ -19,8 +19,12 @@ const (
 	// If we use 0, we get intermittent test timeouts.
 	// TODO TODO TODO When bootstrapping API is available, use that to make sure testnet is ready.
 	REFERENCE_NODE_INDEX = 4
+
+	NODE_SERVICE_ID = 0
+	NODE_CONFIG_ID = 0
 )
 
+// TODO Rename this to StakingNetworkRpcWorkflowTest
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
 func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
@@ -48,7 +52,7 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, conte
 	// TODO TODO TODO Test transferring staking rewards back to XChain
 }
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 60 * time.Second
@@ -97,7 +101,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
@@ -123,7 +127,7 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
@@ -165,9 +169,26 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return ava_networks.NewFixedGeckoNetworkLoader(5, 5, true)
+	return getFiveNodeStakingLoader()
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 	return 30 * time.Second
+}
+
+// =============== Helper functions =============================
+
+func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
+	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+		NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+	}
+	return ava_networks.NewTestGeckoNetworkLoader(
+		ava_services.LOG_LEVEL_DEBUG,
+		true,
+		serviceConfigs,
+		map[int]int{
+			NODE_SERVICE_ID: NODE_CONFIG_ID,
+		},
+		2,
+		2)
 }
