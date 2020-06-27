@@ -193,16 +193,143 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	allServiceIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds[NODE_SERVICE_ID] = true
 
+	originalServiceIds := make(map[int]bool)
+	for serviceId, _ := range allServiceIds {
+		originalServiceIds[serviceId] = true
+	}
+
 	// Verify that everybody has everyone else as peers before we add the services with the duplicate nodes
+	allGeckoNodeIds := make(map[string]bool)
+	allGeckoClients := make(map[int]*gecko_client.GeckoClient)
 	for serviceId, _ := range allServiceIds {
 		geckoClient, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Error getting Gecko client for service with ID %v", serviceId))
 		}
+		allGeckoClients[serviceId] = geckoClient
 
-		
+		adminApi := geckoClient.AdminApi()
+		peers, err := adminApi.GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		}
+		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
+		for _, peer := range peers {
+			allGeckoNodeIds[peer.Id] = true
+		}
 	}
-	client, err := castedNetwork.
+
+	// We'll need these later
+	originalGeckoNodeIds := make(map[string]bool)
+	for nodeId, _ := range allGeckoNodeIds {
+		originalGeckoNodeIds[nodeId] = true
+	}
+
+	// Add the first dupe node ID (should look normal from a network perspective
+	badServiceId1 := 1
+	checker1, err := castedNetwork.AddService(SAME_CERT_CONIFG_ID, badServiceId1)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to create first dupe node ID service with ID %v", badServiceId1))
+	}
+	if err := checker1.WaitForStartup(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred waiting for first dupe node ID service to start"))
+	}
+	allServiceIds[badServiceId1] = true
+
+	badServiceClient1, err := castedNetwork.GetGeckoClient(badServiceId1)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the first dupe node ID service with ID %v", badServiceId1))
+	}
+	allGeckoClients[badServiceId1] = badServiceClient1
+
+	badServiceNodeId1, err := badServiceClient1.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId1))
+	}
+	allGeckoNodeIds[badServiceNodeId1] = true
+
+	// Verify that the new node got accepted by everyone
+	for serviceId, _ := range allServiceIds {
+		client := allGeckoClients[serviceId]
+
+		adminApi := client.AdminApi()
+		peers, err := adminApi.GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		}
+		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
+		for _, peer := range peers {
+			_, found := allGeckoNodeIds[peer.Id]
+			context.AssertTrue(found)
+		}
+	}
+
+	// Now, add a second node with the same ID
+	badServiceId2 := 1
+	checker2, err := castedNetwork.AddService(SAME_CERT_CONIFG_ID, badServiceId2)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to create second dupe node ID service with ID %v", badServiceId2))
+	}
+	if err := checker2.WaitForStartup(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred waiting for second dupe node ID service to start"))
+	}
+	allServiceIds[badServiceId2] = true
+
+	badServiceClient2, err := castedNetwork.GetGeckoClient(badServiceId2)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the second dupe node ID service with ID %v", badServiceId2))
+	}
+	allGeckoClients[badServiceId2] = badServiceClient2
+
+	badServiceNodeId2, err := badServiceClient2.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId2))
+	}
+	allGeckoNodeIds[badServiceNodeId2] = true
+
+	// At this point, it's undefined what happens with the two nodes with duplicate IDs; verify that the original nodes
+	//  network operates normally amongst themselves
+	for serviceId, _ := range originalServiceIds {
+		client := allGeckoClients[serviceId]
+		peers, err := client.AdminApi().GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "An error occurred getting peers from service with ID %v", serviceId))
+		}
+
+		// Verify we have, at minimum, all the original nodes
+		originalGeckoNodeIdsSeen := make(map[string]bool)
+		for _, peer := range peers {
+			peerId := peer.Id
+			if _, found := originalGeckoNodeIds[peerId]; found {
+				originalGeckoNodeIdsSeen[peerId] = true
+			}
+		}
+		context.AssertTrue(len(originalGeckoNodeIdsSeen) == len(originalGeckoNodeIds) - 1)
+	}
+
+	// Now, kill the first dupe node to leave only the second (who everyone should connect with)
+	if err := castedNetwork.RemoveService(badServiceId1); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not remove the first service with duped node ID"))
+	}
+	delete(allServiceIds, badServiceId1)
+	delete(allGeckoClients, badServiceId1)
+	delete(allGeckoNodeIds, badServiceNodeId1)
+
+	// Now that the first duped node ID is gone, leaving only the second, verify everyone's happy again
+	for serviceId, _ := range allServiceIds {
+		client := allGeckoClients[serviceId]
+
+		adminApi := client.AdminApi()
+		peers, err := adminApi.GetPeers()
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		}
+		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
+		for _, peer := range peers {
+			_, found := allGeckoNodeIds[peer.Id]
+			context.AssertTrue(found)
+		}
+	}
 }
 
 func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
