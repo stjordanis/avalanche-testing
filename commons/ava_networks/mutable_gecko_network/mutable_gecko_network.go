@@ -29,7 +29,11 @@ func (network MutableGeckoNetwork) GetNumberOfNodes() int {
 
 // ============== Loader ======================
 const (
-	geckoServiceConfigId = iota
+	varyingCertGeckoConfigId = iota
+	fixedCertGeckoConfigId = iota
+
+	snowSampleSize = 2
+	snowQuorumSize = 2
 )
 
 type MutableGeckoNetworkLoader struct {
@@ -56,17 +60,31 @@ func NewMutableGeckoNetworkLoader(initNumNodes int, numBootNodes int, isStaking 
 }
 
 func (loader MutableGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkBuilder) error {
-	initializerCore := ava_services.NewGeckoServiceInitializerCore(
-		2,
-		2,
+	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
+
+	varyingCertInitializerCore := ava_services.NewGeckoServiceInitializerCore(
+		snowSampleSize,
+		snowQuorumSize,
 		loader.isStaking,
 		[]string{ava_services.STAKER_1_NODE_ID},
+		*ava_services.NewGeckoCertProvider(true),
 		ava_services.LOG_LEVEL_DEBUG)
-	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
-	err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore)
-	if err != nil {
-		return stacktrace.Propagate(err, "An error occurred adding the Gecko node configuration")
+	if err := builder.AddTestImageConfiguration(varyingCertGeckoConfigId, varyingCertInitializerCore, availabilityCheckerCore); err != nil {
+		return stacktrace.Propagate(err, "An error occurred adding the varying-cert Gecko node configuration")
 	}
+
+	//
+	fixedCertInitializerCore := ava_services.NewGeckoServiceInitializerCore(
+		snowSampleSize,
+		snowQuorumSize,
+		loader.isStaking,
+		[]string{ava_services.STAKER_1_NODE_ID},
+		*ava_services.NewGeckoCertProvider(false),
+		ava_services.LOG_LEVEL_DEBUG)
+	if err := builder.AddTestImageConfiguration(varyingCertGeckoConfigId, fixedCertInitializerCore, availabilityCheckerCore); err != nil {
+		return stacktrace.Propagate(err, "An error occurred adding the fixed-cert Gecko node configuration")
+	}
+
 	return nil
 }
 
@@ -74,7 +92,7 @@ func (loader MutableGeckoNetworkLoader) InitializeNetwork(network *networks.Serv
 	bootNodeIds := make(map[int]bool)
 	availabilityCheckers := make(map[int]services.ServiceAvailabilityChecker)
 	for i := 0; i < loader.numBootNodes; i++ {
-		checker, err := network.AddService(geckoServiceConfigId, i, bootNodeIds)
+		checker, err := network.AddService(varyingCertGeckoConfigId, i, bootNodeIds)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding boot node with ID %v", i)
 		}
@@ -82,7 +100,7 @@ func (loader MutableGeckoNetworkLoader) InitializeNetwork(network *networks.Serv
 		availabilityCheckers[i] = *checker
 	}
 	for i := loader.numBootNodes; i < loader.numNodes; i++ {
-		checker, err := network.AddService(geckoServiceConfigId, i, bootNodeIds)
+		checker, err := network.AddService(varyingCertGeckoConfigId, i, bootNodeIds)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding dependent node with ID %v", i)
 		}

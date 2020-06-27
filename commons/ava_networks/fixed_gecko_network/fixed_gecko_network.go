@@ -61,12 +61,14 @@ func (loader FixedGeckoNetworkLoader) ConfigureNetwork(builder *networks.Service
 		2,
 		loader.isStaking,
 		[]string{ava_services.STAKER_1_NODE_ID},
+		*ava_services.NewGeckoCertProvider(true),
 		ava_services.LOG_LEVEL_DEBUG)
 	availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 	err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore)
 	if err != nil {
 		return stacktrace.Propagate(err, "An error occurred adding the Gecko node configuration")
 	}
+
 	return nil
 }
 
