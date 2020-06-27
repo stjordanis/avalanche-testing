@@ -1,5 +1,10 @@
 package ava_testsuite
 
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+//  Rename this entire file and everything in it to emphasize the "staking" aspect, not the number of nodes (because the
+//  number of nodes doesn't really matter)
+// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
@@ -15,20 +20,14 @@ const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
 	SEED_AMOUNT = 1000000
-	// Use 4 as a reference node for now, because it appears to handle bootstrapping more quickly than the first node.
-	// If we use 0, we get intermittent test timeouts.
-	// TODO TODO TODO When bootstrapping API is available, use that to make sure testnet is ready.
-	REFERENCE_NODE_INDEX = 4
-
 	NODE_SERVICE_ID = 0
 	NODE_CONFIG_ID = 0
 )
 
-// TODO Rename this to StakingNetworkRpcWorkflowTest
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
 func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}

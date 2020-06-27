@@ -17,7 +17,7 @@
     * `StaticGeckoCertProvider`, which provides the exact same predefined cert repeatedly
     * `RandomGeckoCertProvider`, which provides generated certs (optionally, the same random-generated cert each time)
 * Removed `FixedGeckoNetwork` in favor of `TestGeckoNetwork`, which allows for more control over the testnet that gets created
-* Removed the single-node Gecko tests; they don't actually test anything useful
+* Removed the single-node and ten-node Gecko tests; they don't actually test anything useful when compared to the staking network tests
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
