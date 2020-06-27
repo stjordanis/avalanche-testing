@@ -32,6 +32,10 @@ func (network TestGeckoNetwork) GetGeckoClient(clientId int) (*gecko_client.Geck
 	return gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort()), nil
 }
 
+func (network TestGeckoNetwork) GetNumberOfNodes() int {
+	return network.svcNetwork.GetSize()
+}
+
 func (network TestGeckoNetwork) GetAllBootServiceIds() []int {
 	genesisStakers := DefaultLocalNetGenesisConfig.Stakers
 	result := make([]int, 0, len(genesisStakers))
