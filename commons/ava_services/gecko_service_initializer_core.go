@@ -20,21 +20,21 @@ const (
 )
 
 // ========= Loglevel Enum ========================
-type geckoLogLevel string
+type GeckoLogLevel string
 const (
-	LOG_LEVEL_VERBOSE geckoLogLevel = "verbo"
-	LOG_LEVEL_DEBUG   geckoLogLevel = "debug"
-	LOG_LEVEL_INFO    geckoLogLevel = "info"
+	LOG_LEVEL_VERBOSE GeckoLogLevel = "verbo"
+	LOG_LEVEL_DEBUG   GeckoLogLevel = "debug"
+	LOG_LEVEL_INFO    GeckoLogLevel = "info"
 )
 
 // ========= Initializer Core ========================
 type GeckoServiceInitializerCore struct {
-	snowSampleSize    int
-	snowQuorumSize    int
-	stakingTlsEnabled bool
+	snowSampleSize      int
+	snowQuorumSize      int
+	stakingTlsEnabled   bool
 	bootstrapperNodeIds []string
-	certProvider 	GeckoCertProvider
-	logLevel          geckoLogLevel
+	certProvider        GeckoCertProvider
+	logLevel            GeckoLogLevel
 }
 
 /*
@@ -59,7 +59,7 @@ func NewGeckoServiceInitializerCore(
 			stakingTlsEnabled bool,
 			bootstrapperNodeIds []string,
 			certProvider GeckoCertProvider,
-			logLevel geckoLogLevel) *GeckoServiceInitializerCore {
+			logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
 	copy(bootstrapperIdsCopy, bootstrapperNodeIds)
@@ -93,7 +93,7 @@ func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
-	defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
+	defaultStakers := ava_default_testnet.LocalTestNet.Stakers
 	/*
 		TODO TODO TODO use a TlsCertKeyProvider in order to inject identities properly
 		This is a huge hack because if someone defines a dependency chain rather than
@@ -150,7 +150,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 			avaDependencies = append(avaDependencies, service.(AvaService))
 		}
 
-		defaultStakers := ava_default_testnet.DefaultTestNet.DefaultStakers
+		defaultStakers := ava_default_testnet.LocalTestNet.Stakers
 		socketStrs := make([]string, 0, len(avaDependencies))
 		bootstrapIds := make([]string, 0, len(avaDependencies))
 		// TODO Use cert provider to do this properly!!!

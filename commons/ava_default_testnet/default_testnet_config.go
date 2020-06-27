@@ -10,7 +10,7 @@ package ava_default_testnet
 */
 
 type TestNet struct {
-	DefaultStakers []StakerIdentity
+	Stakers         []StakerIdentity
 	FundedAddresses FundedAddress
 }
 
@@ -25,8 +25,9 @@ type StakerIdentity struct {
 	TlsCert string
 }
 
-var DefaultTestNet = TestNet{
-	DefaultStakers: defaultStakers,
+// TODO Rename this to DefaultLocalGenesisConfig
+var LocalTestNet = TestNet{
+	Stakers: defaultStakers,
 	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in tests
 	FundedAddresses: FundedAddress{
 		"6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV",
@@ -34,6 +35,14 @@ var DefaultTestNet = TestNet{
 	},
 }
 
+/*
+In Gecko, you need at least $snow_consensus stakers for anything to happen. But, you can't register new stakers... without
+$snow_conensus stakers already staking. Thus, you have to start with some staker IDs already registered. To do this, Gecko
+hardcodes 5 staker IDs already registered on the PChain:
+https://github.com/ava-labs/gecko/blob/master/genesis/config.go#L407
+
+These IDs are those stakers, and all local testnets
+ */
 var defaultStakers = []StakerIdentity{
 	staker1,
 	staker2,

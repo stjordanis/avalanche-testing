@@ -1,4 +1,4 @@
-package fixed_gecko_network
+package ava_networks
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
