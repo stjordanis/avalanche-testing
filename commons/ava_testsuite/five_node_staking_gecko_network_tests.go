@@ -43,6 +43,9 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, conte
 	}
 	balance := pchainAccount.Balance
 	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT))
+	// TODO TODO TODO Test adding stakers
+	// TODO TODO TODO Test adding delegators
+	// TODO TODO TODO Test transferring staking rewards back to XChain
 }
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
@@ -50,32 +53,6 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.
 func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 60 * time.Second
 }
-
-type FiveNodeStakingNetworkXChainTransferTest struct{}
-func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
-	}
-	rpcManager := ava_services.NewHighLevelGeckoClient(
-		referenceNodeClient,
-		USERNAME,
-		PASSWORD)
-	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
-	}
-	balance, err := referenceNodeClient.XChainApi().GetBalance(address, "AVA")
-	context.AssertTrue(balance.Balance == strconv.Itoa(SEED_AMOUNT))
-}
-func (test FiveNodeStakingNetworkXChainTransferTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
-}
-func (test FiveNodeStakingNetworkXChainTransferTest) GetTimeout() time.Duration {
-	return 60 * time.Second
-}
-
 
 
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
