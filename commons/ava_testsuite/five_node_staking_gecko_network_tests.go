@@ -1,8 +1,8 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks/fixed_gecko_network"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -21,16 +21,15 @@ const (
 	REFERENCE_NODE_INDEX = 4
 )
 
-type FiveNodeStakingNetworkPChainImportTest struct{}
-func (test FiveNodeStakingNetworkPChainImportTest) Run(network interface{}, context testsuite.TestContext) {
+type FiveNodeStakingNetworkRpcWorkflowTest struct{}
+func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(fixed_gecko_network.FixedGeckoNetwork)
 	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := NewRpcManager(
+	rpcManager := ava_services.NewHighLevelGeckoClient(
 		referenceNodeClient,
-		&ava_default_testnet.DefaultTestNet,
 		USERNAME,
 		PASSWORD)
 	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
@@ -45,10 +44,10 @@ func (test FiveNodeStakingNetworkPChainImportTest) Run(network interface{}, cont
 	balance := pchainAccount.Balance
 	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT))
 }
-func (test FiveNodeStakingNetworkPChainImportTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return fixed_gecko_network.NewFixedGeckoNetworkLoader(5, 5, true)
 }
-func (test FiveNodeStakingNetworkPChainImportTest) GetTimeout() time.Duration {
+func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 60 * time.Second
 }
 
@@ -59,9 +58,8 @@ func (test FiveNodeStakingNetworkXChainTransferTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := NewRpcManager(
+	rpcManager := ava_services.NewHighLevelGeckoClient(
 		referenceNodeClient,
-		&ava_default_testnet.DefaultTestNet,
 		USERNAME,
 		PASSWORD)
 	address, err := rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)

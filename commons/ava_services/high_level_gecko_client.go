@@ -1,4 +1,4 @@
-package ava_testsuite
+package ava_services
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_default_testnet"
@@ -16,31 +16,28 @@ const (
 	AVA_ASSET_ID = "AVA"
 )
 
-type RpcManager struct {
-	client *gecko_client.GeckoClient
-	testNet *ava_default_testnet.TestNet
-	rpcUser *RpcUser
+type HighLevelGeckoClient struct {
+	client    *gecko_client.GeckoClient
+	geckoUser *GeckoUser
 }
 
-func NewRpcManager(
+func NewHighLevelGeckoClient(
 		client *gecko_client.GeckoClient,
-		testNet *ava_default_testnet.TestNet,
 		username string,
-		password string) *RpcManager {
-	return &RpcManager{
-		client: client,
-		testNet: testNet,
-		rpcUser: NewRpcUser(username, password),
+		password string) *HighLevelGeckoClient {
+	return &HighLevelGeckoClient{
+		client:    client,
+		geckoUser: NewGeckoUser(username, password),
 	}
 }
 
-type RpcUser struct {
+type GeckoUser struct {
 	username string
 	password string
 }
 
-func NewRpcUser(username string, password string) *RpcUser {
-	return &RpcUser{username: username, password: password}
+func NewGeckoUser(username string, password string) *GeckoUser {
+	return &GeckoUser{username: username, password: password}
 }
 
 
@@ -49,11 +46,11 @@ func NewRpcUser(username string, password string) *RpcUser {
 	Transfers funds from the genesis account to the new XChain account using the Genesis private key.
 	Returns the new, funded XChain account address.
  */
-func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
+func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromGenesis(
 	amount int64) (string, error) {
-	client := rpcManager.client
-	username := rpcManager.rpcUser.username
-	password := rpcManager.rpcUser.password
+	client := highLevelGeckoClient.client
+	username := highLevelGeckoClient.geckoUser.username
+	password := highLevelGeckoClient.geckoUser.password
 	_, err := client.KeystoreApi().CreateUser(username, password)
 	if err != nil {
 		stacktrace.Propagate(err, "Could not create user.")
@@ -69,7 +66,7 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	genesisAccountAddress, err := client.XChainApi().ImportKey(
 		GENESIS_USERNAME,
 		GENESIS_PASSWORD,
-		rpcManager.testNet.FundedAddresses.PrivateKey)
+		ava_default_testnet.DefaultTestNet.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
@@ -84,7 +81,7 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
-	err = rpcManager.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for transaction acceptance.")
 	}
@@ -96,11 +93,11 @@ func (rpcManager RpcManager) CreateAndSeedXChainAccountFromGenesis(
 	Transfers funds from an XChain account owned by that username and password to the new PChain account.
 	Returns the new, funded PChain account address.
 */
-func (rpcManager RpcManager) TransferAvaXChainToPChain(
+func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 		amount int64) (string, error) {
-	client := rpcManager.client
-	username := rpcManager.rpcUser.username
-	password := rpcManager.rpcUser.password
+	client := highLevelGeckoClient.client
+	username := highLevelGeckoClient.geckoUser.username
+	password := highLevelGeckoClient.geckoUser.password
 	pchainAddress, err := client.PChainApi().CreateAccount(username, password, nil)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create new account on PChain")
@@ -109,7 +106,7 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
-	err = rpcManager.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
@@ -129,12 +126,12 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
-	rpcManager.waitForNonZeroBalance(pchainAddress)
+	highLevelGeckoClient.waitForNonZeroBalance(pchainAddress)
 	return pchainAddress, nil
 }
 
-func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
-	client := rpcManager.client
+func (highLevelGeckoClient HighLevelGeckoClient) waitForTransactionAcceptance(txnId string) error {
+	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get status.")
@@ -150,8 +147,8 @@ func (rpcManager RpcManager) waitForTransactionAcceptance(txnId string) error {
 	return nil
 }
 
-func (rpcManager RpcManager) waitForNonZeroBalance(pchainAddress string) error {
-	client := rpcManager.client
+func (highLevelGeckoClient HighLevelGeckoClient) waitForNonZeroBalance(pchainAddress string) error {
+	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get PChain account information")
