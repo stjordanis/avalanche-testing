@@ -2,12 +2,58 @@ package ava_testsuite
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
+
+const (
+	USERNAME = "test"
+	PASSWORD = "test34test!23"
+	SEED_AMOUNT = 1000000
+	// Use 4 as a reference node for now, because it appears to handle bootstrapping more quickly than the first node.
+	// If we use 0, we get intermittent test timeouts.
+	// TODO TODO TODO When bootstrapping API is available, use that to make sure testnet is ready.
+	REFERENCE_NODE_INDEX = 4
+)
+
+type FiveNodeStakingNetworkRpcWorkflowTest struct{}
+func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
+	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
+	referenceNodeClient, err := castedNetwork.GetGeckoClient(REFERENCE_NODE_INDEX)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
+	}
+	rpcManager := ava_services.NewHighLevelGeckoClient(
+		referenceNodeClient,
+		USERNAME,
+		PASSWORD)
+	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
+	}
+	pchainAddress, err := rpcManager.TransferAvaXChainToPChain(SEED_AMOUNT)
+	pchainAccount, err := referenceNodeClient.PChainApi().GetAccount(pchainAddress)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get PChain account information"))
+	}
+	balance := pchainAccount.Balance
+	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT))
+	// TODO TODO TODO Test adding stakers
+	// TODO TODO TODO Test adding delegators
+	// TODO TODO TODO Test transferring staking rewards back to XChain
+}
+func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return ava_networks.NewFixedGeckoNetworkLoader(5, 5, true)
+}
+func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
+	return 60 * time.Second
+}
+
 
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
@@ -125,4 +171,3 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuit
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 	return 30 * time.Second
 }
-
