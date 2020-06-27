@@ -5,6 +5,7 @@ import (
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
 
@@ -36,17 +37,12 @@ func NewRpcManager(
 type RpcUser struct {
 	username string
 	password string
-	payerNonce int
 }
 
 func NewRpcUser(username string, password string) *RpcUser {
-	return &RpcUser{username: username, password: password, payerNonce: 0}
+	return &RpcUser{username: username, password: password}
 }
 
-func (rpcUser RpcUser) incrementNonce() int {
-	rpcUser.payerNonce++
-	return rpcUser.payerNonce
-}
 
 /*
 	Creates a new account on the XChain under the username and password.
@@ -117,7 +113,15 @@ func (rpcManager RpcManager) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	txnId, err = client.PChainApi().ImportAVA(username, password, pchainAddress, rpcManager.rpcUser.incrementNonce())
+	pchainAccountInfo, err := client.PChainApi().GetAccount(pchainAddress)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to get pchain account info.")
+	}
+	currentPayerNonce, err := strconv.Atoi(pchainAccountInfo.Nonce)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	txnId, err = client.PChainApi().ImportAVA(username, password, pchainAddress, currentPayerNonce + 1)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
