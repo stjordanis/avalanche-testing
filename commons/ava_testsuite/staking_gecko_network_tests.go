@@ -57,7 +57,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
-	context.AssertTrue(len(currentStakers) == castedNetwork.GetNumberOfNodes())
+	context.AssertTrue(len(currentStakers) == 6)
 	// TODO TODO TODO Test adding delegators
 	// TODO TODO TODO Test transferring staking rewards back to XChain
 }
