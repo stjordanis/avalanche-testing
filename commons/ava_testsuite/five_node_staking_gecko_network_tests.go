@@ -20,8 +20,13 @@ const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
 	SEED_AMOUNT = 1000000
-	NODE_SERVICE_ID = 0
-	NODE_CONFIG_ID = 0
+
+	NODE_SERVICE_ID       = 0
+	NORMAL_NODE_CONFIG_ID = 0
+
+	// The configuration ID of a service
+	SAME_CERT_CONIFG_ID = 1
+
 )
 
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
@@ -62,12 +67,12 @@ type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
-	bootServiceIds := castedNetwork.GetAllBootServiceIds()
-	allServiceIds := append(bootServiceIds, NODE_SERVICE_ID)
+	allServiceIds := castedNetwork.GetAllBootServiceIds()
+	allServiceIds[NODE_SERVICE_ID] = true
 
 	// collect set of IDs in network
 	nodeIdSet := map[string]bool{}
-	for _, serviceId := range allServiceIds {
+	for serviceId, _ := range allServiceIds {
 		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
@@ -82,7 +87,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
 
 	// verify peer lists have set of IDs in network, except their own
-	for _, serviceId := range allServiceIds {
+	for serviceId, _ := range allServiceIds {
 		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
@@ -180,18 +185,47 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 	return 30 * time.Second
 }
 
+// =============== Duplicate Node ID Test ==============================
+type FiveNodeStakingNetworkDuplicateIdTest struct {}
+func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context testsuite.TestContext) {
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+
+	allServiceIds := castedNetwork.GetAllBootServiceIds()
+	allServiceIds[NODE_SERVICE_ID] = true
+
+	// Verify that everybody has everyone else as peers before we add the services with the duplicate nodes
+	for serviceId, _ := range allServiceIds {
+		geckoClient, err := castedNetwork.GetGeckoClient(serviceId)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Error getting Gecko client for service with ID %v", serviceId))
+		}
+
+		
+	}
+	client, err := castedNetwork.
+}
+
+func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+	return getFiveNodeStakingLoader()
+}
+
+func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
+	return 30 * time.Second
+}
+
 // =============== Helper functions =============================
 
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+		SAME_CERT_CONIFG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
 		serviceConfigs,
 		map[int]int{
-			NODE_SERVICE_ID: NODE_CONFIG_ID,
+			NODE_SERVICE_ID: NORMAL_NODE_CONFIG_ID,
 		},
 		2,
 		2)
