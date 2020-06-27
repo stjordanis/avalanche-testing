@@ -26,12 +26,12 @@ const (
 
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
 func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := ava_services.NewHighLevelGeckoClient(
+	rpcManager := ava_networks.NewHighLevelGeckoClient(
 		referenceNodeClient,
 		USERNAME,
 		PASSWORD)
@@ -60,7 +60,7 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkIdSet := map[string]bool{}
 	numNodes := castedNetwork.GetNumberOfNodes()
 
@@ -109,7 +109,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration 
 
 type FiveNodeStakingNetworkBasicTest struct{}
 func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	// TODO check ALL nodes!
 	client, err := castedNetwork.GetGeckoClient(0)
@@ -136,7 +136,7 @@ func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}
 func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.FixedGeckoNetwork)
+	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	// TODO we need to make sure ALL the nodes agree about validators!
 	client, err := castedNetwork.GetGeckoClient(0)

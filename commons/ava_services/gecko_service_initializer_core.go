@@ -62,7 +62,10 @@ func NewGeckoServiceInitializerCore(
 			logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
-	copy(bootstrapperIdsCopy, bootstrapperNodeIds)
+	for _, nodeId := range bootstrapperNodeIds {
+		bootstrapperIdsCopy = append(bootstrapperIdsCopy, nodeId)
+	}
+
 	return &GeckoServiceInitializerCore{
 		snowSampleSize:    snowSampleSize,
 		snowQuorumSize:    snowQuorumSize,
@@ -144,18 +147,20 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		commandList = append(commandList, "--bootstrap-ids=" + strings.Join(core.bootstrapperNodeIds, ","))
 	}
 
-	avaDependencies := make([]AvaService, 0, len(dependencies))
-	for _, service := range dependencies {
-		avaDependencies = append(avaDependencies, service.(AvaService))
-	}
+	if len(dependencies) > 0 {
+		avaDependencies := make([]AvaService, 0, len(dependencies))
+		for _, service := range dependencies {
+			avaDependencies = append(avaDependencies, service.(AvaService))
+		}
 
-	socketStrs := make([]string, 0, len(avaDependencies))
-	for _, service := range avaDependencies {
-		socket := service.GetStakingSocket()
-		socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
+		socketStrs := make([]string, 0, len(avaDependencies))
+		for _, service := range avaDependencies {
+			socket := service.GetStakingSocket()
+			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
+		}
+		joinedSockets := strings.Join(socketStrs, ",")
+		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
 	}
-	joinedSockets := strings.Join(socketStrs, ",")
-	commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
 
 	logrus.Debugf("Command list: %+v", commandList)
 	return commandList, nil

@@ -161,7 +161,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			certProvider,
 			configParams.serviceLogLevel)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
-		if err := builder.AddTestImageConfiguration(geckoServiceConfigId, initializerCore, availabilityCheckerCore); err != nil {
+		if err := builder.AddTestImageConfiguration(configId, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
 		}
 	}
