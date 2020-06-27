@@ -10,6 +10,8 @@
 * Fix bug with tests passing when they shouldn't
 * Catch RPC-level errors in MakeRPCRequest
 * Add all five default stakers to staking network bootstrapping
+* Implement test for transferring assets between XChain accounts
+* Implement test for transferring assets from XChain to PChain
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
