@@ -25,7 +25,7 @@ const (
 	NORMAL_NODE_CONFIG_ID = 0
 
 	// The configuration ID of a service
-	SAME_CERT_CONIFG_ID = 1
+	SAME_CERT_CONFIG_ID = 1
 
 )
 
@@ -50,7 +50,7 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, conte
 		context.Fatal(stacktrace.Propagate(err, "Could not get PChain account information"))
 	}
 	balance := pchainAccount.Balance
-	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT))
+	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT), stacktrace.NewError("Balance %v did not equal seed amount %v", balance, SEED_AMOUNT))
 	// TODO TODO TODO Test adding stakers
 	// TODO TODO TODO Test adding delegators
 	// TODO TODO TODO Test transferring staking rewards back to XChain
@@ -102,10 +102,17 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
 			// verify that peer is inside the nodeIdSet
-			context.AssertTrue(nodeIdSet[peer.Id])
+			context.AssertTrue(nodeIdSet[peer.Id], stacktrace.NewError("Peer ID %v is not in the node ID set", peer.Id))
 		}
 		// verify that every other peer (besides the node itself) is represented in the peer list.
-		context.AssertTrue(len(peerSet) == len(allServiceIds) - 1)
+		actualNumPeers := len(peerSet)
+		expectedNumPeers := len(allServiceIds) - 1
+		context.AssertTrue(
+			actualNumPeers == expectedNumPeers,
+			stacktrace.NewError(
+				"Actual length of peer set, %v, is not equal to expected length of peer set, %v",
+				actualNumPeers,
+				expectedNumPeers))
 	}
 }
 
@@ -129,10 +136,12 @@ func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context tes
 
 	peers, err := client.AdminApi().GetPeers()
 	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
+		context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
 	}
 
-	context.AssertTrue(len(peers) == 9)
+	actualNumPeers := len(peers)
+	expectedNumPeers := 9
+	context.AssertTrue(actualNumPeers == expectedNumPeers, stacktrace.NewError("Actual num peers, %v, != expected num peers, %v", actualNumPeers, expectedNumPeers))
 }
 
 func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
@@ -174,7 +183,7 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 		logrus.Infof("Validator ID: %s", validator.Id)
 	}
 	// TODO change this to be specific
-	context.AssertTrue(len(validators) >= 1)
+	context.AssertTrue(len(validators) >= 1, stacktrace.NewError("No validators found"))
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
@@ -190,49 +199,57 @@ type FiveNodeStakingNetworkDuplicateIdTest struct {}
 func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
-	allServiceIds := castedNetwork.GetAllBootServiceIds()
-	allServiceIds[NODE_SERVICE_ID] = true
+	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 
+	allServiceIds := make(map[int]bool)
+	allServiceIds[NODE_SERVICE_ID] = true
+	for bootServiceId, _ := range bootServiceIds {
+		allServiceIds[bootServiceId] = true
+	}
+
+	allGeckoClients := make(map[int]*gecko_client.GeckoClient)
+	allNodeIds := make(map[int]string)
+	for serviceId, _ := range allServiceIds {
+		client, err := castedNetwork.GetGeckoClient(serviceId)
+		if err != nil {
+			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko client for service with ID %v", serviceId))
+		}
+		allGeckoClients[serviceId] = client
+		nodeId, err := client.AdminApi().GetNodeId()
+		if err != nil {
+			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko node ID for service with ID %v", serviceId))
+		}
+		allNodeIds[serviceId] = nodeId
+	}
+
+	logrus.Info("Verifying that initial network state is as expected...")
+	for serviceId, _ := range allServiceIds {
+		acceptableNodeIds := make(map[string]bool)
+		for iterServiceId, nodeId := range allNodeIds {
+			if serviceId != iterServiceId {
+				acceptableNodeIds[nodeId] = true
+			}
+		}
+		verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
+	}
+
+	// We'll need these later
 	originalServiceIds := make(map[int]bool)
 	for serviceId, _ := range allServiceIds {
 		originalServiceIds[serviceId] = true
 	}
 
-	// Verify that everybody has everyone else as peers before we add the services with the duplicate nodes
-	allGeckoNodeIds := make(map[string]bool)
-	allGeckoClients := make(map[int]*gecko_client.GeckoClient)
-	for serviceId, _ := range allServiceIds {
-		geckoClient, err := castedNetwork.GetGeckoClient(serviceId)
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Error getting Gecko client for service with ID %v", serviceId))
-		}
-		allGeckoClients[serviceId] = geckoClient
-
-		adminApi := geckoClient.AdminApi()
-		peers, err := adminApi.GetPeers()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
-		}
-		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
-		for _, peer := range peers {
-			allGeckoNodeIds[peer.Id] = true
-		}
-	}
-
-	// We'll need these later
-	originalGeckoNodeIds := make(map[string]bool)
-	for nodeId, _ := range allGeckoNodeIds {
-		originalGeckoNodeIds[nodeId] = true
-	}
+	logrus.Debugf("Service IDs before adding any nodes: %v", allServiceIds)
+	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIds)
 
 	// Add the first dupe node ID (should look normal from a network perspective
 	badServiceId1 := 1
-	checker1, err := castedNetwork.AddService(SAME_CERT_CONIFG_ID, badServiceId1)
+	checker1, err := castedNetwork.AddService(SAME_CERT_CONFIG_ID, badServiceId1)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to create first dupe node ID service with ID %v", badServiceId1))
 	}
 	if err := checker1.WaitForStartup(); err != nil {
-		context.Fatal(stacktrace.Propagate(err, "An error occurred waiting for first dupe node ID service to start"))
+		context.Fatal(stacktrace.Propagate(err, "An error occurred waiting for first dupe node ID service with ID to start", badServiceId1))
 	}
 	allServiceIds[badServiceId1] = true
 
@@ -246,27 +263,33 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId1))
 	}
-	allGeckoNodeIds[badServiceNodeId1] = true
+	allNodeIds[badServiceId1] = badServiceNodeId1
 
 	// Verify that the new node got accepted by everyone
 	for serviceId, _ := range allServiceIds {
-		client := allGeckoClients[serviceId]
+		acceptableNodeIds := make(map[string]bool)
 
-		adminApi := client.AdminApi()
-		peers, err := adminApi.GetPeers()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		// All original nodes should have the boot nodes (though a boot node won't have itself)
+		for bootServiceId, _ := range bootServiceIds {
+			if serviceId != bootServiceId {
+				bootNodeId := allNodeIds[bootServiceId]
+				acceptableNodeIds[bootNodeId] = true
+			}
 		}
-		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
-		for _, peer := range peers {
-			_, found := allGeckoNodeIds[peer.Id]
-			context.AssertTrue(found)
+
+		// Boot nodes will also have the other two nodes
+		if _, found := bootServiceIds[serviceId]; found {
+			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
+			acceptableNodeIds[badServiceNodeId1] = true
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
+		} else {
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
 		}
 	}
 
 	// Now, add a second node with the same ID
 	badServiceId2 := 1
-	checker2, err := castedNetwork.AddService(SAME_CERT_CONIFG_ID, badServiceId2)
+	checker2, err := castedNetwork.AddService(SAME_CERT_CONFIG_ID, badServiceId2)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to create second dupe node ID service with ID %v", badServiceId2))
 	}
@@ -285,26 +308,31 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId2))
 	}
-	allGeckoNodeIds[badServiceNodeId2] = true
+	allNodeIds[badServiceId2] = badServiceNodeId2
 
 	// At this point, it's undefined what happens with the two nodes with duplicate IDs; verify that the original nodes
-	//  network operates normally amongst themselves
+	//  in the network operate normally amongst themselves
 	for serviceId, _ := range originalServiceIds {
-		client := allGeckoClients[serviceId]
-		peers, err := client.AdminApi().GetPeers()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "An error occurred getting peers from service with ID %v", serviceId))
-		}
+		acceptableNodeIds := make(map[string]bool)
 
-		// Verify we have, at minimum, all the original nodes
-		originalGeckoNodeIdsSeen := make(map[string]bool)
-		for _, peer := range peers {
-			peerId := peer.Id
-			if _, found := originalGeckoNodeIds[peerId]; found {
-				originalGeckoNodeIdsSeen[peerId] = true
+		// All original nodes should have the boot nodes (though a boot node won't have itself)
+		for bootServiceId, _ := range bootServiceIds {
+			if serviceId != bootServiceId {
+				bootNodeId := allNodeIds[bootServiceId]
+				acceptableNodeIds[bootNodeId] = true
 			}
 		}
-		context.AssertTrue(len(originalGeckoNodeIdsSeen) == len(originalGeckoNodeIds) - 1)
+
+		if _, found := bootServiceIds[serviceId]; found {
+			// Boot nodes should have the original node, one of the duplicates, and MAY have the duplicate nodes
+			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
+			acceptableNodeIds[badServiceNodeId1] = true
+			acceptableNodeIds[badServiceNodeId2] = true
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds) - 1, true)
+		} else {
+			// The original non-boot node should have exactly the boot nodes
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
+		}
 	}
 
 	// Now, kill the first dupe node to leave only the second (who everyone should connect with)
@@ -313,21 +341,28 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	}
 	delete(allServiceIds, badServiceId1)
 	delete(allGeckoClients, badServiceId1)
-	delete(allGeckoNodeIds, badServiceNodeId1)
+	delete(allNodeIds, badServiceId1)
 
-	// Now that the first duped node ID is gone, leaving only the second, verify everyone's happy again
+	// Now that the first duped node is gone, verify that the original node is still connected to just boot nodes and
+	//  the second duped-ID node is now accepted by the boot nodes
 	for serviceId, _ := range allServiceIds {
-		client := allGeckoClients[serviceId]
+		acceptableNodeIds := make(map[string]bool)
 
-		adminApi := client.AdminApi()
-		peers, err := adminApi.GetPeers()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		// All nodes should have the boot nodes (though a boot node won't have itself)
+		for bootServiceId, _ := range bootServiceIds {
+			if serviceId != bootServiceId {
+				bootNodeId := allNodeIds[bootServiceId]
+				acceptableNodeIds[bootNodeId] = true
+			}
 		}
-		context.AssertTrue(len(peers) == len(allServiceIds) - 1)
-		for _, peer := range peers {
-			_, found := allGeckoNodeIds[peer.Id]
-			context.AssertTrue(found)
+
+		// Boot nodes should have all nodes
+		if _, found := bootServiceIds[serviceId]; found {
+			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
+			acceptableNodeIds[badServiceNodeId2] = true
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
+		} else {
+			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
 		}
 	}
 }
@@ -337,7 +372,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.Tes
 }
 
 func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 120 * time.Second
 }
 
 // =============== Helper functions =============================
@@ -345,7 +380,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
-		SAME_CERT_CONIFG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG),
+		SAME_CERT_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
@@ -356,4 +391,45 @@ func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 		},
 		2,
 		2)
+}
+
+/*
+Verifies that a node's actual peers are what we expect
+
+Args:
+	context: Test context (used for failing if there's a problem)
+	serviceId: Service ID of the node whose peers are being examined
+	client: Gecko client for the node being examined
+	acceptableNodeIds: A "set" of acceptable node IDs where, if a peer doesn't have this ID, the test will be failed
+	expectedNumPeers: The number of peers we expect this node to have
+	atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
+ */
+func verifyExpectedPeers(
+			context testsuite.TestContext,
+			serviceId int,
+			client *gecko_client.GeckoClient,
+			acceptableNodeIds map[string]bool,
+			expectedNumPeers int,
+			atLeast bool) {
+	peers, err := client.AdminApi().GetPeers()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+	}
+
+	actualNumPeers := len(peers)
+	context.AssertTrue(
+		actualNumPeers == expectedNumPeers,
+		stacktrace.NewError(
+			"Service ID %v actual num peers, %v, != expected num peers, %v",
+			serviceId,
+			actualNumPeers,
+			expectedNumPeers,
+		),
+	)
+
+	// Verify that IDs of the peers we have are in our list of acceptable IDs
+	for _, peer := range peers {
+		_, found := acceptableNodeIds[peer.Id]
+		context.AssertTrue(found, stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.Id))
+	}
 }
