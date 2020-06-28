@@ -20,6 +20,9 @@
 * Removed the single-node and ten-node Gecko tests; they don't actually test anything useful when compared to the staking network tests
 * Expanded RpcWorkflow test to add a staker
 * Expanded RpcWorkflow test to add a delegator and transfer funds back to XChain
+* Created initial version of InfoApi, which will take over AdminApi functionality
+* Created high level function to both fund and add a staker to default subnet
+* Fixed fully connected test and added nonbootstrap node as staker
 
 # 0.2.1
 * Fix tee suppressing exit code of the Docker image
