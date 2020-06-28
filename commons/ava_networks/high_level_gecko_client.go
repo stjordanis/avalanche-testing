@@ -17,7 +17,7 @@ const (
 	TIME_UNTIL_STAKING_ENDS = 72 * time.Hour
 	TIME_UNTIL_DELEGATING_BEGINS = 20 * time.Second
 	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
-	DELEGATION_FEE_RATE = 100000
+	DELEGATION_FEE_RATE = 500000
 )
 
 type HighLevelGeckoClient struct {
@@ -44,11 +44,64 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
+func (highLevelGeckoClient HighLevelGeckoClient) SendManyTransactions(
+		toXchainAddress string,
+		amountPerTransaction int64,
+		numberOfTransactions int) (string, error) {
+	client := highLevelGeckoClient.client
+	username := highLevelGeckoClient.geckoUser.username
+	password := highLevelGeckoClient.geckoUser.password
+	_, err := highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(amountPerTransaction * int64(numberOfTransactions))
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to seed XChain account from genesis.")
+	}
+	var txnId string
+	for i := 0; i < numberOfTransactions; i++ {
+		txnId, err = client.XChainApi().Send(amountPerTransaction, AVA_ASSET_ID, toXchainAddress, username, password)
+		if err != nil {
+			return "", stacktrace.Propagate(err, "Failed to send AVA to make transactions.")
+		}
+	}
+	highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	return toXchainAddress, nil
+}
+
 func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
 		delegateeNodeId string,
 		pchainAddress string,
 		stakeAmount int64,
 		) error {
+	client := highLevelGeckoClient.client
+	currentPayerNonce, err := highLevelGeckoClient.getCurrentPayerNonce(pchainAddress)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to get payer nonce from address %s", pchainAddress)
+	}
+	delegatorStartTime := time.Now().Add(TIME_UNTIL_DELEGATING_BEGINS).Unix()
+	addDelegatorUnsignedTxn, err := client.PChainApi().AddDefaultSubnetDelegator(
+		delegateeNodeId,
+		delegatorStartTime,
+		time.Now().Add(TIME_UNTIL_DELEGATING_ENDS).Unix(),
+		stakeAmount,
+		currentPayerNonce + 1,
+		pchainAddress)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", pchainAddress)
+	}
+	addDelegatorSignedTxn, err := client.PChainApi().Sign(
+		addDelegatorUnsignedTxn,
+		pchainAddress,
+		highLevelGeckoClient.geckoUser.username,
+		highLevelGeckoClient.geckoUser.password)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to sign delegator transaction.")
+	}
+	_, err = client.PChainApi().IssueTx(addDelegatorSignedTxn)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to issue staker transaction.")
+	}
+	for time.Now().Unix() < delegatorStartTime {
+		time.Sleep(time.Second)
+	}
 	return nil
 }
 
@@ -71,7 +124,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 		pchainAddress,
 		DELEGATION_FEE_RATE)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", nodeId)
+		return stacktrace.Propagate(err, "Failed to add default subnet staker %s", nodeId)
 	}
 	addStakerSignedTxn, err := client.PChainApi().Sign(
 		addStakerUnsignedTxn,

@@ -16,10 +16,14 @@ import (
 )
 
 const (
-	USERNAME                  = "test"
-	PASSWORD                  = "test34test!23"
+	STAKER_USERNAME           = "staker"
+	STAKER_PASSWORD           = "test34test!23"
+	DELEGATOR_USERNAME           = "delegator"
+	DELEGATOR_PASSWORD           = "test34test!23"
 	SEED_AMOUNT               = 50000000000000
-	STAKE_AMOUNT              = 20000000000000
+	STAKE_AMOUNT              = 30000000000000
+	DELEGATOR_AMOUNT              = 30000000000000
+	AMOUNT_PER_TRANSFER_FOR_STAKING_TEST = 10000000
 	NODE_SERVICE_ID           = 0
 	NODE_CONFIG_ID            = 0
 	DELEGATOR_NODE_SERVICE_ID = 1
@@ -29,39 +33,76 @@ const (
 type StakingNetworkRpcWorkflowTest struct{}
 func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
+	stakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
+		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
-	nodeId, err := referenceNodeClient.AdminApi().GetNodeId()
+	delegatorClient, err := castedNetwork.GetGeckoClient(DELEGATOR_NODE_SERVICE_ID)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get reference nodeId."))
+		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
-	highLevelGeckoClient := ava_networks.NewHighLevelGeckoClient(
-		referenceNodeClient,
-		USERNAME,
-		PASSWORD)
-	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	stakerNodeId, err := stakerClient.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
+	}
+	delegatorNodeId, err := stakerClient.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
+	}
+	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(
+		stakerClient,
+		STAKER_USERNAME,
+		STAKER_PASSWORD)
+	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(
+		delegatorClient,
+		DELEGATOR_USERNAME,
+		DELEGATOR_PASSWORD)
+	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	pchainAddress, err := highLevelGeckoClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
+	}
+	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
+	}
+	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
 	// Adding stakers
-	err = highLevelGeckoClient.AddValidatorOnSubnet(nodeId, pchainAddress, STAKE_AMOUNT)
+	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, STAKE_AMOUNT)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", nodeId))
+		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
-	currentStakers, err := referenceNodeClient.PChainApi().GetCurrentValidators(nil)
+	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	context.AssertTrue(len(currentStakers) == 6)
-	// TODO TODO TODO Test adding delegators
+	// Adding delegators
+	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, DELEGATOR_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
+	}
+	// Create many transactions to force staking.
+	_, err = highLevelDelegatorClient.SendManyTransactions(
+		stakerXchainAddress,
+		AMOUNT_PER_TRANSFER_FOR_STAKING_TEST,
+		50)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not test sending many small amounts."))
+	}
 	// TODO TODO TODO Test transferring staking rewards back to XChain
+	accountInfo, err := stakerClient.PChainApi().GetAccount(stakerPchainAddress)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get staker account info."))
+	}
+	logrus.Debugf("Staker account info after many transactions: %+v", accountInfo)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()
