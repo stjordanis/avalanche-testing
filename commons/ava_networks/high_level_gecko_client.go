@@ -13,7 +13,7 @@ const (
 	GENESIS_PASSWORD            = "genesis34!23"
 	TRANSACTION_ACCEPTED_STATUS = "Accepted"
 	AVA_ASSET_ID = "AVA"
-	TIME_UNTIL_STAKING_BEGINS = 30 * time.Second
+	TIME_UNTIL_STAKING_BEGINS = 20 * time.Second
 	TIME_UNTIL_STAKING_ENDS = 72 * time.Hour
 	TIME_UNTIL_DELEGATING_BEGINS = 20 * time.Second
 	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
@@ -53,9 +53,9 @@ func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
 }
 
 func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
-	nodeId string,
-	pchainAddress string,
-	stakeAmount int64) error {
+		nodeId string,
+		pchainAddress string,
+		stakeAmount int64) error {
 	client := highLevelGeckoClient.client
 	currentPayerNonce, err := highLevelGeckoClient.getCurrentPayerNonce(pchainAddress)
 	if err != nil {
@@ -98,7 +98,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 	Returns the new, funded XChain account address.
  */
 func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromGenesis(
-	amount int64) (string, error) {
+		amount int64) (string, error) {
 	client := highLevelGeckoClient.client
 	username := highLevelGeckoClient.geckoUser.username
 	password := highLevelGeckoClient.geckoUser.password
