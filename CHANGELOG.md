@@ -1,4 +1,4 @@
-# TBD
+# 0.3.0
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
 * After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.
