@@ -1,4 +1,5 @@
 # TBD
+* Added tests for XChain endpoints
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
 * After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.
