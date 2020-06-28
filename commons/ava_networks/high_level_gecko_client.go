@@ -244,9 +244,9 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 */
 func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	// HighLevelGeckoClient must own both pchainAddress and xchainAddress.
-	pchainAddress string,
-	xchainAddress string,
-	amount int64) (string, error) {
+		pchainAddress string,
+		xchainAddress string,
+		amount int64) (string, error) {
 	client := highLevelGeckoClient.client
 	username := highLevelGeckoClient.geckoUser.username
 	password := highLevelGeckoClient.geckoUser.password
