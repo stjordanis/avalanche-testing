@@ -34,16 +34,28 @@ type JsonRpcRequest struct {
 	Id int `json:"id"`
 }
 
+type JsonRpcError struct {
+	Code int `json:"code"`
+	Message string `json:"message"`
+	Data interface{} `json: "data"`
+}
+
+type JsonRpcResponse struct {
+	JsonRpcVersion string             `json:"jsonrpc"`
+	Error JsonRpcError `json: "error"`
+	Result map[string]interface{} `json: "result"`
+	Id             int                `json:"id"`
+}
+
+
 func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error) {
 	// Either Golang or Ava have a very nasty & subtle behaviour where duplicated '//' in the URL is treated as GET, even if it's POST
 	// https://stackoverflow.com/questions/23463601/why-golang-treats-my-post-request-as-a-get-one
 	endpoint = strings.TrimLeft(endpoint, "/")
-
 	request := JsonRpcRequest{
 		JsonRpc: JSON_RPC_VERSION,
 		Method: method,
 		Params:  params,
-		// TODO let the user set this?
 		Id: 1,
 	}
 
@@ -84,6 +96,14 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 			"Received response with non-200 code '%v' and response body '%v'",
 			statusCode,
 			string(responseBodyBytes))
+	}
+
+	var response JsonRpcResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	if response.Error.Code != 0 {
+		return nil, stacktrace.NewError("RPC call failed: %+v", response.Error)
 	}
 	return responseBodyBytes, nil
 }

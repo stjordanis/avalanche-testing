@@ -13,7 +13,7 @@ In your Docker engine you'll now see:
 * A set of running Docker containers representing the nodes of the test networks
 * A set of stopped Docker containers for the test controllers, one for each test
 
-To view the results of your tests, open the logs of the stopped test controller containers (this will also be improved this week)
+You can now run `scripts/run.sh` to re-run the testing suite, using whatever arguments you like. To see the full list of supported arguments, pass in the `--help` flag to the `run.sh` script.
 
 ## Developing Locally
 Some info:

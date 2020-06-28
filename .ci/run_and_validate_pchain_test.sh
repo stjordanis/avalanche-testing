@@ -6,7 +6,7 @@ DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
 
 return_code=0
-if ! bash "${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh" "tenNodeGetValidatorsTest"; then
+if ! bash "${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"; then
     echo "Ava E2E tests failed"
     return_code=1
 else

@@ -29,7 +29,6 @@ func (api PChainApi) CreateBlockchain(vmId string, subnetId string, name string,
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response CreateBlockchainResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -47,7 +46,6 @@ func (api PChainApi) GetBlockchainStatus(blockchainId string) (string, error) {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetBlockchainStatusResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -58,18 +56,25 @@ func (api PChainApi) GetBlockchainStatus(blockchainId string) (string, error) {
 // ============= Accounts ====================
 
 // Creates an account with the given parameters, returning the account address
-func (api PChainApi) CreateAccount(username string, password string, privateKey string) (string, error) {
-	params := map[string]interface{}{
-		"username": username,
-		"password": password,
-		"privateKey": privateKey,
+func (api PChainApi) CreateAccount(username string, password string, privateKeyPtr *string) (string, error) {
+	var params map[string]interface{}
+	if privateKeyPtr == nil {
+		params = map[string]interface{}{
+			"username": username,
+			"password": password,
+		}
+	} else {
+		params = map[string]interface{}{
+			"username": username,
+			"password": password,
+			"privateKey": &privateKeyPtr,
+		}
 	}
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response CreateAccountResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -88,7 +93,6 @@ func (api PChainApi) ImportKey(username string, password string, privateKey stri
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ImportKeyResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -109,7 +113,6 @@ func (api PChainApi) ExportKey(username string, password string, address string)
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ExportKeyResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -127,7 +130,6 @@ func (api PChainApi) GetAccount(address string) (AccountInfo, error) {
 		return AccountInfo{}, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetAccountResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return AccountInfo{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -146,7 +148,6 @@ func (api PChainApi) ListAccounts(username string, password string) ([]AccountIn
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ListAccountsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -172,7 +173,6 @@ func (api PChainApi) GetCurrentValidators(subnetIdPtr *string) ([]Validator, err
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetValidatorsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -192,7 +192,6 @@ func (api PChainApi) GetPendingValidators(subnetIdPtr *string) ([]Validator, err
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetValidatorsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -212,7 +211,6 @@ func (api PChainApi) SampleValidators(subnetIdPtr *string) ([]string, error) {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response SampleValidatorsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -242,7 +240,6 @@ func (api PChainApi) AddDefaultSubnetValidator(
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response AddDefaultSubnetValidatorResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -270,7 +267,6 @@ func (api PChainApi) AddNonDefaultSubnetValidator(
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response AddNonDefaultSubnetValidatorResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -298,7 +294,6 @@ func (api PChainApi) AddDefaultSubnetDelegator(
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response AddDefaultSubnetDelegator
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -321,7 +316,6 @@ func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonc
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response CreateUnsignedTransactionResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -337,7 +331,6 @@ func (api PChainApi) GetSubnets() ([]Subnet, error) {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetSubnetsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -355,7 +348,6 @@ func (api PChainApi) ValidatedBy(blockchainId string) (string, error) {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ValidatedByResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -374,7 +366,6 @@ func (api PChainApi) Validates(subnetId string) ([]string, error) {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ValidatesResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -390,7 +381,6 @@ func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response GetBlockchainsResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return nil, stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -399,7 +389,7 @@ func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 }
 
 
-func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, error) {
+func (api PChainApi) ExportAVA(amount int64, to string, payerNonce int) (string, error) {
 	params := map[string]interface{}{
 		"amount": amount,
 		"to": to,
@@ -410,7 +400,6 @@ func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, e
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ExportAVAResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -431,7 +420,6 @@ func (api PChainApi) ImportAVA(username string, password string, to string, paye
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response ImportAVAResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -451,7 +439,6 @@ func (api PChainApi) Sign(tx string, signer string, username string, password st
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response SignResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
@@ -469,7 +456,6 @@ func (api PChainApi) IssueTx(tx string) (string, error) {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
 
-	// TODO try moving this inside the MakeRequest method, even though Go doesn't have generics
 	var response IssueTxResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")

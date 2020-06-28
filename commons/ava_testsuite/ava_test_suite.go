@@ -9,12 +9,9 @@ type AvaTestSuite struct {}
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
-	// If we want, we can parameterize these tests so that they can be NNodeGeckoNetwork
-	result["tenNodeBasicTest"] = TenNodeGeckoNetworkBasicTest{}
-	result["tenNodeGetValidatorsTest"] = TenNodeNetworkGetValidatorsTest{}
-	result["singleNodeBasicTest"] = SingleNodeGeckoNetworkBasicTest{}
-	result["singleNodeGetValidatorsTest"] = SingleNodeNetworkGetValidatorsTest{}
 	result["fiveStakingNodeGetValidatorsTest"] = FiveNodeStakingNetworkGetValidatorsTest{}
+	result["fiveStakingNodeFullyConnectedTest"] = FiveNodeStakingNetworkFullyConnectedTest{}
+	result["stakingNodeRpcWorkflowTest"] = StakingNetworkRpcWorkflowTest{}
 
 	return result
 }

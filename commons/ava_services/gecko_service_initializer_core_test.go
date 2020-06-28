@@ -1,26 +1,30 @@
 package ava_services
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 
-const TEST_IP="172.17.0.2"
+const TEST_PUBLIC_IP ="172.17.0.2"
 
 
-func TestGetContainerStartCommand(t *testing.T) {
-	initializerConfig := GeckoServiceInitializerCore{
-		snowSampleSize:    1,
-		snowQuorumSize:    1,
-		stakingTlsEnabled: false,
-		logLevel:          LOG_LEVEL_INFO,
-	}
+func TestNoDepsStartCommand(t *testing.T) {
+	initializerCore := NewGeckoServiceInitializerCore(
+		1,
+		1,
+		false,
+		[]string{},
+		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		LOG_LEVEL_INFO)
 
-	expectedNoDeps := []string{
+	expected := []string{
 		"/gecko/build/ava",
-		"--public-ip=" + TEST_IP,
+		"--public-ip=" + TEST_PUBLIC_IP,
 		"--network-id=local",
 		"--http-port=9650",
 		"--staking-port=9651",
@@ -29,21 +33,44 @@ func TestGetContainerStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actualNoDeps, err := initializerConfig.GetStartCommand(TEST_IP, make([]services.Service, 0))
-	if err != nil {
-		panic(err)
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), TEST_PUBLIC_IP, make([]services.Service, 0))
+	assert.NoError(t, err, "An error occurred getting the start command")
+	assert.Equal(t, expected, actual)
+}
+
+func TestWithDepsStartCommand(t *testing.T) {
+	testNodeId := "node1"
+	testDependencyIp := "1.2.3.4"
+
+	bootstrapperNodeIds := []string{
+		testNodeId,
 	}
-	assert.DeepEqual(t, expectedNoDeps, actualNoDeps)
+	initializerCore := NewGeckoServiceInitializerCore(
+		1,
+		1,
+		false,
+		bootstrapperNodeIds,
+		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		LOG_LEVEL_INFO)
+
+	expected := []string{
+		"/gecko/build/ava",
+		"--public-ip=" + TEST_PUBLIC_IP,
+		"--network-id=local",
+		"--http-port=9650",
+		"--staking-port=9651",
+		"--log-level=info",
+		"--snow-sample-size=1",
+		"--snow-quorum-size=1",
+		"--staking-tls-enabled=false",
+		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIp),
+	}
 
 	testDependency := GeckoService{ipAddr: "1.2.3.4"}
 	testDependencySlice := []services.Service{
 		testDependency,
 	}
-	expectedWithDeps := append(expectedNoDeps, "--bootstrap-ips=1.2.3.4:9651")
-	actualWithDeps, err := initializerConfig.GetStartCommand(TEST_IP, testDependencySlice)
-	if err != nil {
-		panic(err)
-	}
-	assert.DeepEqual(t, expectedWithDeps, actualWithDeps)
-
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), TEST_PUBLIC_IP, testDependencySlice)
+	assert.NoError(t, err, "An error occurred getting the start command")
+	assert.Equal(t, expected, actual)
 }
