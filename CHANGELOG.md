@@ -13,6 +13,7 @@
 * Implement test for transferring assets between XChain accounts
 * Implement test for transferring assets from XChain to PChain
 * Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
+* Expanding RpcWorkflow test to add a staker
 
 ### Duplicate Node ID Test
 * Created `GeckoCertProvider` interface that's fed into the `GeckoServiceInitializerCore`, allowing for test writers to customize the certs that the certs get

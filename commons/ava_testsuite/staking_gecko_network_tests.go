@@ -12,55 +12,66 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"strconv"
 	"time"
 )
 
 const (
 	USERNAME = "test"
 	PASSWORD = "test34test!23"
-	SEED_AMOUNT = 1000000
-
-	NODE_SERVICE_ID       = 0
+	SEED_AMOUNT = 50000000000000
+	STAKE_AMOUNT = 20000000000000
+	NODE_SERVICE_ID = 0
 	NORMAL_NODE_CONFIG_ID = 0
 
 	// The configuration ID of a service where all servies made with this configuration will have the same cert
 	SAME_CERT_CONFIG_ID = 1
-
 )
 
 // ================ RPC Workflow Test ===================================
-type FiveNodeStakingNetworkRpcWorkflowTest struct{}
-func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
+type StakingNetworkRpcWorkflowTest struct{}
+func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
 	}
-	rpcManager := ava_networks.NewHighLevelGeckoClient(
+	nodeId, err := referenceNodeClient.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get reference nodeId."))
+	}
+	highLevelGeckoClient := ava_networks.NewHighLevelGeckoClient(
 		referenceNodeClient,
 		USERNAME,
 		PASSWORD)
-	_, err = rpcManager.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	pchainAddress, err := rpcManager.TransferAvaXChainToPChain(SEED_AMOUNT)
-	pchainAccount, err := referenceNodeClient.PChainApi().GetAccount(pchainAddress)
+	pchainAddress, err := highLevelGeckoClient.TransferAvaXChainToPChain(SEED_AMOUNT)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get PChain account information"))
+		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
-	balance := pchainAccount.Balance
-	context.AssertTrue(balance == strconv.Itoa(SEED_AMOUNT), stacktrace.NewError("Balance %v did not equal seed amount %v", balance, SEED_AMOUNT))
-	// TODO TODO TODO Test adding stakers
+	// Adding stakers
+	err = highLevelGeckoClient.AddValidatorOnSubnet(nodeId, pchainAddress, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", nodeId))
+	}
+	currentStakers, err := referenceNodeClient.PChainApi().GetCurrentValidators(nil)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
+	}
+	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
+	actualNumStakers := len(currentStakers)
+	expectedNumStakers := 6
+	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 	// TODO TODO TODO Test adding delegators
 	// TODO TODO TODO Test transferring staking rewards back to XChain
 }
-func (test FiveNodeStakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()
 }
-func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
-	return 60 * time.Second
+func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
+	return 90 * time.Second
 }
 
 
@@ -364,6 +375,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
 
 // =============== Helper functions =============================
 
+// TODO TODO TODO Rename this
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
