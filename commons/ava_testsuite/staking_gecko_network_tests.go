@@ -114,7 +114,10 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava", actualRemainingAva, expectedRemainingAva))
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
+	return getStakingNetworkLoader(map[int]int{
+		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
+		DELEGATOR_NODE_SERVICE_ID: NORMAL_NODE_CONFIG_ID,
+	})
 }
 func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 90 * time.Second
@@ -185,7 +188,9 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
+	return getStakingNetworkLoader(map[int]int{
+		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
+	})
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
@@ -227,7 +232,9 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, con
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
+	return getStakingNetworkLoader(map[int]int{
+		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
+	})
 }
 
 func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
@@ -421,7 +428,9 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 }
 
 func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
+	return getStakingNetworkLoader(map[int]int{
+		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
+	})
 }
 
 func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
@@ -430,8 +439,11 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
 
 // =============== Helper functions =============================
 
-// TODO TODO TODO Rename this
-func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
+/*
+Args:
+	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
+ */
+func getStakingNetworkLoader(desiredServices map[int]int) (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
 		SAME_CERT_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG),
@@ -440,11 +452,7 @@ func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
 		serviceConfigs,
-		// TODO TODO Make this configurable by each test so that every test doesn't get a delegator!!
-		map[int]int{
-			NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
-			DELEGATOR_NODE_SERVICE_ID: NORMAL_NODE_CONFIG_ID,
-		},
+		desiredServices,
 		2,
 		2)
 }
