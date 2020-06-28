@@ -111,7 +111,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	}
 	actualRemainingAva := xchainAccountInfo.Balance
 	expectedRemainingAva := strconv.FormatInt(remainingStakerAva, 10)
-	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava", actualRemainingAva, expectedRemainingAva))
+	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, expectedRemainingAva))
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
