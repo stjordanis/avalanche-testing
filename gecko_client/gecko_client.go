@@ -11,7 +11,6 @@ type GeckoClient struct {
 	adminApi  AdminApi
 	healthApi HealthApi
 	keystoreApi KeystoreApi
-	infoApi InfoApi
 }
 
 func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
