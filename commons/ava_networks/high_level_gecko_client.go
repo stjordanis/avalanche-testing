@@ -15,6 +15,8 @@ const (
 	AVA_ASSET_ID = "AVA"
 	TIME_UNTIL_STAKING_BEGINS = 30 * time.Second
 	TIME_UNTIL_STAKING_ENDS = 72 * time.Hour
+	TIME_UNTIL_DELEGATING_BEGINS = 20 * time.Second
+	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
 	DELEGATION_FEE_RATE = 100000
 )
 
@@ -42,9 +44,13 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
-/*func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
-	delegatedNodeId string,
-	)*/
+func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
+		delegateeNodeId string,
+		pchainAddress string,
+		stakeAmount int64,
+		) error {
+	return nil
+}
 
 func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 	nodeId string,
