@@ -20,10 +20,9 @@ const (
 	STAKER_PASSWORD           = "test34test!23"
 	DELEGATOR_USERNAME           = "delegator"
 	DELEGATOR_PASSWORD           = "test34test!23"
-	SEED_AMOUNT               = 50000000000000
-	STAKE_AMOUNT              = 30000000000000
-	DELEGATOR_AMOUNT              = 30000000000000
-	AMOUNT_PER_TRANSFER_FOR_STAKING_TEST = 10000000
+	SEED_AMOUNT               = int64(50000000000000)
+	STAKE_AMOUNT              = int64(30000000000000)
+	DELEGATOR_AMOUNT              = int64(30000000000000)
 	NODE_SERVICE_ID           = 0
 	NODE_CONFIG_ID            = 0
 	DELEGATOR_NODE_SERVICE_ID = 1
@@ -89,20 +88,16 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
 	}
-	// Create many transactions to force staking.
-	_, err = highLevelDelegatorClient.SendManyTransactions(
-		stakerXchainAddress,
-		AMOUNT_PER_TRANSFER_FOR_STAKING_TEST,
-		50)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not test sending many small amounts."))
-	}
-	// TODO TODO TODO Test transferring staking rewards back to XChain
-	accountInfo, err := stakerClient.PChainApi().GetAccount(stakerPchainAddress)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get staker account info."))
-	}
-	logrus.Debugf("Staker account info after many transactions: %+v", accountInfo)
+	/*
+		Currently no way to verify rewards for stakers and delegators because rewards are
+		only paid out at the end of the staking period, and the staking period must last at least
+		24 hours. This is far too long to be able to test in a CI scenario.
+	 */
+	remainingStakerAva := SEED_AMOUNT - STAKE_AMOUNT
+	highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
+	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
+	logrus.Debugf("XChain account info: %+v", xchainAccountInfo)
+	context.AssertTrue(string(remainingStakerAva) == 	xchainAccountInfo.Balance)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()

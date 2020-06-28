@@ -50,6 +50,24 @@ func (api XChainApi) ExportAVA(to string, amount int64, username string, passwor
 	return response.Result.TxID, nil
 }
 
+func (api XChainApi) ImportAVA(to string, username string, password string) (string, error) {
+	params := map[string]interface{}{
+		"to": to,
+		"username": username,
+		"password": password,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.importAVA", params)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Error making request")
+	}
+
+	var response XChainImportAVAResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return "", stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.TxID, nil
+}
+
 func (api XChainApi) GetTxStatus(txnId string) (string, error) {
 	params := map[string]interface{}{
 		"txID": txnId,
