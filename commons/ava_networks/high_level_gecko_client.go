@@ -5,6 +5,7 @@ import (
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,7 +16,10 @@ const (
 	AVA_ASSET_ID = "AVA"
 	TIME_UNTIL_STAKING_BEGINS = 20 * time.Second
 	TIME_UNTIL_STAKING_ENDS = 72 * time.Hour
-	DELEGATION_FEE_RATE = 100000
+	TIME_UNTIL_DELEGATING_BEGINS = 20 * time.Second
+	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
+	DELEGATION_FEE_RATE = 500000
+	XCHAIN_ADDRESS_PREFIX = "X-"
 )
 
 type HighLevelGeckoClient struct {
@@ -42,6 +46,76 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
+/*
+	High level function that takes a regular node with no Ava and funds it from genesis,
+	transfers those funds to the PChain, and registers it as a validator on the default subnet.
+ */
+func (highLevelGeckoClient HighLevelGeckoClient) GetFundsAndStartValidating(
+	    seedAmount int64,
+	    stakeAmount int64) error {
+	client := highLevelGeckoClient.client
+	stakerNodeId, err := client.AdminApi().GetNodeId()
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not get staker node ID.")
+	}
+	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+	}
+	stakerPchainAddress, err := highLevelGeckoClient.TransferAvaXChainToPChain(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
+	}
+	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+	}
+	// Adding staker
+	err = highLevelGeckoClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId)
+	}
+	return nil
+}
+
+func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
+		delegateeNodeId string,
+		pchainAddress string,
+		stakeAmount int64,
+		) error {
+	client := highLevelGeckoClient.client
+	currentPayerNonce, err := highLevelGeckoClient.getCurrentPayerNonce(pchainAddress)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to get payer nonce from address %s", pchainAddress)
+	}
+	delegatorStartTime := time.Now().Add(TIME_UNTIL_DELEGATING_BEGINS).Unix()
+	addDelegatorUnsignedTxn, err := client.PChainApi().AddDefaultSubnetDelegator(
+		delegateeNodeId,
+		delegatorStartTime,
+		time.Now().Add(TIME_UNTIL_DELEGATING_ENDS).Unix(),
+		stakeAmount,
+		currentPayerNonce + 1,
+		pchainAddress)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", pchainAddress)
+	}
+	addDelegatorSignedTxn, err := client.PChainApi().Sign(
+		addDelegatorUnsignedTxn,
+		pchainAddress,
+		highLevelGeckoClient.geckoUser.username,
+		highLevelGeckoClient.geckoUser.password)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to sign delegator transaction.")
+	}
+	_, err = client.PChainApi().IssueTx(addDelegatorSignedTxn)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to issue staker transaction.")
+	}
+	for time.Now().Unix() < delegatorStartTime {
+		time.Sleep(time.Second)
+	}
+	return nil
+}
 
 func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 		nodeId string,
@@ -62,7 +136,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 		pchainAddress,
 		DELEGATION_FEE_RATE)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", nodeId)
+		return stacktrace.Propagate(err, "Failed to add default subnet staker %s", nodeId)
 	}
 	addStakerSignedTxn, err := client.PChainApi().Sign(
 		addStakerUnsignedTxn,
@@ -123,7 +197,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromG
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
-	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for transaction acceptance.")
 	}
@@ -148,7 +222,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
-	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
@@ -164,11 +238,53 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
-	highLevelGeckoClient.waitForNonZeroBalance(pchainAddress)
+	highLevelGeckoClient.waitForPchainNonZeroBalance(pchainAddress)
 	return pchainAddress, nil
 }
 
-func (highLevelGeckoClient HighLevelGeckoClient) waitForTransactionAcceptance(txnId string) error {
+/*
+	Transfers funds from a Phain account owned by that username and password to an XChain account.
+	Returns the XChain account address.
+*/
+func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
+	// HighLevelGeckoClient must own both pchainAddress and xchainAddress.
+		pchainAddress string,
+		xchainAddress string,
+		amount int64) (string, error) {
+	client := highLevelGeckoClient.client
+	username := highLevelGeckoClient.geckoUser.username
+	password := highLevelGeckoClient.geckoUser.password
+	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XCHAIN_ADDRESS_PREFIX)
+	currentPayerNonce, err := highLevelGeckoClient.getCurrentPayerNonce(pchainAddress)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to get current payer nonce from pchainAddress %v", pchainAddress)
+	}
+	// PChain API only accepts the XChain address without the xchain prefix.
+	unsignedTxnId, err := client.PChainApi().ExportAVA(amount, xchainAddressWithoutPrefix, currentPayerNonce + 1)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to export AVA to xchainAddress %s", xchainAddress)
+	}
+	signedTxnId, err := client.PChainApi().Sign(unsignedTxnId, pchainAddress, username, password)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to sign export AVA transaction.")
+	}
+	_, err = client.PChainApi().IssueTx(signedTxnId)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
+	}
+	// XChain API only accepts the XChain address with the xchain prefix.
+	txnId, err := client.XChainApi().ImportAVA(xchainAddress, username, password)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
+	}
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
+	}
+	return xchainAddress, nil
+}
+
+func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAcceptance(txnId string) error {
 	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
 	if err != nil {
@@ -185,7 +301,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForTransactionAcceptance(tx
 	return nil
 }
 
-func (highLevelGeckoClient HighLevelGeckoClient) waitForNonZeroBalance(pchainAddress string) error {
+func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pchainAddress string) error {
 	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
 	if err != nil {
