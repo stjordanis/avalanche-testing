@@ -27,7 +27,6 @@ const (
 	NODE_SERVICE_ID           = 0
 	NODE_CONFIG_ID            = 0
 	DELEGATOR_NODE_SERVICE_ID = 1
-	DELEGATOR_NODE_CONFIG_ID  = 1
 )
 
 type StakingNetworkRpcWorkflowTest struct{}
@@ -95,8 +94,14 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 		24 hours. This is far too long to be able to test in a CI scenario.
 	 */
 	remainingStakerAva := SEED_AMOUNT - STAKE_AMOUNT
-	highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
+	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
+	}
 	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
+	}
 	context.AssertTrue(strconv.FormatInt(remainingStakerAva, 10) == xchainAccountInfo.Balance)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
@@ -226,7 +231,6 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NODE_CONFIG_ID:           *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
-		DELEGATOR_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
@@ -234,7 +238,7 @@ func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 		serviceConfigs,
 		map[int]int{
 			NODE_SERVICE_ID:           NODE_CONFIG_ID,
-			DELEGATOR_NODE_SERVICE_ID: DELEGATOR_NODE_CONFIG_ID,
+			DELEGATOR_NODE_SERVICE_ID: NODE_CONFIG_ID,
 		},
 		2,
 		2)

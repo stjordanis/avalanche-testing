@@ -257,7 +257,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XCHAIN_ADDRESS_PREFIX)
 	currentPayerNonce, err := highLevelGeckoClient.getCurrentPayerNonce(pchainAddress)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "")
+		return "", stacktrace.Propagate(err, "Failed to get current payer nonce from pchainAddress %v", pchainAddress)
 	}
 	// PChain API only accepts the XChain address without the xchain prefix.
 	unsignedTxnId, err := client.PChainApi().ExportAVA(amount, xchainAddressWithoutPrefix, currentPayerNonce + 1)
@@ -279,7 +279,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	}
 	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "")
+		return "", stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
 	}
 	return xchainAddress, nil
 }
