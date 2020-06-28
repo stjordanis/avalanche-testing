@@ -389,7 +389,7 @@ func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 }
 
 
-func (api PChainApi) ExportAVA(amount int, to string, payerNonce int) (string, error) {
+func (api PChainApi) ExportAVA(amount int64, to string, payerNonce int) (string, error) {
 	params := map[string]interface{}{
 		"amount": amount,
 		"to": to,

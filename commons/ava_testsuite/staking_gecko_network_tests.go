@@ -12,54 +12,97 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
 
 const (
-	USERNAME = "test"
-	PASSWORD = "test34test!23"
-	SEED_AMOUNT = 50000000000000
-	STAKE_AMOUNT = 20000000000000
-	NODE_SERVICE_ID = 0
-	NODE_CONFIG_ID = 0
+	STAKER_USERNAME           = "staker"
+	STAKER_PASSWORD           = "test34test!23"
+	DELEGATOR_USERNAME           = "delegator"
+	DELEGATOR_PASSWORD           = "test34test!23"
+	SEED_AMOUNT               = int64(50000000000000)
+	STAKE_AMOUNT              = int64(30000000000000)
+	DELEGATOR_AMOUNT              = int64(30000000000000)
+	NODE_SERVICE_ID           = 0
+	NODE_CONFIG_ID            = 0
+	DELEGATOR_NODE_SERVICE_ID = 1
 )
 
 type StakingNetworkRpcWorkflowTest struct{}
 func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	referenceNodeClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
+	stakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get reference client"))
+		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
-	nodeId, err := referenceNodeClient.AdminApi().GetNodeId()
+	delegatorClient, err := castedNetwork.GetGeckoClient(DELEGATOR_NODE_SERVICE_ID)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get reference nodeId."))
+		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
-	highLevelGeckoClient := ava_networks.NewHighLevelGeckoClient(
-		referenceNodeClient,
-		USERNAME,
-		PASSWORD)
-	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	stakerNodeId, err := stakerClient.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
+	}
+	delegatorNodeId, err := stakerClient.AdminApi().GetNodeId()
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
+	}
+	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(
+		stakerClient,
+		STAKER_USERNAME,
+		STAKER_PASSWORD)
+	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(
+		delegatorClient,
+		DELEGATOR_USERNAME,
+		DELEGATOR_PASSWORD)
+	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	pchainAddress, err := highLevelGeckoClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
+	}
+	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
+	}
+	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(SEED_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
 	// Adding stakers
-	err = highLevelGeckoClient.AddValidatorOnSubnet(nodeId, pchainAddress, STAKE_AMOUNT)
+	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, STAKE_AMOUNT)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", nodeId))
+		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
-	currentStakers, err := referenceNodeClient.PChainApi().GetCurrentValidators(nil)
+	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	context.AssertTrue(len(currentStakers) == 6)
-	// TODO TODO TODO Test adding delegators
-	// TODO TODO TODO Test transferring staking rewards back to XChain
+	// Adding delegators
+	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, DELEGATOR_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
+	}
+	/*
+		Currently no way to verify rewards for stakers and delegators because rewards are
+		only paid out at the end of the staking period, and the staking period must last at least
+		24 hours. This is far too long to be able to test in a CI scenario.
+	 */
+	remainingStakerAva := SEED_AMOUNT - STAKE_AMOUNT
+	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
+	}
+	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
+	}
+	context.AssertTrue(strconv.FormatInt(remainingStakerAva, 10) == xchainAccountInfo.Balance)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()
@@ -75,6 +118,19 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds := append(bootServiceIds, NODE_SERVICE_ID)
+
+	extraStakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to get extra staker client."))
+	}
+	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
+		extraStakerClient,
+		STAKER_USERNAME,
+		STAKER_PASSWORD)
+	err = highLevelExtraStakerClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
+	}
 
 	// collect set of IDs in network
 	nodeIdSet := map[string]bool{}
@@ -92,26 +148,29 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 
 	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
 
-	// verify peer lists have set of IDs in network, except their own
+	// verify bootstrapper peer lists have full set of IDs in network.
 	for _, serviceId := range allServiceIds {
 		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		peers, err := client.AdminApi().GetPeers()
+		nodeId, err := client.AdminApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
 		}
-		logrus.Debugf("Peer set: %+v", peers)
+		logrus.Debugf("Length of Peer set for node %v: %v", serviceId, len(peers))
 
 		peerSet := map[string]bool{}
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
-			// verify that peer is inside the nodeIdSet
-			context.AssertTrue(nodeIdSet[peer.Id])
 		}
-		// verify that every other peer (besides the node itself) is represented in the peer list.
-		context.AssertTrue(len(peerSet) == len(allServiceIds) - 1)
+		for expectedNodeId, _ := range nodeIdSet {
+			// Nodes are expected to have all other nodes in the network on their peer list.
+			if nodeId != expectedNodeId {
+				context.AssertTrue(peerSet[expectedNodeId])
+			}
+		}
 	}
 }
 
@@ -120,34 +179,9 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsui
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 60 * time.Second
 }
 
-type FiveNodeStakingNetworkBasicTest struct{}
-func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-
-	// TODO check ALL nodes!
-	client, err := castedNetwork.GetGeckoClient(0)
-	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get client"))
-	}
-
-	peers, err := client.AdminApi().GetPeers()
-	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
-	}
-
-	context.AssertTrue(len(peers) == 9)
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
-	return 30 * time.Second
-}
 
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}
@@ -196,14 +230,15 @@ func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
 // TODO TODO TODO Rename this
 func getFiveNodeStakingLoader() (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
+		NODE_CONFIG_ID:           *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
 		serviceConfigs,
 		map[int]int{
-			NODE_SERVICE_ID: NODE_CONFIG_ID,
+			NODE_SERVICE_ID:           NODE_CONFIG_ID,
+			DELEGATOR_NODE_SERVICE_ID: NODE_CONFIG_ID,
 		},
 		2,
 		2)
