@@ -97,7 +97,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
 	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
 	logrus.Debugf("XChain account info: %+v", xchainAccountInfo)
-	context.AssertTrue(string(remainingStakerAva) == 	xchainAccountInfo.Balance)
+	context.AssertTrue(string(remainingStakerAva) == xchainAccountInfo.Balance)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()

@@ -236,7 +236,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to sign export AVA transaction.")
 	}
-	_, err = client.XChainApi().IssueTx(signedTxnId)
+	_, err = client.PChainApi().IssueTx(signedTxnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
