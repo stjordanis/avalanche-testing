@@ -31,7 +31,6 @@ func clientFromRequester(requester jsonRpcRequester) *GeckoClient {
 		adminApi: AdminApi{rpcRequester: requester},
 		healthApi: HealthApi{rpcRequester: requester},
 		keystoreApi: KeystoreApi{rpcRequester: requester},
-		infoApi: InfoApi{rpcRequester: requester},
 	}
 }
 
@@ -45,10 +44,6 @@ func (client GeckoClient) XChainApi() XChainApi {
 
 func (client GeckoClient) AdminApi() AdminApi {
 	return client.adminApi
-}
-
-func (client GeckoClient) InfoApi() InfoApi {
-	return client.infoApi
 }
 
 func (client GeckoClient) HealthApi() HealthApi {
