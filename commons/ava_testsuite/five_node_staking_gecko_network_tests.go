@@ -431,17 +431,21 @@ func verifyExpectedPeers(
 
 	actualNumPeers := len(peers)
 	var condition bool
+	var operatorAsserted string
 	if atLeast {
 		condition = actualNumPeers >= expectedNumPeers
+		operatorAsserted = ">="
 	} else {
 		condition = actualNumPeers == expectedNumPeers
+		operatorAsserted = "=="
 	}
 	context.AssertTrue(
 		condition,
 		stacktrace.NewError(
-			"Service ID %v actual num peers, %v, != expected num peers, %v",
+			"Service ID %v actual num peers, %v, is not %v expected num peers, %v",
 			serviceId,
 			actualNumPeers,
+			operatorAsserted,
 			expectedNumPeers,
 		),
 	)
