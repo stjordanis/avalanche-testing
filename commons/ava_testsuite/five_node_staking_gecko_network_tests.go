@@ -24,11 +24,12 @@ const (
 	NODE_SERVICE_ID       = 0
 	NORMAL_NODE_CONFIG_ID = 0
 
-	// The configuration ID of a service
+	// The configuration ID of a service where all servies made with this configuration will have the same cert
 	SAME_CERT_CONFIG_ID = 1
 
 )
 
+// ================ RPC Workflow Test ===================================
 type FiveNodeStakingNetworkRpcWorkflowTest struct{}
 func (test FiveNodeStakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
@@ -63,6 +64,7 @@ func (test FiveNodeStakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 }
 
 
+// =================== Fully Connected Test ==============================
 type FiveNodeStakingNetworkFullyConnectedTest struct{}
 func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
@@ -121,34 +123,6 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsui
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 30 * time.Second
-}
-
-type FiveNodeStakingNetworkBasicTest struct{}
-func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-
-	// TODO check ALL nodes!
-	client, err := castedNetwork.GetGeckoClient(0)
-	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get client"))
-	}
-
-	peers, err := client.AdminApi().GetPeers()
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
-	}
-
-	actualNumPeers := len(peers)
-	expectedNumPeers := 9
-	context.AssertTrue(actualNumPeers == expectedNumPeers, stacktrace.NewError("Actual num peers, %v, != expected num peers, %v", actualNumPeers, expectedNumPeers))
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
 	return 30 * time.Second
 }
 
