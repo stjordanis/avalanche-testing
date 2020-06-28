@@ -165,7 +165,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromG
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
-	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for transaction acceptance.")
 	}
@@ -190,7 +190,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
-	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
@@ -206,7 +206,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
 	}
-	highLevelGeckoClient.waitForNonZeroBalance(pchainAddress)
+	highLevelGeckoClient.waitForPchainNonZeroBalance(pchainAddress)
 	return pchainAddress, nil
 }
 
@@ -245,14 +245,14 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
 	}
-	err = highLevelGeckoClient.waitForTransactionAcceptance(txnId)
+	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 	return xchainAddress, nil
 }
 
-func (highLevelGeckoClient HighLevelGeckoClient) waitForTransactionAcceptance(txnId string) error {
+func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAcceptance(txnId string) error {
 	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
 	if err != nil {
@@ -269,7 +269,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForTransactionAcceptance(tx
 	return nil
 }
 
-func (highLevelGeckoClient HighLevelGeckoClient) waitForNonZeroBalance(pchainAddress string) error {
+func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pchainAddress string) error {
 	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
 	if err != nil {

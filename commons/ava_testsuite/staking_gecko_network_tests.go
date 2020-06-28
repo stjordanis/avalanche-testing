@@ -12,6 +12,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
 
@@ -96,8 +97,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	remainingStakerAva := SEED_AMOUNT - STAKE_AMOUNT
 	highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
 	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
-	logrus.Debugf("XChain account info: %+v", xchainAccountInfo)
-	context.AssertTrue(string(remainingStakerAva) == xchainAccountInfo.Balance)
+	context.AssertTrue(strconv.FormatInt(remainingStakerAva, 10) == xchainAccountInfo.Balance)
 }
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getFiveNodeStakingLoader()
