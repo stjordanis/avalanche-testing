@@ -46,6 +46,10 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
+/*
+	High level function that takes a regular node with no Ava and funds it from genesis,
+	transfers those funds to the PChain, and registers it as a validator on the default subnet.
+ */
 func (highLevelGeckoClient HighLevelGeckoClient) GetFundsAndStartValidating(
 	    seedAmount int64,
 	    stakeAmount int64) error {
