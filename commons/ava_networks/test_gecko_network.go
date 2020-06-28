@@ -47,7 +47,7 @@ func (network TestGeckoNetwork) GetAllBootServiceIds() map[int]bool {
 func (network TestGeckoNetwork) AddService(configurationId int, serviceId int) (*services.ServiceAvailabilityChecker, error) {
 	availabilityChecker, err := network.svcNetwork.AddService(configurationId, serviceId, network.GetAllBootServiceIds())
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "An error occurred adding service with service ID %v, configuration ID %v", serviceId, configurationId)
 	}
 	return availabilityChecker, nil
 }
