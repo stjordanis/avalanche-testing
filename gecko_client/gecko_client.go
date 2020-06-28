@@ -11,6 +11,7 @@ type GeckoClient struct {
 	adminApi  AdminApi
 	healthApi HealthApi
 	keystoreApi KeystoreApi
+	infoApi InfoApi
 }
 
 func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
@@ -30,6 +31,7 @@ func clientFromRequester(requester jsonRpcRequester) *GeckoClient {
 		adminApi: AdminApi{rpcRequester: requester},
 		healthApi: HealthApi{rpcRequester: requester},
 		keystoreApi: KeystoreApi{rpcRequester: requester},
+		infoApi: InfoApi{rpcRequester: requester},
 	}
 }
 
@@ -43,6 +45,10 @@ func (client GeckoClient) XChainApi() XChainApi {
 
 func (client GeckoClient) AdminApi() AdminApi {
 	return client.adminApi
+}
+
+func (client GeckoClient) InfoApi() InfoApi {
+	return client.infoApi
 }
 
 func (client GeckoClient) HealthApi() HealthApi {

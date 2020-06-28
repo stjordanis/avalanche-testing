@@ -114,6 +114,19 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds := append(bootServiceIds, NODE_SERVICE_ID)
 
+	extraStakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to get extra staker client."))
+	}
+	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
+		extraStakerClient,
+		STAKER_USERNAME,
+		STAKER_PASSWORD)
+	err = highLevelExtraStakerClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
+	}
+
 	// collect set of IDs in network
 	nodeIdSet := map[string]bool{}
 	for _, serviceId := range allServiceIds {
@@ -130,26 +143,29 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 
 	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
 
-	// verify peer lists have set of IDs in network, except their own
+	// verify bootstrapper peer lists have full set of IDs in network.
 	for _, serviceId := range allServiceIds {
 		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
 		peers, err := client.AdminApi().GetPeers()
+		nodeId, err := client.AdminApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
 		}
-		logrus.Debugf("Peer set: %+v", peers)
+		logrus.Debugf("Length of Peer set for node %v: %v", serviceId, len(peers))
 
 		peerSet := map[string]bool{}
 		for _, peer := range peers {
 			peerSet[peer.Id] = true
-			// verify that peer is inside the nodeIdSet
-			context.AssertTrue(nodeIdSet[peer.Id])
 		}
-		// verify that every other peer (besides the node itself) is represented in the peer list.
-		context.AssertTrue(len(peerSet) == len(allServiceIds) - 1)
+		for expectedNodeId, _ := range nodeIdSet {
+			// Nodes are expected to have all other nodes in the network on their peer list.
+			if nodeId != expectedNodeId {
+				context.AssertTrue(peerSet[expectedNodeId])
+			}
+		}
 	}
 }
 
@@ -158,34 +174,9 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsui
 }
 
 func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 60 * time.Second
 }
 
-type FiveNodeStakingNetworkBasicTest struct{}
-func (test FiveNodeStakingNetworkBasicTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-
-	// TODO check ALL nodes!
-	client, err := castedNetwork.GetGeckoClient(0)
-	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get client"))
-	}
-
-	peers, err := client.AdminApi().GetPeers()
-	if err != nil {
-	context.Fatal(stacktrace.Propagate(err, "Could not get peers"))
-	}
-
-	context.AssertTrue(len(peers) == 9)
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getFiveNodeStakingLoader()
-}
-
-func (test FiveNodeStakingNetworkBasicTest) GetTimeout() time.Duration {
-	return 30 * time.Second
-}
 
 // =============== Get Validators Test ==================================
 type FiveNodeStakingNetworkGetValidatorsTest struct{}

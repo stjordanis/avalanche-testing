@@ -46,6 +46,34 @@ func NewGeckoUser(username string, password string) *GeckoUser {
 	return &GeckoUser{username: username, password: password}
 }
 
+func (highLevelGeckoClient HighLevelGeckoClient) GetFundsAndStartValidating(
+	    seedAmount int64,
+	    stakeAmount int64) error {
+	client := highLevelGeckoClient.client
+	stakerNodeId, err := client.AdminApi().GetNodeId()
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not get staker node ID.")
+	}
+	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+	}
+	stakerPchainAddress, err := highLevelGeckoClient.TransferAvaXChainToPChain(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
+	}
+	_, err = highLevelGeckoClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+	}
+	// Adding staker
+	err = highLevelGeckoClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId)
+	}
+	return nil
+}
+
 func (highLevelGeckoClient HighLevelGeckoClient) AddDelegatorOnSubnet(
 		delegateeNodeId string,
 		pchainAddress string,
