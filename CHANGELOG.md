@@ -2,6 +2,16 @@
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
 * Migrate AdminAPI endpoints to the new InfoAPI
 * Parse error message on XChain Imports in order to wait for PChain transaction to be accepted
+* Fixed fully connected test and added nonbootstrap node as staker
+* Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
+* Added duplicate node ID test:
+    * Created `GeckoCertProvider` interface that's fed into the `GeckoServiceInitializerCore`, allowing for test writers to customize the certs that the certs get
+    * Created two implementations of `GeckoCertProvider`:
+        * `StaticGeckoCertProvider`, which provides the exact same predefined cert repeatedly
+        * `RandomGeckoCertProvider`, which provides generated certs (optionally, the same random-generated cert each time)
+    * Removed `FixedGeckoNetwork` in favor of `TestGeckoNetwork`, which allows for more control over the testnet that gets created
+    * Removed the single-node and ten-node Gecko tests; they don't actually test anything useful when compared to the staking network tests
+    * Test if the network functions as expected when nodes with duplicate node IDs occur
 
 # 0.3.0
 * Removed startPortRange and endPortRange CLI args
@@ -17,19 +27,6 @@
 * Add all five default stakers to staking network bootstrapping
 * Implement test for transferring assets between XChain accounts
 * Implement test for transferring assets from XChain to PChain
-* Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
-* Fixed fully connected test and added nonbootstrap node as staker
-
-### Duplicate Node ID Test
-* Created `GeckoCertProvider` interface that's fed into the `GeckoServiceInitializerCore`, allowing for test writers to customize the certs that the certs get
-* Created two implementations of `GeckoCertProvider`:
-    * `StaticGeckoCertProvider`, which provides the exact same predefined cert repeatedly
-    * `RandomGeckoCertProvider`, which provides generated certs (optionally, the same random-generated cert each time)
-* Removed `FixedGeckoNetwork` in favor of `TestGeckoNetwork`, which allows for more control over the testnet that gets created
-* Removed the single-node and ten-node Gecko tests; they don't actually test anything useful when compared to the staking network tests
-* Test if the network functions as expected when nodes with duplicate node IDs occur
-
-### Full RPC Workflow Test
 * Expanded RpcWorkflow test to add a staker
 * Expanded RpcWorkflow test to add a delegator and transfer funds back to XChain
 * Created high level function to both fund and add a staker to default subnet
