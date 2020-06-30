@@ -1,3 +1,6 @@
+# TBD
+* Upgrade controller Docker image to allow for a Docker network per test
+
 # 0.3.0
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests

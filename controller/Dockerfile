@@ -26,6 +26,7 @@ CMD ls $(dirname ${LOG_FILEPATH}) && ./test-controller \
     --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
     --test-image-name=${TEST_IMAGE_NAME} \
+    --docker-network=${NETWORK_NAME}
     --subnet-mask=${SUBNET_MASK} \
     --test-controller-ip=${TEST_CONTROLLER_IP} \
     --gateway-ip=${GATEWAY_IP} \
