@@ -1,4 +1,9 @@
 # TBD
+* Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
+* Migrate AdminAPI endpoints to the new InfoAPI
+* Parse error message on XChain Imports in order to wait for PChain transaction to be accepted
+
+# 0.3.0
 * Removed startPortRange and endPortRange CLI args
 * Declare timeouts for tests
 * After reviewing possibility of centralizing deserialization of JSON RPC responses, determined it's not doable. Removing TODOs related to this.

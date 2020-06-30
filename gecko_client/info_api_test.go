@@ -40,7 +40,7 @@ func TestGetPeers(t *testing.T) {
     }
 }`
 	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
-	peers, err := client.AdminApi().GetPeers()
+	peers, err := client.InfoApi().GetPeers()
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, len(peers), 3)
 }
@@ -54,7 +54,7 @@ func TestGetNodeId(t *testing.T) {
     "id": 1
 }`
 	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
-	nodeId, err := client.AdminApi().GetNodeId()
+	nodeId, err := client.InfoApi().GetNodeId()
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, nodeId, "5mb46qkSBj81k9g9e4VFjGGSbaaSLFRzD")
 }

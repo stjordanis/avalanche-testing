@@ -6,15 +6,15 @@ import (
 )
 
 const (
-	adminEndpoint = "ext/admin"
+	adminEndpoint = "ext/info"
 )
 
-type AdminApi struct {
+type InfoApi struct {
 	rpcRequester jsonRpcRequester
 }
 
-func (api AdminApi) GetPeers() ([]Peer, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.peers", make(map[string]interface{}))
+func (api InfoApi) GetPeers() ([]Peer, error) {
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "info.peers", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -26,8 +26,8 @@ func (api AdminApi) GetPeers() ([]Peer, error) {
 	return response.Result.Peers, nil
 }
 
-func (api AdminApi) GetNodeId() (string, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "admin.getNodeID", make(map[string]interface{}))
+func (api InfoApi) GetNodeId() (string, error) {
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "info.getNodeID", make(map[string]interface{}))
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
