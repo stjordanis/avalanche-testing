@@ -284,6 +284,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait fro transaction acceptance
 		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
 			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
+			time.Sleep(time.Second)
 		} else {
 			return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
 		}
