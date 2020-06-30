@@ -275,7 +275,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	}
 	// XChain API only accepts the XChain address with the xchain prefix.
 	txnId, err := client.XChainApi().ImportAVA(xchainAddress, username, password)
-	for err != nil {
+	for i := 0; err != nil && i < 5; i++ {
 		/*
 			HACK HACK HACK because the PChain does not have a way to verify transaction acceptence yet,
 			we retry based on the contents of the error message from the XChain call if the pchain transaction
