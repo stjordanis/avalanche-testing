@@ -20,6 +20,8 @@ const (
 	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
 	DELEGATION_FEE_RATE = 500000
 	XCHAIN_ADDRESS_PREFIX = "X-"
+	NO_IMPORT_INPUTS_ERROR_STR = "problem issuing transaction: no import inputs"
+	IMPORT_AVA_TO_XCHAIN_TIMEOUT = time.Second
 )
 
 type HighLevelGeckoClient struct {
@@ -54,7 +56,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) GetFundsAndStartValidating(
 	    seedAmount int64,
 	    stakeAmount int64) error {
 	client := highLevelGeckoClient.client
-	stakerNodeId, err := client.AdminApi().GetNodeId()
+	stakerNodeId, err := client.InfoApi().GetNodeId()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get staker node ID.")
 	}
@@ -175,7 +177,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) CreateAndSeedXChainAccountFromG
 	if err != nil {
 		stacktrace.Propagate(err, "Could not create genesis user.")
 	}
-	nodeId, err := client.AdminApi().GetNodeId()
+	nodeId, err := client.InfoApi().GetNodeId()
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Could not get node id")
 	}
@@ -274,8 +276,19 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	}
 	// XChain API only accepts the XChain address with the xchain prefix.
 	txnId, err := client.XChainApi().ImportAVA(xchainAddress, username, password)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
+	for err != nil {
+		/*
+			HACK HACK HACK because the PChain does not have a way to verify transaction acceptence yet,
+			we retry based on the contents of the error message from the XChain call if the pchain transaction
+			has not yet reached consensus
+		*/
+		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait fro transaction acceptance
+		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
+			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
+			time.Sleep(IMPORT_AVA_TO_XCHAIN_TIMEOUT)
+		} else {
+			return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
+		}
 	}
 	err = highLevelGeckoClient.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {

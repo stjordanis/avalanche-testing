@@ -40,11 +40,11 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
-	stakerNodeId, err := stakerClient.AdminApi().GetNodeId()
+	stakerNodeId, err := stakerClient.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
 	}
-	delegatorNodeId, err := stakerClient.AdminApi().GetNodeId()
+	delegatorNodeId, err := stakerClient.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
@@ -139,7 +139,7 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
-		id, err := client.AdminApi().GetNodeId()
+		id, err := client.InfoApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get node ID of service with ID %v", serviceId))
 		}
@@ -154,8 +154,8 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
 		}
-		peers, err := client.AdminApi().GetPeers()
-		nodeId, err := client.AdminApi().GetNodeId()
+		peers, err := client.InfoApi().GetPeers()
+		nodeId, err := client.InfoApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
 		}
