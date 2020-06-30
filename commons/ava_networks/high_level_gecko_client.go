@@ -21,6 +21,7 @@ const (
 	DELEGATION_FEE_RATE = 500000
 	XCHAIN_ADDRESS_PREFIX = "X-"
 	NO_IMPORT_INPUTS_ERROR_STR = "problem issuing transaction: no import inputs"
+	IMPORT_AVA_TO_XCHAIN_TIMEOUT = time.Second
 )
 
 type HighLevelGeckoClient struct {
@@ -275,7 +276,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	}
 	// XChain API only accepts the XChain address with the xchain prefix.
 	txnId, err := client.XChainApi().ImportAVA(xchainAddress, username, password)
-	for i := 0; err != nil && i < 5; i++ {
+	for err != nil {
 		/*
 			HACK HACK HACK because the PChain does not have a way to verify transaction acceptence yet,
 			we retry based on the contents of the error message from the XChain call if the pchain transaction
@@ -284,7 +285,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait fro transaction acceptance
 		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
 			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
-			time.Sleep(time.Second)
+			time.Sleep(IMPORT_AVA_TO_XCHAIN_TIMEOUT)
 		} else {
 			return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
 		}
