@@ -121,6 +121,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		publicIpFlag,
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort),
+		fmt.Sprintf("--http-host=%s", publicIpAddr),
 		fmt.Sprintf("--staking-port=%d", stakingPort),
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
