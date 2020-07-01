@@ -2,6 +2,7 @@
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
 * Migrate AdminAPI endpoints to the new InfoAPI
 * Parse error message on XChain Imports in order to wait for PChain transaction to be accepted
+* Added tests for XChain endpoints
 * Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
 * Test if the network functions as expected when nodes with duplicate node IDs occur
 
