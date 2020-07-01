@@ -259,12 +259,12 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	for serviceId, _ := range allServiceIds {
 		client, err := castedNetwork.GetGeckoClient(serviceId)
 		if err != nil {
-			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko client for service with ID %v", serviceId))
+			context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
 		}
 		allGeckoClients[serviceId] = client
 		nodeId, err := client.InfoApi().GetNodeId()
 		if err != nil {
-			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko node ID for service with ID %v", serviceId))
+			context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
 		}
 		allNodeIds[serviceId] = nodeId
 	}
