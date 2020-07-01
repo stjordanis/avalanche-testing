@@ -8,6 +8,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
+	"time"
 )
 
 const (
@@ -19,26 +20,43 @@ const (
 )
 
 // ============== Network ======================
+const (
+	containerStopTimeout = 30 * time.Second
+)
 type TestGeckoNetwork struct{
 	svcNetwork *networks.ServiceNetwork
 }
-func (network TestGeckoNetwork) GetGeckoClient(clientId int) (*gecko_client.GeckoClient, error){
-	node, err := network.svcNetwork.GetService(clientId)
+func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.GeckoClient, error){
+	node, err := network.svcNetwork.GetService(serviceId)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", clientId)
+		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceId)
 	}
 	geckoService := node.Service.(ava_services.GeckoService)
 	jsonRpcSocket := geckoService.GetJsonRpcSocket()
 	return gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort()), nil
 }
 
-func (network TestGeckoNetwork) GetAllBootServiceIds() []int {
-	genesisStakers := DefaultLocalNetGenesisConfig.Stakers
-	result := make([]int, 0, len(genesisStakers))
+func (network TestGeckoNetwork) GetAllBootServiceIds() map[int]bool {
+	result := make(map[int]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		result = append(result, bootNodeServiceIdStart + i)
+		result[bootNodeServiceIdStart + i] = true
 	}
 	return result
+}
+
+func (network TestGeckoNetwork) AddService(configurationId int, serviceId int) (*services.ServiceAvailabilityChecker, error) {
+	availabilityChecker, err := network.svcNetwork.AddService(configurationId, serviceId, network.GetAllBootServiceIds())
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "An error occurred adding service with service ID %v, configuration ID %v", serviceId, configurationId)
+	}
+	return availabilityChecker, nil
+}
+
+func (network TestGeckoNetwork) RemoveService(serviceId int) error {
+	if err := network.svcNetwork.RemoveService(serviceId, containerStopTimeout); err != nil {
+		return stacktrace.Propagate(err, "An error occurred removing service with ID %v", serviceId)
+	}
+	return nil
 }
 
 // ============= Loader Service Config ====================================
