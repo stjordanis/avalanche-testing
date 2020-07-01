@@ -262,7 +262,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko client for service with ID %v", serviceId))
 		}
 		allGeckoClients[serviceId] = client
-		nodeId, err := client.AdminApi().GetNodeId()
+		nodeId, err := client.InfoApi().GetNodeId()
 		if err != nil {
 			context.Fatal(stacktrace.NewError("An error occurred getting the Gecko node ID for service with ID %v", serviceId))
 		}
@@ -307,7 +307,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	}
 	allGeckoClients[badServiceId1] = badServiceClient1
 
-	badServiceNodeId1, err := badServiceClient1.AdminApi().GetNodeId()
+	badServiceNodeId1, err := badServiceClient1.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId1))
 	}
@@ -357,7 +357,7 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	}
 	allGeckoClients[badServiceId2] = badServiceClient2
 
-	badServiceNodeId2, err := badServiceClient2.AdminApi().GetNodeId()
+	badServiceNodeId2, err := badServiceClient2.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId2))
 	}
@@ -475,7 +475,7 @@ func verifyExpectedPeers(
 			acceptableNodeIds map[string]bool,
 			expectedNumPeers int,
 			atLeast bool) {
-	peers, err := client.AdminApi().GetPeers()
+	peers, err := client.InfoApi().GetPeers()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
 	}
