@@ -23,7 +23,7 @@ func TestCreateAccount(t *testing.T) {
 	assert.Equal(t, "Q4MzFZZDPHRPAHFeDs3NiyyaZDvxHKivf", address)
 }
 
-func TestImportKey(t *testing.T) {
+func TestPChainImportKey(t *testing.T) {
 	resultStr := `{
     "jsonrpc":"2.0",
     "id"     :3,

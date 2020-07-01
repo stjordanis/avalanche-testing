@@ -39,13 +39,13 @@ func main() {
 
 	initializerLogLevelArg := flag.String(
 		"initializer-log-level",
-		"info",
+		"debug",
 		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
 	)
 
 	controllerLogLevelArg := flag.String(
 		"controller-log-level",
-		"info",
+		"debug",
 		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
 	)
 	flag.Parse()
