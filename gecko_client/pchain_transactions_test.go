@@ -67,7 +67,7 @@ func TestSign(t *testing.T) {
 		signTx)
 }
 
-func TestIssueTx(t *testing.T) {
+func TestPChainIssueTx(t *testing.T) {
 	resultStr := `{
 		"jsonrpc": "2.0",
 		"result": {
