@@ -5,6 +5,7 @@
 * Added tests for XChain endpoints
 * Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
 * Test if the network functions as expected when nodes with duplicate node IDs occur
+* Drop default loglevel for initializer & controller down to DEBUG
 
 # 0.3.0
 * Removed startPortRange and endPortRange CLI args
