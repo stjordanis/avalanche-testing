@@ -11,6 +11,12 @@ import (
 )
 
 func main() {
+	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:               true,
+		FullTimestamp:             true,
+	})
+
 	testVolumeArg := flag.String(
 		"test-volume",
 		"",
@@ -98,12 +104,12 @@ func main() {
 	setupErr, testErr := controller.RunTest(*testNameArg)
 	if setupErr != nil {
 		logrus.Errorf("Test %v encountered an error during setup (test did not run):", *testNameArg)
-		logrus.Error(setupErr)
+		fmt.Println(setupErr)
 		os.Exit(1)
 	}
 	if testErr != nil {
 		logrus.Errorf("Test %v failed:", *testNameArg)
-		logrus.Error(testErr)
+		fmt.Println(testErr)
 		os.Exit(1)
 	}
 	logrus.Infof("Test %v succeeded", *testNameArg)
