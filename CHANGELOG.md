@@ -2,6 +2,7 @@
 * Drop default loglevel for initializer & controller down to DEBUG
 * Upgrade controller Docker image to allow for a Docker network per test
 * Run tests in parallel!
+* Removed references to `fiveNode` in testsuite (because these networks are no longer five-node, and the network size is less important than whether it's staking or not)
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
