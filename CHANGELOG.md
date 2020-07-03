@@ -1,4 +1,6 @@
 # TBD
+* Drop default loglevel for initializer & controller down to DEBUG
+* Upgrade controller Docker image to allow for a Docker network per test
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
@@ -7,7 +9,6 @@
 * Added tests for XChain endpoints
 * Remove `FiveNodeStakingNetworkBasicTest` (wasn't being used)
 * Test if the network functions as expected when nodes with duplicate node IDs occur
-* Drop default loglevel for initializer & controller down to DEBUG
 
 # 0.3.0
 * Removed startPortRange and endPortRange CLI args

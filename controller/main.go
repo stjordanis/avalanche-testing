@@ -35,6 +35,12 @@ func main() {
 		"Name of Docker image of the service being tested",
 	)
 
+	dockerNetworkArg := flag.String(
+		"docker-network",
+		"",
+		"Name of Docker network that the container is running in, and in which all services should be started",
+	)
+
 	subnetMaskArg := flag.String(
 		"subnet-mask",
 		"",
@@ -71,7 +77,8 @@ func main() {
 	logrus.SetLevel(*logLevelPtr)
 
 	logrus.Debugf(
-		"Controller CLI arguments: subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
+		"Controller CLI arguments: dockerNetwork: %v, subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
+		*dockerNetworkArg,
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
@@ -80,6 +87,7 @@ func main() {
 	controller := controller.NewTestController(
 		*testVolumeArg,
 		*testVolumeMountpointArg,
+		*dockerNetworkArg,
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
