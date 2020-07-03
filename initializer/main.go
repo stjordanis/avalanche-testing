@@ -15,6 +15,7 @@ import (
 const (
 	TEST_NAME_ARG_SEPARATOR = ","
 
+	defaultParallelism = 4
 )
 
 func main() {
@@ -54,6 +55,13 @@ func main() {
 		"debug",
 		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
 	)
+
+	parallelismArg := flag.Uint(
+		"parallelism",
+		defaultParallelism,
+		"Number of tests to run in parallel",
+	)
+
 	flag.Parse()
 
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
@@ -91,8 +99,7 @@ func main() {
 		*controllerLogLevelArg)
 
 	// Create the container based on the configurations, but don't start it yet.
-	// TODO Make parallelism configurable
-	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, 4)
+	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
 	if error != nil {
 		logrus.Error("An error occurred running the tests:")
 		logrus.Error(error)

@@ -104,12 +104,12 @@ func main() {
 	setupErr, testErr := controller.RunTest(*testNameArg)
 	if setupErr != nil {
 		logrus.Errorf("Test %v encountered an error during setup (test did not run):", *testNameArg)
-		fmt.Println(setupErr)
+		fmt.Fprintln(logrus.StandardLogger().Out, setupErr)
 		os.Exit(1)
 	}
 	if testErr != nil {
 		logrus.Errorf("Test %v failed:", *testNameArg)
-		fmt.Println(testErr)
+		fmt.Fprintln(logrus.StandardLogger().Out, testErr)
 		os.Exit(1)
 	}
 	logrus.Infof("Test %v succeeded", *testNameArg)
