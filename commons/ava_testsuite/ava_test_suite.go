@@ -9,10 +9,9 @@ type AvaTestSuite struct {}
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
-	result["fiveStakingNodeGetValidatorsTest"] = FiveNodeStakingNetworkGetValidatorsTest{}
-	result["fiveStakingNodeFullyConnectedTest"] = FiveNodeStakingNetworkFullyConnectedTest{}
-	result["fiveStakingNodeDuplicateNodeIdTest"] = FiveNodeStakingNetworkDuplicateIdTest{}
-	result["stakingNodeRpcWorkflowTest"] = StakingNetworkRpcWorkflowTest{}
+	result["stakingNetworkFullyConnectedTest"] = StakingNetworkFullyConnectedTest{}
+	result["stakingNetworkDuplicateNodeIdTest"] = StakingNetworkDuplicateNodeIdTest{}
+	result["stakingNetworkRpcWorkflowTest"] = StakingNetworkRpcWorkflowTest{}
 
 	return result
 }
