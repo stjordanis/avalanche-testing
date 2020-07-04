@@ -15,9 +15,16 @@ import (
 const (
 	TEST_NAME_ARG_SEPARATOR = ","
 
+	defaultParallelism = 4
 )
 
 func main() {
+	// NOTE: we'll need to change the ForceColors to false if we ever want structured logging
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:               true,
+		FullTimestamp:             true,
+	})
+
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
 		"gecko-image-name", 
@@ -48,6 +55,13 @@ func main() {
 		"debug",
 		fmt.Sprintf("Log level to use for the initializer (%v)", logging.GetAcceptableStrings()),
 	)
+
+	parallelismArg := flag.Uint(
+		"parallelism",
+		defaultParallelism,
+		"Number of tests to run in parallel",
+	)
+
 	flag.Parse()
 
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
@@ -85,16 +99,11 @@ func main() {
 		*controllerLogLevelArg)
 
 	// Create the container based on the configurations, but don't start it yet.
-	results, error := testSuiteRunner.RunTests(testNames)
+	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
 	if error != nil {
-		panic(error)
-	}
-
-	logrus.Info("================================== TEST RESULTS ================================")
-	allTestsSucceeded := true
-	for testName, result := range results {
-		logrus.Infof("- %v: %v", testName, result)
-		allTestsSucceeded = allTestsSucceeded && result == initializer.PASSED
+		logrus.Error("An error occurred running the tests:")
+		logrus.Error(error)
+		os.Exit(1)
 	}
 
 	if allTestsSucceeded {

@@ -1,6 +1,7 @@
 # TBD
 * Drop default loglevel for initializer & controller down to DEBUG
 * Upgrade controller Docker image to allow for a Docker network per test
+* Run tests in parallel!
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
