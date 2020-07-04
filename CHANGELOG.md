@@ -3,6 +3,7 @@
 * Upgrade controller Docker image to allow for a Docker network per test
 * Run tests in parallel!
 * Removed references to `fiveNode` in testsuite (because these networks are no longer five-node, and the network size is less important than whether it's staking or not)
+* Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
