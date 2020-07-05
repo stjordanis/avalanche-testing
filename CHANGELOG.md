@@ -2,6 +2,7 @@
 * Drop default loglevel for initializer & controller down to DEBUG
 * Upgrade controller Docker image to allow for a Docker network per test
 * Run tests in parallel!
+* Fix bug in RPC workflow test where delegator ID was actually staker ID
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
