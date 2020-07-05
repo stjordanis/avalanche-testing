@@ -1,4 +1,6 @@
 # TBD
+
+# 0.4.0
 * Drop default loglevel for initializer & controller down to DEBUG
 * Upgrade controller Docker image to allow for a Docker network per test
 * Run tests in parallel!
