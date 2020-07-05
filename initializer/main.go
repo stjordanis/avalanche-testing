@@ -8,6 +8,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -24,6 +25,12 @@ func main() {
 		ForceColors:               true,
 		FullTimestamp:             true,
 	})
+
+	doListArg := flag.Bool(
+		"list",
+		false,
+		"Rather than running the tests, lists the tests available to run",
+	)
 
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
@@ -64,6 +71,21 @@ func main() {
 
 	flag.Parse()
 
+	testSuite := ava_testsuite.AvaTestSuite{}
+	if *doListArg {
+		testNames := []string{}
+		for name, _ := range testSuite.GetTests() {
+			testNames = append(testNames, name)
+		}
+		sort.Strings(testNames)
+
+		for _, name := range testNames {
+			fmt.Println("- " + name)
+		}
+		os.Exit(0)
+	}
+
+
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
 	if initializerLevelPtr == nil {
 		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
@@ -93,7 +115,7 @@ func main() {
 	}
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
-		ava_testsuite.AvaTestSuite{},
+		testSuite,
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*controllerLogLevelArg)

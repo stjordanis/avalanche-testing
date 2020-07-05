@@ -1,10 +1,5 @@
 package ava_testsuite
 
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-//  Rename this entire file and everything in it to emphasize the "staking" aspect, not the number of nodes (because the
-//  number of nodes doesn't really matter)
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
@@ -125,8 +120,8 @@ func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 
 
 // =================== Fully Connected Test ==============================
-type FiveNodeStakingNetworkFullyConnectedTest struct{}
-func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
+type StakingNetworkFullyConnectedTest struct{}
+func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	allServiceIds := castedNetwork.GetAllBootServiceIds()
@@ -187,63 +182,19 @@ func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, co
 	}
 }
 
-func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
 	})
 }
 
-func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
+func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
 	return 60 * time.Second
 }
 
-// =============== Get Validators Test ==================================
-type FiveNodeStakingNetworkGetValidatorsTest struct{}
-func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-
-	// TODO we need to make sure ALL the nodes agree about validators!
-	client, err := castedNetwork.GetGeckoClient(0)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
-	}
-
-	// TODO This retry logic is only necessary because there's not a way for Ava nodes to reliably report
-	//  bootstrapping as complete; remove it when Gecko can report successful bootstrapping
-	var validators []gecko_client.Validator
-	for i := 0; i < 5; i++ {
-		validators, err = client.PChainApi().GetCurrentValidators(nil)
-		if err == nil {
-			break
-		}
-		logrus.Error(stacktrace.Propagate(err, "Could not get current validators; sleeping for 5 seconds..."))
-		time.Sleep(5 * time.Second)
-	}
-	// TODO This should go away as soon as Ava can reliably report bootstrapping as complete
-	if validators == nil {
-		context.Fatal(stacktrace.NewError("Could not get validators even after retrying!"))
-	}
-
-	for _, validator := range validators {
-		logrus.Infof("Validator ID: %s", validator.Id)
-	}
-	// TODO change this to be specific
-	context.AssertTrue(len(validators) >= 1, stacktrace.NewError("No validators found"))
-}
-
-func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getStakingNetworkLoader(map[int]int{
-		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
-	})
-}
-
-func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
-	return 30 * time.Second
-}
-
 // =============== Duplicate Node ID Test ==============================
-type FiveNodeStakingNetworkDuplicateIdTest struct {}
-func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context testsuite.TestContext) {
+type StakingNetworkDuplicateNodeIdTest struct {}
+func (f StakingNetworkDuplicateNodeIdTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
@@ -427,13 +378,13 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
 }
 
-func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
 	})
 }
 
-func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
+func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
 	return 120 * time.Second
 }
 
