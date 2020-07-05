@@ -11,6 +11,12 @@ import (
 )
 
 func main() {
+	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:               true,
+		FullTimestamp:             true,
+	})
+
 	testVolumeArg := flag.String(
 		"test-volume",
 		"",
@@ -33,6 +39,12 @@ func main() {
 		"test-image-name",
 		"",
 		"Name of Docker image of the service being tested",
+	)
+
+	dockerNetworkArg := flag.String(
+		"docker-network",
+		"",
+		"Name of Docker network that the container is running in, and in which all services should be started",
 	)
 
 	subnetMaskArg := flag.String(
@@ -71,7 +83,8 @@ func main() {
 	logrus.SetLevel(*logLevelPtr)
 
 	logrus.Debugf(
-		"Controller CLI arguments: subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
+		"Controller CLI arguments: dockerNetwork: %v, subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
+		*dockerNetworkArg,
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
@@ -80,6 +93,7 @@ func main() {
 	controller := controller.NewTestController(
 		*testVolumeArg,
 		*testVolumeMountpointArg,
+		*dockerNetworkArg,
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
@@ -90,12 +104,12 @@ func main() {
 	setupErr, testErr := controller.RunTest(*testNameArg)
 	if setupErr != nil {
 		logrus.Errorf("Test %v encountered an error during setup (test did not run):", *testNameArg)
-		logrus.Error(setupErr)
+		fmt.Fprintln(logrus.StandardLogger().Out, setupErr)
 		os.Exit(1)
 	}
 	if testErr != nil {
 		logrus.Errorf("Test %v failed:", *testNameArg)
-		logrus.Error(testErr)
+		fmt.Fprintln(logrus.StandardLogger().Out, testErr)
 		os.Exit(1)
 	}
 	logrus.Infof("Test %v succeeded", *testNameArg)
