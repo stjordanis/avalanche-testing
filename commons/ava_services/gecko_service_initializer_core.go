@@ -2,6 +2,7 @@ package ava_services
 
 import (
 	"fmt"
+	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
@@ -11,10 +12,10 @@ import (
 )
 
 const (
-	httpPort             = 9650
-	stakingPort          = 9651
-	stakingTlsCertFileId = "staking-tls-cert"
-	stakingTlsKeyFileId  = "staking-tls-key"
+	httpPort             nat.Port = "9650/tcp"
+	stakingPort          nat.Port = "9651/tcp"
+	stakingTlsCertFileId          = "staking-tls-cert"
+	stakingTlsKeyFileId           = "staking-tls-key"
 
 	testVolumeMountpoint = "/shared"
 )
@@ -76,8 +77,8 @@ func NewGeckoServiceInitializerCore(
 	}
 }
 
-func (core GeckoServiceInitializerCore) GetUsedPorts() map[int]bool {
-	return map[int]bool{
+func (core GeckoServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
+	return map[nat.Port]bool{
 		httpPort:    true,
 		stakingPort: true,
 	}
@@ -120,9 +121,9 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		"/gecko/build/ava",
 		publicIpFlag,
 		"--network-id=local",
-		fmt.Sprintf("--http-port=%d", httpPort),
+		fmt.Sprintf("--http-port=%d", httpPort.Int()),
 		fmt.Sprintf("--http-host=%s", publicIpAddr),
-		fmt.Sprintf("--staking-port=%d", stakingPort),
+		fmt.Sprintf("--staking-port=%d", stakingPort.Int()),
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
