@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"encoding/json"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client/rpc_requester"
 	"github.com/palantir/stacktrace"
 )
 
@@ -10,7 +11,7 @@ const (
 )
 
 type XChainApi struct {
-	rpcRequester jsonRpcRequester
+	rpcRequester rpc_requester.JsonRpcRequester
 }
 
 func (api XChainApi) ImportKey(username string, password string, privateKey string) (string, error) {
@@ -19,7 +20,7 @@ func (api XChainApi) ImportKey(username string, password string, privateKey stri
 		"password": password,
 		"privateKey": privateKey,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.importKey", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.importKey", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -38,7 +39,7 @@ func (api XChainApi) ExportAVA(to string, amount int64, username string, passwor
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.exportAVA", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.exportAVA", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -56,7 +57,7 @@ func (api XChainApi) ImportAVA(to string, username string, password string) (str
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.importAVA", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.importAVA", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -72,7 +73,7 @@ func (api XChainApi) GetTxStatus(txnId string) (string, error) {
 	params := map[string]interface{}{
 		"txID": txnId,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.getTxStatus", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.getTxStatus", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -89,7 +90,7 @@ func (api XChainApi) GetBalance(address string, assetId string) (*AccountWithUtx
 		"address": address,
 		"assetID": assetId,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.getBalance", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.getBalance", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -109,7 +110,7 @@ func (api XChainApi) Send(amount int64, assetId string, to string, username stri
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.send", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.send", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -126,7 +127,7 @@ func (api XChainApi) CreateAddress(username string, password string) (string, er
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.createAddress", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.createAddress", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -142,7 +143,7 @@ func (api XChainApi) IssueTx(tx string) (string, error) {
 	params := map[string]interface{}{
 		"tx": tx,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.issueTx", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(xchainEndpoint, "avm.issueTx", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}

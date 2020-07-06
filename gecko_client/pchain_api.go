@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"encoding/json"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client/rpc_requester"
 	"github.com/palantir/stacktrace"
 )
 
@@ -10,7 +11,7 @@ const (
 )
 
 type PChainApi struct {
-	rpcRequester jsonRpcRequester
+	rpcRequester rpc_requester.JsonRpcRequester
 }
 
 // ============= Blockchain ====================
@@ -24,7 +25,7 @@ func (api PChainApi) CreateBlockchain(vmId string, subnetId string, name string,
 		"genesisData": genesisData,
 		"payerNonce" : payerNonce,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createBlockchain", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.createBlockchain", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -41,7 +42,7 @@ func (api PChainApi) GetBlockchainStatus(blockchainId string) (string, error) {
 	params := map[string]interface{}{
 		"blockchainID": blockchainId,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getBlockchainStatus", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getBlockchainStatus", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -70,7 +71,7 @@ func (api PChainApi) CreateAccount(username string, password string, privateKeyP
 			"privateKey": &privateKeyPtr,
 		}
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createAccount", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.createAccount", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -88,7 +89,7 @@ func (api PChainApi) ImportKey(username string, password string, privateKey stri
 		"password": password,
 		"privateKey": privateKey,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.importKey", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.importKey", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -107,7 +108,7 @@ func (api PChainApi) ExportKey(username string, password string, address string)
 		"password": password,
 		"address": address,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportKey", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.exportKey", params)
 
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
@@ -125,7 +126,7 @@ func (api PChainApi) GetAccount(address string) (AccountInfo, error) {
 	params := map[string]interface{}{
 		"address": address,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getAccount", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getAccount", params)
 	if err != nil {
 		return AccountInfo{}, stacktrace.Propagate(err, "Error making request")
 	}
@@ -143,7 +144,7 @@ func (api PChainApi) ListAccounts(username string, password string) ([]AccountIn
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.listAccounts", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.listAccounts", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -168,7 +169,7 @@ func (api PChainApi) GetCurrentValidators(subnetIdPtr *string) ([]Validator, err
 		params["subnetID"] = *subnetIdPtr
 	}
 
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getCurrentValidators", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getCurrentValidators", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -187,7 +188,7 @@ func (api PChainApi) GetPendingValidators(subnetIdPtr *string) ([]Validator, err
 		params["subnetID"] = *subnetIdPtr
 	}
 
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getPendingValidators", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getPendingValidators", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -206,7 +207,7 @@ func (api PChainApi) SampleValidators(subnetIdPtr *string) ([]string, error) {
 		params["subnetID"] = *subnetIdPtr
 	}
 
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.sampleValidators", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.sampleValidators", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -235,7 +236,7 @@ func (api PChainApi) AddDefaultSubnetValidator(
 		"stakeAmount": stakeAmount,
 		"delegationFeeRate": delegationFeeRate,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.addDefaultSubnetValidator", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.addDefaultSubnetValidator", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -262,7 +263,7 @@ func (api PChainApi) AddNonDefaultSubnetValidator(
 		"weight": weight,
 		"payerNonce": payerNonce,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.addNonDefaultSubnetValidator", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.addNonDefaultSubnetValidator", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -289,7 +290,7 @@ func (api PChainApi) AddDefaultSubnetDelegator(
 		"endTime": endTime,
 		"stakeAmount": stakeAmount,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.addDefaultSubnetDelegator", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.addDefaultSubnetDelegator", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -311,7 +312,7 @@ func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonc
 		"threshold": threshold,
 		"payerNonce": payerNonce,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.createSubnet", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.createSubnet", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -326,7 +327,7 @@ func (api PChainApi) CreateSubnet(controlKeys []string, threshold int, payerNonc
 
 func (api PChainApi) GetSubnets() ([]Subnet, error) {
 	params := map[string]interface{}{}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getSubnets", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getSubnets", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -343,7 +344,7 @@ func (api PChainApi) ValidatedBy(blockchainId string) (string, error) {
 	params := map[string]interface{}{
 		"blockchainID": blockchainId,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.validatedBy", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.validatedBy", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -361,7 +362,7 @@ func (api PChainApi) Validates(subnetId string) ([]string, error) {
 	params := map[string]interface{}{
 		"subnetID": subnetId,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.validates", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.validates", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -376,7 +377,7 @@ func (api PChainApi) Validates(subnetId string) ([]string, error) {
 
 func (api PChainApi) GetBlockchains() ([]Blockchain, error) {
 	params := map[string]interface{}{}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.getBlockchains", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.getBlockchains", params)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -395,7 +396,7 @@ func (api PChainApi) ExportAVA(amount int64, to string, payerNonce int) (string,
 		"to": to,
 		"payerNonce": payerNonce,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.exportAVA", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.exportAVA", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -415,7 +416,7 @@ func (api PChainApi) ImportAVA(username string, password string, to string, paye
 		"to": to,
 		"payerNonce": payerNonce,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.importAVA", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.importAVA", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -434,7 +435,7 @@ func (api PChainApi) Sign(tx string, signer string, username string, password st
 		"username": username,
 		"password": password,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.sign", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.sign", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -451,7 +452,7 @@ func (api PChainApi) IssueTx(tx string) (string, error) {
 	params := map[string]interface{}{
 		"tx": tx,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(pchainEndpoint, "platform.issueTx", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(pchainEndpoint, "platform.issueTx", params)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}

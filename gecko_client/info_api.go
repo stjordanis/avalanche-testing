@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"encoding/json"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client/rpc_requester"
 	"github.com/palantir/stacktrace"
 )
 
@@ -10,11 +11,11 @@ const (
 )
 
 type InfoApi struct {
-	rpcRequester jsonRpcRequester
+	rpcRequester rpc_requester.JsonRpcRequester
 }
 
 func (api InfoApi) GetPeers() ([]Peer, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.peers", make(map[string]interface{}))
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(infoEndpoint, "info.peers", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -27,7 +28,7 @@ func (api InfoApi) GetPeers() ([]Peer, error) {
 }
 
 func (api InfoApi) GetNodeId() (string, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.getNodeID", make(map[string]interface{}))
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(infoEndpoint, "info.getNodeID", make(map[string]interface{}))
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -43,7 +44,7 @@ func (api InfoApi) IsBootstrapped(chain string) (bool, error) {
 	params := map[string]interface{}{
 		"chain": chain,
 	}
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.isBootstrapped", params)
+	responseBodyBytes, err := api.rpcRequester.MakeRpcRequest(infoEndpoint, "info.isBootstrapped", params)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "Error making request")
 	}

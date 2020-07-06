@@ -1,5 +1,6 @@
 # TBD
 * Switch to using the `Info.isBootstrapped` endpoint to check for node liveness
+* Add 30s timeout to Gecko client requests
 
 # 0.4.0
 * Drop default loglevel for initializer & controller down to DEBUG

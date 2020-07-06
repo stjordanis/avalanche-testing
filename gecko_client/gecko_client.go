@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"github.com/docker/go-connections/nat"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client/rpc_requester"
 )
 
 
@@ -14,16 +15,12 @@ type GeckoClient struct {
 }
 
 func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
-	rpcRequester := geckoJsonRpcRequester{
-		ipAddr: ipAddr,
-		port:   port,
-	}
-
+	rpcRequester := rpc_requester.NewGeckoJsonRpcRequester(ipAddr, port)
 	return clientFromRequester(rpcRequester)
 }
 
 // This method is exposed for mocking the Gecko client
-func clientFromRequester(requester jsonRpcRequester) *GeckoClient {
+func clientFromRequester(requester rpc_requester.JsonRpcRequester) *GeckoClient {
 	return &GeckoClient{
 		pChainApi:   PChainApi{rpcRequester: requester},
 		xChainApi:   XChainApi{rpcRequester: requester},

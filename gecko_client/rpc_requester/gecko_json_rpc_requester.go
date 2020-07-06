@@ -1,4 +1,4 @@
-package gecko_client
+package rpc_requester
 
 import (
 	"bytes"
@@ -10,21 +10,33 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // ============= RPC Requester ===================
 const (
 	JSON_RPC_VERSION = "2.0"
+	REQUEST_TIMEOUT = 30 * time.Second
 )
 
-type jsonRpcRequester interface {
-	makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error)
-}
-
-type geckoJsonRpcRequester struct {
+type GeckoJsonRpcRequester struct {
 	ipAddr string
 	port nat.Port
+	client http.Client
 }
+
+func NewGeckoJsonRpcRequester(ipAddr string, port nat.Port) *GeckoJsonRpcRequester {
+	client := http.Client{
+		// TODO Make this configurable
+		Timeout: REQUEST_TIMEOUT,
+	}
+	return &GeckoJsonRpcRequester{
+		ipAddr: ipAddr,
+		port: port,
+		client: client,
+	}
+}
+
 
 // This needs to be public so the JSON package can serialize it
 type JsonRpcRequest struct {
@@ -41,22 +53,22 @@ type JsonRpcError struct {
 }
 
 type JsonRpcResponse struct {
-	JsonRpcVersion string             `json:"jsonrpc"`
-	Error JsonRpcError `json: "error"`
-	Result map[string]interface{} `json: "result"`
-	Id             int                `json:"id"`
+	JsonRpcVersion string                 `json:"jsonrpc"`
+	Error          JsonRpcError           `json: "error"`
+	Result         map[string]interface{} `json: "result"`
+	Id             int                    `json:"id"`
 }
 
 
-func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error) {
+func (requester GeckoJsonRpcRequester) MakeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error) {
 	// Either Golang or Ava have a very nasty & subtle behaviour where duplicated '//' in the URL is treated as GET, even if it's POST
 	// https://stackoverflow.com/questions/23463601/why-golang-treats-my-post-request-as-a-get-one
 	endpoint = strings.TrimLeft(endpoint, "/")
 	request := JsonRpcRequest{
 		JsonRpc: JSON_RPC_VERSION,
-		Method: method,
+		Method:  method,
 		Params:  params,
-		Id: 1,
+		Id:      1,
 	}
 
 	requestBodyBytes, err := json.Marshal(request)
@@ -73,7 +85,7 @@ func (requester geckoJsonRpcRequester) makeRpcRequest(endpoint string, method st
 
 	logrus.Tracef("Making request to url: %v", url)
 	logrus.Tracef("Request body: %v", string(requestBodyBytes))
-	resp, err := http.Post(
+	resp, err := requester.client.Post(
 		url,
 		"application/json",
 		bytes.NewBuffer(requestBodyBytes),
