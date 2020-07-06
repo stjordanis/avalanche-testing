@@ -1,11 +1,15 @@
 # TBD
+* Switch to using the `Info.isBootstrapped` endpoint to check for node liveness
+
+# 0.4.0
 * Drop default loglevel for initializer & controller down to DEBUG
 * Upgrade controller Docker image to allow for a Docker network per test
 * Run tests in parallel!
+* Fix bug in RPC workflow test where delegator ID was actually staker ID
 * Removed references to `fiveNode` in testsuite (because these networks are no longer five-node, and the network size is less important than whether it's staking or not)
 * Removed `fiveStakingNodeGetValidatorsTest`, which has been superseded by the RPC workflow test
 * Provided `--list` flag to the initializer CLI to simply list the tests registered in the suite
-* Switch to using the `Info.isBootstrapped` endpoint to check for node liveness
+* Switched `int` ports to `nat.Port` to allow for specifying non-TCP ports
 
 # 0.3.1
 * Specify --http-host CLI flag in GetStartCommand to have RPC calls bind to publicIP
