@@ -58,3 +58,17 @@ func TestGetNodeId(t *testing.T) {
 	assert.Nil(t, err, "Error message should be nil")
 	assert.Equal(t, nodeId, "5mb46qkSBj81k9g9e4VFjGGSbaaSLFRzD")
 }
+
+func TestIsBootstrapped(t *testing.T) {
+	resultStr := `{
+    "jsonrpc": "2.0",
+    "result": {
+        "isBootstrapped": true
+    },
+    "id": 1
+}`
+	client := clientFromRequester(mockedJsonRpcRequester{resultStr: resultStr})
+	isBootstrapped, err := client.InfoApi().IsBootstrapped("P")
+	assert.Nil(t, err, "Error message should be nil")
+	assert.True(t, isBootstrapped)
+}

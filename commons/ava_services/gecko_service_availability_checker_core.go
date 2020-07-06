@@ -3,9 +3,13 @@ package ava_services
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"time"
+)
+
+const (
+	pChainId = "P"
+	xChainId = "X"
 )
 
 type GeckoServiceAvailabilityCheckerCore struct {}
@@ -13,18 +17,23 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	castedService := toCheck.(GeckoService)
 	jsonRpcSocket := castedService.GetJsonRpcSocket()
 	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
-	healthInfo, err := client.HealthApi().GetLiveness()
-	if err != nil {
-		logrus.Trace(stacktrace.Propagate(err, "Error occurred in getting liveness info"))
-		return false
+
+	// We use the design pattern of a for-loop with return statements to avoid making unnecessary requests to the Gecko node
+	//  by aborting early
+	for _, chainId := range []string{pChainId, xChainId} {
+		isBootstrapped, err := client.InfoApi().IsBootstrapped(chainId)
+		if err != nil {
+			logrus.Tracef("%s-Chain is not available due to error: %s", chainId, err.Error())
+			return false
+		}
+		if !isBootstrapped {
+			logrus.Tracef("%s-Chain is not available due not being bootstrapped yet", chainId)
+			return false
+		}
 	}
 
-	// HACK HACK HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
-	// TODO TODO TODO once bootstrapping checker is available, use that instead of just waiting
-	if healthInfo.Healthy {
-		time.Sleep(15 * time.Second)
-	}
-	return healthInfo.Healthy
+	logrus.Trace("All chains are now bootstrapped successfully")
+	return true
 }
 
 func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {

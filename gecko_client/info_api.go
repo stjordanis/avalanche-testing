@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	adminEndpoint = "ext/info"
+	infoEndpoint = "ext/info"
 )
 
 type InfoApi struct {
@@ -14,7 +14,7 @@ type InfoApi struct {
 }
 
 func (api InfoApi) GetPeers() ([]Peer, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "info.peers", make(map[string]interface{}))
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.peers", make(map[string]interface{}))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "Error making request")
 	}
@@ -27,7 +27,7 @@ func (api InfoApi) GetPeers() ([]Peer, error) {
 }
 
 func (api InfoApi) GetNodeId() (string, error) {
-	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(adminEndpoint, "info.getNodeID", make(map[string]interface{}))
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.getNodeID", make(map[string]interface{}))
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Error making request")
 	}
@@ -38,3 +38,21 @@ func (api InfoApi) GetNodeId() (string, error) {
 	}
 	return response.Result.NodeID, nil
 }
+
+func (api InfoApi) IsBootstrapped(chain string) (bool, error) {
+	params := map[string]interface{}{
+		"chain": chain,
+	}
+	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(infoEndpoint, "info.isBootstrapped", params)
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Error making request")
+	}
+
+	var response IsBootstrappedResponse
+	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
+		return false, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+	}
+	return response.Result.IsBootstrapped, nil
+}
+
+

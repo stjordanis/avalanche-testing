@@ -28,3 +28,13 @@ type GetNodeIDResponse struct {
 	Result NodeID	`json:"result"`
 	Id int	`json:"id"`
 }
+
+type IsBootstrappedInfo struct {
+	IsBootstrapped bool	`json:"isBootstrapped"`
+}
+
+type IsBootstrappedResponse struct {
+	JsonRpcVersion string	`json:"jsonrpc"`
+	Result IsBootstrappedInfo	`json:"result"`
+	Id int	`json:"id"`
+}
