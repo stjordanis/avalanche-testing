@@ -44,7 +44,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
 	}
-	delegatorNodeId, err := stakerClient.InfoApi().GetNodeId()
+	delegatorNodeId, err := delegatorClient.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
