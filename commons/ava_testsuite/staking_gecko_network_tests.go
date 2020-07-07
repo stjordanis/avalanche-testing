@@ -1,5 +1,4 @@
 package ava_testsuite
-
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
@@ -126,9 +125,9 @@ func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context te
 	nonBootValidatorServiceId := 0
 	nonBootNonValidatorServiceId := 1
 
-	bootIds := castedNetwork.GetAllBootServiceIds()
+	stakerIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds := make(map[int]bool)
-	for stakerId, _ := range bootIds {
+	for stakerId, _ := range stakerIds {
 		allServiceIds[stakerId] = true
 	}
 	// Add our custom nodes
@@ -136,45 +135,32 @@ func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context te
 	allServiceIds[nonBootNonValidatorServiceId] = true
 
 	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
-	if err := verifyNetworkFullyConnected(allServiceIds, bootIds, allNodeIds, allGeckoClients); err != nil {
+	if err := verifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
-	normalServiceClient1 := allGeckoClients[nonBootValidatorServiceId]
+	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceId]
 	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
-		normalServiceClient1,
+		nonBootValidatorClient,
 		STAKER_USERNAME,
 		STAKER_PASSWORD)
 	if err := highLevelExtraStakerClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
 	}
 
+	// Give time for the new validator to propagate via gossip
+	time.Sleep(70 * time.Second)
+
+	stakerIds[nonBootValidatorServiceId] = true
+
 	/*
-	Now that we've registered the first non-boot node as a validator, and because peers are only gossiped if they're a validator, we expect:
-	1) All bootstrappers to see all other nodes in the network (because they're validators and the non-boots use them for startup)
-	2) The non-boot, validator node to see ONLY the bootstrappers (because the non-boot, non-validator node shouldn't get gossiped)
-	2) The non-boot, non-validator node to see ALL other nodes in the network (because the non-boot, validator node SHOULD get gossiped)
+	After gossip, we expect the peers list to look like:
+	1) No node has itself in its peers list
+	2) The validators will have ALL other nodes in the network (propagated via gossip)
+	3) The non-validators will have all the validators in the network (propagated via gossip)
 	 */
-	for serviceId, _ := range allServiceIds {
-		expectedNodeIds := make(map[string]bool)
-		for bootServiceId, _ := range bootIds {
-			if serviceId == bootServiceId {
-				continue
-			}
-			bootNodeId := allNodeIds[bootServiceId]
-			expectedNodeIds[bootNodeId] = true
-		}
-
-		if _, isBoot := bootIds[serviceId]; isBoot {
-			expectedNodeIds[allNodeIds[nonBootValidatorServiceId]] = true
-			expectedNodeIds[allNodeIds[nonBootNonValidatorServiceId]] = true
-		} else if serviceId == nonBootNonValidatorServiceId {
-			expectedNodeIds[allNodeIds[nonBootValidatorServiceId]] = true
-		}
-
-		if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], expectedNodeIds, len(expectedNodeIds), false); err != nil {
-			context.Fatal(stacktrace.Propagate(err, "An error occurred verifying peers of node with service ID %v", serviceId))
-		}
+	if err := verifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
 }
 
@@ -187,7 +173,7 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestN
 }
 
 func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 60 * time.Second
+	return 120 * time.Second
 }
 
 // =============== Duplicate Node ID Test ==============================
@@ -382,7 +368,7 @@ func getNodeIdsAndClients(
 /*
 Asserts that the network is fully connected, meaning:
 1) The stakers have all the other nodes in the network besides themselves in their peer list
-2) All the other nodes have only the bootstrappers in their peer list
+2) All non-stakers have all the stakers in their peer list
 
 Args:
 	allServiceIds: All the service IDs in the network, and the IDs that will be iterated over to check
