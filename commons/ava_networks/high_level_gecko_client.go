@@ -39,6 +39,10 @@ func NewHighLevelGeckoClient(
 	}
 }
 
+func (highLevelGeckoClient HighLevelGeckoClient) GetLowLevelClient() *gecko_client.GeckoClient {
+	return highLevelGeckoClient.client
+}
+
 type GeckoUser struct {
 	username string
 	password string
