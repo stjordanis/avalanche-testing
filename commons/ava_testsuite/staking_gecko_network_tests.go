@@ -1,10 +1,4 @@
 package ava_testsuite
-
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-//  Rename this entire file and everything in it to emphasize the "staking" aspect, not the number of nodes (because the
-//  number of nodes doesn't really matter)
-// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
@@ -49,7 +43,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
 	}
-	delegatorNodeId, err := stakerClient.InfoApi().GetNodeId()
+	delegatorNodeId, err := delegatorClient.InfoApi().GetNodeId()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
@@ -125,159 +119,79 @@ func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 
 
 // =================== Fully Connected Test ==============================
-type FiveNodeStakingNetworkFullyConnectedTest struct{}
-func (test FiveNodeStakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
+type StakingNetworkFullyConnectedTest struct{}
+func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	nonBootValidatorServiceId := 0
+	nonBootNonValidatorServiceId := 1
 
-	allServiceIds := castedNetwork.GetAllBootServiceIds()
-	allServiceIds[NODE_SERVICE_ID] = true
-
-	extraStakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to get extra staker client."))
+	stakerIds := castedNetwork.GetAllBootServiceIds()
+	allServiceIds := make(map[int]bool)
+	for stakerId, _ := range stakerIds {
+		allServiceIds[stakerId] = true
 	}
+	// Add our custom nodes
+	allServiceIds[nonBootValidatorServiceId] = true
+	allServiceIds[nonBootNonValidatorServiceId] = true
+
+	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
+	if err := verifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
+	}
+
+	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceId]
 	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
-		extraStakerClient,
+		nonBootValidatorClient,
 		STAKER_USERNAME,
 		STAKER_PASSWORD)
-	err = highLevelExtraStakerClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT)
-	if err != nil {
+	if err := highLevelExtraStakerClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
 	}
 
-	// collect set of IDs in network
-	nodeIdSet := map[string]bool{}
-	for serviceId, _ := range allServiceIds {
-		client, err := castedNetwork.GetGeckoClient(serviceId)
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
-		}
-		id, err := client.InfoApi().GetNodeId()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get node ID of service with ID %v", serviceId))
-		}
-		nodeIdSet[id] = true
-	}
+	// Give time for the new validator to propagate via gossip
+	time.Sleep(70 * time.Second)
 
-	logrus.Debugf("Network ID Set: %+v", nodeIdSet)
+	stakerIds[nonBootValidatorServiceId] = true
 
-	// verify bootstrapper peer lists have full set of IDs in network.
-	for serviceId, _ := range allServiceIds {
-		client, err := castedNetwork.GetGeckoClient(serviceId)
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get client for service with ID %v", serviceId))
-		}
-		peers, err := client.InfoApi().GetPeers()
-		nodeId, err := client.InfoApi().GetNodeId()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get peers of service with ID %v", serviceId))
-		}
-		logrus.Debugf("Length of Peer set for node %v: %v", serviceId, len(peers))
-
-		peerSet := map[string]bool{}
-		for _, peer := range peers {
-			peerSet[peer.Id] = true
-		}
-		for expectedNodeId, _ := range nodeIdSet {
-			// Nodes are expected to have all other nodes in the network on their peer list.
-			if nodeId != expectedNodeId {
-				context.AssertTrue(peerSet[expectedNodeId], stacktrace.NewError("Didn't find node ID %v in peer set", expectedNodeId))
-			}
-		}
+	/*
+	After gossip, we expect the peers list to look like:
+	1) No node has itself in its peers list
+	2) The validators will have ALL other nodes in the network (propagated via gossip)
+	3) The non-validators will have all the validators in the network (propagated via gossip)
+	 */
+	if err := verifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
 }
 
-func (test FiveNodeStakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
-		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
+		// TODO Once this is split into its own file, make these constants
+		0: NORMAL_NODE_CONFIG_ID,
+		1: NORMAL_NODE_CONFIG_ID,
 	})
 }
 
-func (test FiveNodeStakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 60 * time.Second
-}
-
-// =============== Get Validators Test ==================================
-type FiveNodeStakingNetworkGetValidatorsTest struct{}
-func (test FiveNodeStakingNetworkGetValidatorsTest) Run(network interface{}, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-
-	// TODO we need to make sure ALL the nodes agree about validators!
-	client, err := castedNetwork.GetGeckoClient(0)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get client"))
-	}
-
-	// TODO This retry logic is only necessary because there's not a way for Ava nodes to reliably report
-	//  bootstrapping as complete; remove it when Gecko can report successful bootstrapping
-	var validators []gecko_client.Validator
-	for i := 0; i < 5; i++ {
-		validators, err = client.PChainApi().GetCurrentValidators(nil)
-		if err == nil {
-			break
-		}
-		logrus.Error(stacktrace.Propagate(err, "Could not get current validators; sleeping for 5 seconds..."))
-		time.Sleep(5 * time.Second)
-	}
-	// TODO This should go away as soon as Ava can reliably report bootstrapping as complete
-	if validators == nil {
-		context.Fatal(stacktrace.NewError("Could not get validators even after retrying!"))
-	}
-
-	for _, validator := range validators {
-		logrus.Infof("Validator ID: %s", validator.Id)
-	}
-	// TODO change this to be specific
-	context.AssertTrue(len(validators) >= 1, stacktrace.NewError("No validators found"))
-}
-
-func (test FiveNodeStakingNetworkGetValidatorsTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getStakingNetworkLoader(map[int]int{
-		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
-	})
-}
-
-func (test FiveNodeStakingNetworkGetValidatorsTest) GetTimeout() time.Duration {
-	return 30 * time.Second
+func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
+	return 120 * time.Second
 }
 
 // =============== Duplicate Node ID Test ==============================
-type FiveNodeStakingNetworkDuplicateIdTest struct {}
-func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context testsuite.TestContext) {
+type StakingNetworkDuplicateNodeIdTest struct {}
+func (f StakingNetworkDuplicateNodeIdTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 
 	allServiceIds := make(map[int]bool)
-	allServiceIds[NODE_SERVICE_ID] = true
 	for bootServiceId, _ := range bootServiceIds {
 		allServiceIds[bootServiceId] = true
 	}
+	allServiceIds[NODE_SERVICE_ID] = true
 
-	allGeckoClients := make(map[int]*gecko_client.GeckoClient)
-	allNodeIds := make(map[int]string)
-	for serviceId, _ := range allServiceIds {
-		client, err := castedNetwork.GetGeckoClient(serviceId)
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
-		}
-		allGeckoClients[serviceId] = client
-		nodeId, err := client.InfoApi().GetNodeId()
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
-		}
-		allNodeIds[serviceId] = nodeId
-	}
-
-	logrus.Info("Verifying that initial network state is as expected...")
-	for serviceId, _ := range allServiceIds {
-		acceptableNodeIds := make(map[string]bool)
-		for iterServiceId, nodeId := range allNodeIds {
-			if serviceId != iterServiceId {
-				acceptableNodeIds[nodeId] = true
-			}
-		}
-		verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
+	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
+	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
 	// We'll need these later
@@ -317,25 +231,8 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 
 	// Verify that the new node got accepted by everyone
 	logrus.Infof("Verifying that the new node with service ID %v was accepted by all bootstrappers...", badServiceId1)
-	for serviceId, _ := range allServiceIds {
-		acceptableNodeIds := make(map[string]bool)
-
-		// All original nodes should have the boot nodes (though a boot node won't have itself)
-		for bootServiceId, _ := range bootServiceIds {
-			if serviceId != bootServiceId {
-				bootNodeId := allNodeIds[bootServiceId]
-				acceptableNodeIds[bootNodeId] = true
-			}
-		}
-
-		// Boot nodes will also have the other two nodes
-		if _, found := bootServiceIds[serviceId]; found {
-			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
-			acceptableNodeIds[badServiceNodeId1] = true
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
-		} else {
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
-		}
+	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceId1)
 
@@ -383,10 +280,14 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
 			acceptableNodeIds[badServiceNodeId1] = true
 			acceptableNodeIds[badServiceNodeId2] = true
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds) - 1, true)
+			if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds)-1, true); err != nil {
+				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
+			}
 		} else {
 			// The original non-boot node should have exactly the boot nodes
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
+			if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false); err != nil {
+				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
+			}
 		}
 	}
 	logrus.Info("Verified that original nodes are still connected to each other")
@@ -404,36 +305,19 @@ func (f FiveNodeStakingNetworkDuplicateIdTest) Run(network interface{}, context 
 	// Now that the first duped node is gone, verify that the original node is still connected to just boot nodes and
 	//  the second duped-ID node is now accepted by the boot nodes
 	logrus.Info("Verifying that the network has connected to the second node with a previously-duplicated node ID...")
-	for serviceId, _ := range allServiceIds {
-		acceptableNodeIds := make(map[string]bool)
-
-		// All nodes should have the boot nodes (though a boot node won't have itself)
-		for bootServiceId, _ := range bootServiceIds {
-			if serviceId != bootServiceId {
-				bootNodeId := allNodeIds[bootServiceId]
-				acceptableNodeIds[bootNodeId] = true
-			}
-		}
-
-		// Boot nodes should have all nodes
-		if _, found := bootServiceIds[serviceId]; found {
-			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
-			acceptableNodeIds[badServiceNodeId2] = true
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(allServiceIds) - 1, false)
-		} else {
-			verifyExpectedPeers(context, serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false)
-		}
+	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
 }
 
-func (f FiveNodeStakingNetworkDuplicateIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
 	})
 }
 
-func (f FiveNodeStakingNetworkDuplicateIdTest) GetTimeout() time.Duration {
+func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
 	return 120 * time.Second
 }
 
@@ -458,26 +342,84 @@ func getStakingNetworkLoader(desiredServices map[int]int) (testsuite.TestNetwork
 }
 
 /*
+This helper function will grab node IDs and Gecko clients
+ */
+func getNodeIdsAndClients(
+			testContext testsuite.TestContext,
+			network ava_networks.TestGeckoNetwork,
+			allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
+	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
+	allNodeIds = make(map[int]string)
+	for serviceId, _ := range allServiceIds {
+		client, err := network.GetGeckoClient(serviceId)
+		if err != nil {
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
+		}
+		allGeckoClients[serviceId] = client
+		nodeId, err := client.InfoApi().GetNodeId()
+		if err != nil {
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
+		}
+		allNodeIds[serviceId] = nodeId
+	}
+	return
+}
+
+/*
+Asserts that the network is fully connected, meaning:
+1) The stakers have all the other nodes in the network besides themselves in their peer list
+2) All non-stakers have all the stakers in their peer list
+
+Args:
+	allServiceIds: All the service IDs in the network, and the IDs that will be iterated over to check
+	stakerServiceIds: The service IDs of nodes that we expect to be fully connected - i.e. any node that's actually
+		staking. Most of the time this will be just the bootstrappers, but if we add more stakers then this set will
+		expand beyond the bootstrappers.
+	allNodeIds: The mapping of servcie_id -> node_id
+ */
+func verifyNetworkFullyConnected(allServiceIds map[int]bool, stakerServiceIds map[int]bool, allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) error {
+	logrus.Tracef("All node IDs in network being verified: %v", allNodeIds)
+	for serviceId, _ := range allServiceIds {
+		_, isStaker := stakerServiceIds[serviceId]
+
+		acceptableNodeIds := make(map[string]bool)
+		for comparisonId, _ := range allServiceIds {
+			// Nodes will never have themselves in their peer list
+			if serviceId == comparisonId {
+				continue
+			}
+			_, isComparisonStaker := stakerServiceIds[comparisonId]
+
+			// Staker nodes will have all other nodes in their peer list
+			// Non-stakers will only have the stakers
+			if isStaker || (!isStaker && isComparisonStaker) {
+				comparisonNodeId := allNodeIds[comparisonId]
+				acceptableNodeIds[comparisonNodeId] = true
+			}
+		}
+
+		logrus.Debugf("Expecting serviceId %v to have the following peer node IDs, %v", serviceId, acceptableNodeIds)
+		if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(acceptableNodeIds), false); err != nil {
+			return stacktrace.Propagate(err, "An error occurred verifying the expected peers list")
+		}
+	}
+	return nil
+}
+
+/*
 Verifies that a node's actual peers are what we expect
 
 Args:
-	context: Test context (used for failing if there's a problem)
 	serviceId: Service ID of the node whose peers are being examined
 	client: Gecko client for the node being examined
 	acceptableNodeIds: A "set" of acceptable node IDs where, if a peer doesn't have this ID, the test will be failed
 	expectedNumPeers: The number of peers we expect this node to have
 	atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
  */
-func verifyExpectedPeers(
-			context testsuite.TestContext,
-			serviceId int,
-			client *gecko_client.GeckoClient,
-			acceptableNodeIds map[string]bool,
-			expectedNumPeers int,
-			atLeast bool) {
+func verifyExpectedPeers(serviceId int, client *gecko_client.GeckoClient, acceptableNodeIds map[string]bool, expectedNumPeers int, atLeast bool) error {
 	peers, err := client.InfoApi().GetPeers()
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId))
+		return stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId)
 	}
 
 	actualNumPeers := len(peers)
@@ -490,20 +432,23 @@ func verifyExpectedPeers(
 		condition = actualNumPeers == expectedNumPeers
 		operatorAsserted = "=="
 	}
-	context.AssertTrue(
-		condition,
-		stacktrace.NewError(
+
+	if !condition {
+		return stacktrace.NewError(
 			"Service ID %v actual num peers, %v, is not %v expected num peers, %v",
 			serviceId,
 			actualNumPeers,
 			operatorAsserted,
 			expectedNumPeers,
-		),
-	)
+		)
+	}
 
 	// Verify that IDs of the peers we have are in our list of acceptable IDs
 	for _, peer := range peers {
 		_, found := acceptableNodeIds[peer.Id]
-		context.AssertTrue(found, stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.Id))
+		if !found {
+			return stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.Id)
+		}
 	}
+	return nil
 }
