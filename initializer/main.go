@@ -15,6 +15,7 @@ import (
 
 const (
 	TEST_NAME_ARG_SEPARATOR = ","
+	CHIT_SPAMMER_IMAGE_NAME = "gecko-byzantine-634a4d0"
 	defaultParallelism = 4
 )
 
@@ -38,7 +39,6 @@ func main() {
 		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
 	)
 
-	// Define and parse command line flags.
 	chitSpammerImageNameArg := flag.String(
 		"chit-spammer-image-name",
 		"",
@@ -77,21 +77,6 @@ func main() {
 
 	flag.Parse()
 
-	chitSpammerImageNameStr := strings.TrimSpace(*chitSpammerImageNameArg)
-	testSuite := ava_testsuite.AvaTestSuite{ChitSpammerImageName: chitSpammerImageNameStr}
-	if *doListArg {
-		testNames := []string{}
-		for name, _ := range testSuite.GetTests() {
-			testNames = append(testNames, name)
-		}
-		sort.Strings(testNames)
-
-		for _, name := range testNames {
-			fmt.Println("- " + name)
-		}
-		os.Exit(0)
-	}
-
 
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
 	if initializerLevelPtr == nil {
@@ -113,6 +98,23 @@ func main() {
 
 
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
+	testSuite := ava_testsuite.AvaTestSuite{
+		ChitSpammerImageName: *chitSpammerImageNameArg,
+		NormalImageName: *geckoImageNameArg,
+	}
+	if *doListArg {
+		testNames := []string{}
+		for name, _ := range testSuite.GetTests() {
+			testNames = append(testNames, name)
+		}
+		sort.Strings(testNames)
+
+		for _, name := range testNames {
+			fmt.Println("- " + name)
+		}
+		os.Exit(0)
+	}
+
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
 	if len(testNamesArgStr) == 0 {
@@ -125,7 +127,8 @@ func main() {
 		testSuite,
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
-		*controllerLogLevelArg)
+		*controllerLogLevelArg,
+		map[string]string{"CHIT_SPAMMER_IMAGE_NAME": *chitSpammerImageNameArg})
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)

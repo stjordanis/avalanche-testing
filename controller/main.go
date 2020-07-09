@@ -10,6 +10,10 @@ import (
 	"os"
 )
 
+const (
+	CHIT_SPAMMER_IMAGE = "gecko-byzantine-634a4d0"
+)
+
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -39,6 +43,12 @@ func main() {
 		"test-image-name",
 		"",
 		"Name of Docker image of the service being tested",
+	)
+
+	chitSpammerImageNameArg := flag.String(
+		"chit-spammer-image-name",
+		"",
+		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
 	)
 
 	dockerNetworkArg := flag.String(
@@ -90,6 +100,12 @@ func main() {
 		*testControllerIpArg,
 		*testImageNameArg)
 
+
+	logrus.Debugf("Chit spammer image name: %s", *chitSpammerImageNameArg)
+	testSuite := ava_testsuite.AvaTestSuite{
+		ChitSpammerImageName: CHIT_SPAMMER_IMAGE,
+		NormalImageName: *testImageNameArg,
+	}
 	controller := controller.NewTestController(
 		*testVolumeArg,
 		*testVolumeMountpointArg,
@@ -97,7 +113,7 @@ func main() {
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
-		ava_testsuite.AvaTestSuite{},
+		testSuite,
 		*testImageNameArg)
 
 	logrus.Infof("Running test '%v'...", *testNameArg)
