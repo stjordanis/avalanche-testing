@@ -15,7 +15,6 @@ import (
 
 const (
 	TEST_NAME_ARG_SEPARATOR = ","
-
 	defaultParallelism = 4
 )
 
@@ -35,6 +34,13 @@ func main() {
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
 		"gecko-image-name", 
+		"",
+		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
+	)
+
+	// Define and parse command line flags.
+	chitSpammerImageNameArg := flag.String(
+		"chit-spammer-image-name",
 		"",
 		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
 	)
@@ -71,7 +77,8 @@ func main() {
 
 	flag.Parse()
 
-	testSuite := ava_testsuite.AvaTestSuite{}
+	chitSpammerImageNameStr := strings.TrimSpace(*chitSpammerImageNameArg)
+	testSuite := ava_testsuite.AvaTestSuite{ChitSpammerImageName: chitSpammerImageNameStr}
 	if *doListArg {
 		testNames := []string{}
 		for name, _ := range testSuite.GetTests() {

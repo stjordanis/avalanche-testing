@@ -19,14 +19,23 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 	unrequestedChitSpammerImageName *string
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
+	time.Sleep(15 * time.Second)
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	// TODO TODO TODO add Byzantine Node as a validator
-	_, err := addServiceIdAsValidator(castedNetwork, 0, BYZANTINE_USERNAME, BYZANTINE_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to add Byzantine service as a validator."))
+	for i := 0; i < 4; i++ {
+		byzHighLevelClient, err := addServiceIdAsValidator(castedNetwork, i, BYZANTINE_USERNAME, BYZANTINE_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Failed to add Byzantine service as a validator."))
+		}
+		byzClient := byzHighLevelClient.GetLowLevelClient()
+		currentStakers, err := byzClient.PChainApi().GetCurrentValidators(nil)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
+		}
+		logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	}
 	// TODO TODO TODO add Staker as a validator
-	stakerHighLevelClient, err := addServiceIdAsValidator(castedNetwork, 1, STAKER_USERNAME, STAKER_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+	stakerHighLevelClient, err := addServiceIdAsValidator(castedNetwork, 4, STAKER_USERNAME, STAKER_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add Normal service as a validator."))
 	}
@@ -38,17 +47,20 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	}
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	actualNumStakers := len(currentStakers)
-	expectedNumStakers := 7
+	expectedNumStakers := 10
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getByzantineNetworkLoader(map[int]int{
 		0:           BYZANTINE_CONFIG_ID,
-		1:           NORMAL_NODE_CONFIG_ID,
+		1:           BYZANTINE_CONFIG_ID,
+		2:           BYZANTINE_CONFIG_ID,
+		3:           BYZANTINE_CONFIG_ID,
+		4:           NORMAL_NODE_CONFIG_ID,
 	}, test.unrequestedChitSpammerImageName)
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
-	return 90 * time.Second
+	return 720 * time.Second
 }
 
 
@@ -61,7 +73,7 @@ Args:
 */
 func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName *string) (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil, 2, 2),
+		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil, 4, 6),
 		BYZANTINE_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil, 2, 2),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
