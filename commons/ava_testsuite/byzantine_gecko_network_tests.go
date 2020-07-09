@@ -11,7 +11,6 @@ import (
 
 const (
 	BYZANTINE_CONFIG_ID = 2
-	BYZANTINE_SERVICE_ID = 2
 	BYZANTINE_USERNAME = "byzantine_gecko"
 	BYZANTINE_PASSWORD = "byzant1n3!"
 )
@@ -21,42 +20,31 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	/*for i := 0; i < 5; i++ {
-		_, err := addServiceIdAsValidator(
-			castedNetwork,
-			i,
-			BYZANTINE_USERNAME,
-			BYZANTINE_PASSWORD,
-			SEED_AMOUNT,
-			STAKE_AMOUNT)
-		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to get high level byzantine client as a validator."))
-		}
-	}*/
-	highLevelNormalClient, err := addServiceIdAsValidator(
-		castedNetwork,
-		4,
-		STAKER_USERNAME,
-		STAKER_PASSWORD,
-		SEED_AMOUNT,
-		STAKE_AMOUNT)
-	normalClient := highLevelNormalClient.GetLowLevelClient()
-	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
+	// TODO TODO TODO add Byzantine Node as a validator
+	_, err := addServiceIdAsValidator(castedNetwork, 0, BYZANTINE_USERNAME, BYZANTINE_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to add Byzantine service as a validator."))
+	}
+	// TODO TODO TODO add Staker as a validator
+	stakerHighLevelClient, err := addServiceIdAsValidator(castedNetwork, 1, STAKER_USERNAME, STAKER_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Failed to add Normal service as a validator."))
+	}
+	// TODO TODO TODO use Staker to transfer Funds on XChain around
+	stakerClient := stakerHighLevelClient.GetLowLevelClient()
+	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	actualNumStakers := len(currentStakers)
-	expectedNumStakers := 6
+	expectedNumStakers := 7
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
 	return getByzantineNetworkLoader(map[int]int{
-		/*0:           NORMAL_NODE_CONFIG_ID,
+		0:           BYZANTINE_CONFIG_ID,
 		1:           NORMAL_NODE_CONFIG_ID,
-		2:           NORMAL_NODE_CONFIG_ID,
-		3: NORMAL_NODE_CONFIG_ID,*/
-		4: NORMAL_NODE_CONFIG_ID,
 	}, test.unrequestedChitSpammerImageName)
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
@@ -73,16 +61,16 @@ Args:
 */
 func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName *string) (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil),
-		BYZANTINE_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName),
+		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil, 2, 2),
+		BYZANTINE_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, nil, 2, 2),
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
 		serviceConfigs,
 		desiredServices,
-		4,
-		6)
+		2,
+		2)
 }
 
 func addServiceIdAsValidator(
@@ -106,3 +94,4 @@ func addServiceIdAsValidator(
 	}
 	return highLevelClient, nil
 }
+

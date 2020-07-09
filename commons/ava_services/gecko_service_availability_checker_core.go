@@ -5,7 +5,15 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strings"
 	"time"
+)
+
+const (
+	AVAILABILITY_TRANSACTION    = "NO_VALUE_JUST_FOR_CHECKING_LIVENESS"
+	AVAILABILITY_USER   = "NO_VALUE_JUST_FOR_CHECKING_LIVENESS"
+	AVAILABILITY_PASSWORD   = "NO_VALUE_JUST_FOR_CHECKING_LIVENESS"
+	API_NOT_AVAILABLE_ERROR_STR = "404 not found"
 )
 
 type GeckoServiceAvailabilityCheckerCore struct {}
@@ -19,16 +27,47 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 		return false
 	}
 
-	// HACK HACK HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
-	// TODO TODO TODO once bootstrapping checker is available, use that instead of just waiting
-	if healthInfo.Healthy {
-		time.Sleep(15 * time.Second)
+	// check if xChain API handler is up yet
+	xchainAvailability := false
+	_, err = client.XChainApi().GetTxStatus(AVAILABILITY_TRANSACTION)
+	if err != nil {
+		xchainAvailability = !strings.Contains(err.Error(), API_NOT_AVAILABLE_ERROR_STR)
+	} else {
+		xchainAvailability = true
 	}
-	return healthInfo.Healthy
+
+	// check if pChain API handler is up yet
+	pchainAvailability := false
+	_, err = client.PChainApi().GetCurrentValidators(nil)
+	if err != nil {
+		pchainAvailability = !strings.Contains(err.Error(), API_NOT_AVAILABLE_ERROR_STR)
+	} else {
+		pchainAvailability = true
+	}
+
+	// check if keyChain API handler is up yet
+	keyChainAvailability := false
+	_, err = client.KeystoreApi().CreateUser(AVAILABILITY_USER, AVAILABILITY_PASSWORD)
+	if err != nil {
+		keyChainAvailability = !strings.Contains(err.Error(), API_NOT_AVAILABLE_ERROR_STR)
+	} else {
+		keyChainAvailability = true
+	}
+
+	// check if info API handler is up yet
+	infoAvailability := false
+	_, err = client.InfoApi().GetNodeId()
+	if err != nil {
+		infoAvailability = !strings.Contains(err.Error(), API_NOT_AVAILABLE_ERROR_STR)
+	} else {
+		infoAvailability = true
+	}
+
+	return healthInfo.Healthy && xchainAvailability && pchainAvailability && keyChainAvailability && infoAvailability
 }
 
 func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 90 * time.Second
 }
 
 
