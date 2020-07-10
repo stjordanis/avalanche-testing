@@ -10,10 +10,6 @@ import (
 	"os"
 )
 
-const (
-	CHIT_SPAMMER_IMAGE = "gecko-byzantine-634a4d0"
-)
-
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -103,7 +99,7 @@ func main() {
 
 	logrus.Debugf("Chit spammer image name: %s", *chitSpammerImageNameArg)
 	testSuite := ava_testsuite.AvaTestSuite{
-		ChitSpammerImageName: CHIT_SPAMMER_IMAGE,
+		ChitSpammerImageName: *chitSpammerImageNameArg,
 		NormalImageName: *testImageNameArg,
 	}
 	controller := controller.NewTestController(
