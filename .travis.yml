@@ -7,8 +7,11 @@ services:
   - docker
 
 before_install:
+  - export AWS_ACCESS_KEY_ID="${BYZ_REG_AWS_ID}"
+  - export AWS_SECRET_ACCESS_KEY="${BYZ_REG_AWS_KEY}"
+  - export AWS_DEFAULT_REGION="${BYZ_REG_AWS_REGION}"
   - pip install --user awscli # need awscli to access byz-gecko images
-  - export PATH=$PATH:$HOME/.local/bin # this puts user-installed pip packages on path
+  - export PATH="${PATH}:${HOME}/.local/bin" # this puts user-installed pip packages on path
 
 script:
   - .ci/run_and_validate_pchain_test.sh
