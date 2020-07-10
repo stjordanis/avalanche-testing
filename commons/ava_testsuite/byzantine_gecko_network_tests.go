@@ -20,9 +20,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 	normalImageName *string
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
-	time.Sleep(15 * time.Second)
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	// TODO TODO TODO add Byzantine Node as a validator
 	for i := 0; i < 4; i++ {
 		byzHighLevelClient, err := addServiceIdAsValidator(castedNetwork, i, BYZANTINE_USERNAME, BYZANTINE_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
 		if err != nil {
@@ -43,13 +41,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of normal node."))
 	}
-	time.Sleep(time.Second * 15)
-	// TODO TODO TODO add Staker as a validator
 	stakerHighLevelClient, err := addServiceIdAsValidator(castedNetwork, 4, STAKER_USERNAME, STAKER_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add Normal service as a validator."))
 	}
-	// TODO TODO TODO use Staker to transfer Funds on XChain around
 	stakerClient := stakerHighLevelClient.GetLowLevelClient()
 	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
