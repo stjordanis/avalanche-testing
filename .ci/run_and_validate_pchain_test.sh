@@ -7,7 +7,7 @@ aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" | docker login --use
 
 DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
-CHIT_SPAMMER_IMAGE="964377072876.dkr.ecr.us-east-1.amazonaws.com/gecko-byzantine:634a4d0"
+CHIT_SPAMMER_IMAGE="964377072876.dkr.ecr.us-east-1.amazonaws.com/gecko-byzantine:latest"
 
 docker pull "${CHIT_SPAMMER_IMAGE}"
 
