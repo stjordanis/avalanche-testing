@@ -1,4 +1,9 @@
 dist: xenial
+addons:
+  snaps:
+    - name: aws-cli
+      confinement: classic
+      channel: latest/edge
 
 language: go
 go: 1.13.x
