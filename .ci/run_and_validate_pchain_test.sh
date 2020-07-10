@@ -2,11 +2,8 @@ set -euo pipefail
 SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 
-AWS_ACCESS_KEY_ID="${BYZ_REG_AWS_ID}"
-AWS_SECRET_ACCESS_KEY="${BYZ_REG_AWS_KEY}"
-AWS_DEFAULT_REGION="${BYZ_REG_AWS_REGION}"
 # login to AWS for byzantine images
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 964377072876.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" | docker login --username AWS --password-stdin 964377072876.dkr.ecr.us-east-1.amazonaws.com
 
 DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"
 DEFAULT_GECKO_IMAGE="kurtosistech/gecko:latest"
