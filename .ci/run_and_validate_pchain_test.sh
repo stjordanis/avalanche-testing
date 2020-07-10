@@ -11,9 +11,10 @@ CHIT_SPAMMER_IMAGE="964377072876.dkr.ecr.us-east-1.amazonaws.com/gecko-byzantine
 
 docker pull "${CHIT_SPAMMER_IMAGE}"
 
-E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh --chit-spammer-image-name=${CHIT_SPAMMER_IMAGE}"
+E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"
+CHIT_SPAMMER_ARG="--chit-spammer-image-name=${CHIT_SPAMMER_IMAGE}"
 return_code=0
-if ! bash "${E2E_TEST_COMMAND}"; then
+if ! bash "${E2E_TEST_COMMAND}" "${CHIT_SPAMMER_ARG}"; then
     echo "Ava E2E tests failed"
     return_code=1
 else
