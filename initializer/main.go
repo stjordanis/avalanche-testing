@@ -10,6 +10,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 )
 
 
@@ -17,6 +18,9 @@ const (
 	TEST_NAME_ARG_SEPARATOR = ","
 
 	defaultParallelism = 4
+
+	// The max additional time we'll give to a test, on top of the per-test declared timeout, for setup & teardown
+	additionalTestTimeoutBuffer = 120 * time.Second
 )
 
 func main() {
@@ -118,7 +122,8 @@ func main() {
 		testSuite,
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
-		*controllerLogLevelArg)
+		*controllerLogLevelArg,
+		additionalTestTimeoutBuffer)
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
