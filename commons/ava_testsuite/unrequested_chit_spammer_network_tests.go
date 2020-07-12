@@ -22,11 +22,18 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	for i := 0; i < 4; i++ {
-		byzHighLevelClient, err := addServiceIdAsValidator(castedNetwork, i, BYZANTINE_USERNAME, BYZANTINE_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+		byzClient, err := castedNetwork.GetGeckoClient(i)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to add Byzantine service as a validator."))
+			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
-		byzClient := byzHighLevelClient.GetLowLevelClient()
+		highLevelByzClient := ava_networks.NewHighLevelGeckoClient(
+			byzClient,
+			BYZANTINE_USERNAME,
+			BYZANTINE_PASSWORD)
+		err = highLevelByzClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT)
+		if err != nil {
+			context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
+		}
 		currentStakers, err := byzClient.PChainApi().GetCurrentValidators(nil)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
@@ -41,12 +48,19 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of normal node."))
 	}
-	stakerHighLevelClient, err := addServiceIdAsValidator(castedNetwork, 4, STAKER_USERNAME, STAKER_PASSWORD, SEED_AMOUNT, STAKE_AMOUNT)
+	normalClient, err := castedNetwork.GetGeckoClient(4)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to add Normal service as a validator."))
+		context.Fatal(stacktrace.Propagate(err,"Failed to get staker client."))
 	}
-	stakerClient := stakerHighLevelClient.GetLowLevelClient()
-	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
+	highLevelNormalClient := ava_networks.NewHighLevelGeckoClient(
+		normalClient,
+		STAKER_USERNAME,
+		STAKER_PASSWORD)
+	err = highLevelNormalClient.GetFundsAndStartValidating(SEED_AMOUNT, STAKE_AMOUNT)
+	if err != nil {
+		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
+	}
+	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
@@ -90,26 +104,3 @@ func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName *
 		2,
 		2)
 }
-
-func addServiceIdAsValidator(
-		network ava_networks.TestGeckoNetwork,
-		serviceId int,
-		username string,
-		password string,
-		seedAmount int64,
-		stakeAmount int64) (*ava_networks.HighLevelGeckoClient, error) {
-	client, err := network.GetGeckoClient(serviceId)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed to get byzantine client.")
-	}
-	highLevelClient := ava_networks.NewHighLevelGeckoClient(
-		client,
-		username,
-		password)
-	err = highLevelClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "Failed add client as a validator.")
-	}
-	return highLevelClient, nil
-}
-
