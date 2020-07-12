@@ -77,6 +77,24 @@ func main() {
 
 	flag.Parse()
 
+	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
+	testSuite := ava_testsuite.AvaTestSuite{
+		ChitSpammerImageName: *chitSpammerImageNameArg,
+		NormalImageName: *geckoImageNameArg,
+	}
+	if *doListArg {
+		testNames := []string{}
+		for name, _ := range testSuite.GetTests() {
+			testNames = append(testNames, name)
+		}
+		sort.Strings(testNames)
+
+		for _, name := range testNames {
+			fmt.Println("- " + name)
+		}
+		os.Exit(0)
+	}
+
 
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
 	if initializerLevelPtr == nil {
@@ -94,25 +112,6 @@ func main() {
 	if controllerLevelPtr == nil {
 		logrus.Fatalf("Invalid controller log level %v", *controllerLogLevelArg)
 		os.Exit(1)
-	}
-
-
-	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
-	testSuite := ava_testsuite.AvaTestSuite{
-		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName: *geckoImageNameArg,
-	}
-	if *doListArg {
-		testNames := []string{}
-		for name, _ := range testSuite.GetTests() {
-			testNames = append(testNames, name)
-		}
-		sort.Strings(testNames)
-
-		for _, name := range testNames {
-			fmt.Println("- " + name)
-		}
-		os.Exit(0)
 	}
 
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
