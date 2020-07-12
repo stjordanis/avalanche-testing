@@ -14,9 +14,9 @@ import (
 
 
 const (
-	TEST_NAME_ARG_SEPARATOR = ","
-	CHIT_SPAMMER_IMAGE_NAME_ENV_VAR = "CHIT_SPAMMER_IMAGE_NAME"
-	defaultParallelism = 4
+	testNameArgSeparator       = ","
+	chitSpammerImageNameEnvVar = "CHIT_SPAMMER_IMAGE_NAME"
+	defaultParallelism         = 4
 )
 
 func main() {
@@ -119,7 +119,7 @@ func main() {
 	if len(testNamesArgStr) == 0 {
 		testNames = make([]string, 0, 0)
 	} else {
-		testNames = strings.Split(testNamesArgStr, TEST_NAME_ARG_SEPARATOR)
+		testNames = strings.Split(testNamesArgStr, testNameArgSeparator)
 	}
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
@@ -127,7 +127,7 @@ func main() {
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
-		map[string]string{CHIT_SPAMMER_IMAGE_NAME_ENV_VAR: *chitSpammerImageNameArg})
+		map[string]string{chitSpammerImageNameEnvVar: *chitSpammerImageNameArg})
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)

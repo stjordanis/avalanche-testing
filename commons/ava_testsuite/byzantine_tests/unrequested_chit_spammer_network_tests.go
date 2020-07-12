@@ -27,7 +27,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	for i := 0; i < 4; i++ {
+	for i := 0; i < normalNodeServiceId; i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(i)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
@@ -75,12 +75,11 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
-	return getByzantineNetworkLoader(map[int]int{
-		0: byzantineConfigId,
-		1: byzantineConfigId,
-		2: byzantineConfigId,
-		3: byzantineConfigId,
-	}, test.UnrequestedChitSpammerImageName, test.NormalImageName)
+	serviceIdConfigMap := map[int]int{}
+	for i := 0; i < normalNodeServiceId; i++ {
+		serviceIdConfigMap[i] = byzantineConfigId
+	}
+	return getByzantineNetworkLoader(serviceIdConfigMap, test.UnrequestedChitSpammerImageName, test.NormalImageName)
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
 	return 720 * time.Second

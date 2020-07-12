@@ -64,7 +64,6 @@ type TestGeckoNetworkServiceConfig struct {
 	// Whether the certs used by services with this configuration will be different or not
 	varyCerts bool
 	serviceLogLevel ava_services.GeckoLogLevel
-	// Alternate image name, if not the default Gecko image.
 	// Used primarily for Byzantine tests but can also test heterogenous Gecko versions, for example.
 	imageName      string
 	snowQuorumSize int
