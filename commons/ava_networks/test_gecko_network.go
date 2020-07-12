@@ -66,23 +66,23 @@ type TestGeckoNetworkServiceConfig struct {
 	serviceLogLevel ava_services.GeckoLogLevel
 	// Alternate image name, if not the default Gecko image.
 	// Used primarily for Byzantine tests but can also test heterogenous Gecko versions, for example.
-	alternateImageName *string
-	snowQuorumSize     int
-	snowSampleSize     int
+	imageName      string
+	snowQuorumSize int
+	snowSampleSize int
 }
 
 func NewTestGeckoNetworkServiceConfig(
 			varyCerts bool,
 			serviceLogLevel ava_services.GeckoLogLevel,
-			alternateImageName *string,
+			imageName string,
 			snowQuorumSize int,
 			snowSampleSize int) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
-		varyCerts:          varyCerts,
-		serviceLogLevel:    serviceLogLevel,
-		alternateImageName: alternateImageName,
-		snowQuorumSize:     snowQuorumSize,
-		snowSampleSize:     snowSampleSize,
+		varyCerts:       varyCerts,
+		serviceLogLevel: serviceLogLevel,
+		imageName:       imageName,
+		snowQuorumSize:  snowQuorumSize,
+		snowSampleSize:  snowSampleSize,
 	}
 }
 
@@ -187,7 +187,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 	// Add user-custom configs
 	for configId, configParams := range loader.serviceConfigs {
 		certProvider := cert_providers.NewRandomGeckoCertProvider(configParams.varyCerts)
-		alternateImageName := configParams.alternateImageName
+		imageName := configParams.imageName
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(
 			configParams.snowSampleSize,
 			configParams.snowQuorumSize,
@@ -196,14 +196,8 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			certProvider,
 			configParams.serviceLogLevel)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
-		if alternateImageName == nil {
-			if err := builder.AddTestImageConfiguration(configId, initializerCore, availabilityCheckerCore); err != nil {
-				return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
-			}
-		} else {
-			if err := builder.AddStaticImageConfiguration(configId, *alternateImageName, initializerCore, availabilityCheckerCore); err != nil {
-				return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
-			}
+		if err := builder.AddStaticImageConfiguration(configId, imageName, initializerCore, availabilityCheckerCore); err != nil {
+			return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
 		}
 	}
 	return nil

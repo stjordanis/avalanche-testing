@@ -16,8 +16,8 @@ const (
 )
 // ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
 type StakingNetworkUnrequestedChitSpammerTest struct{
-	unrequestedChitSpammerImageName *string
-	normalImageName *string
+	unrequestedChitSpammerImageName string
+	normalImageName string
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
@@ -89,13 +89,13 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration 
 Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
-func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName *string, normalImageName *string) (testsuite.TestNetworkLoader, error) {
+func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (testsuite.TestNetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 6, 8),
 		BYZANTINE_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
 	}
-	logrus.Debugf("Byzantine Image Name: %s", *byzantineImageName)
-	logrus.Debugf("Normal Image Name: %s", *normalImageName)
+	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
+	logrus.Debugf("Normal Image Name: %s", normalImageName)
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
