@@ -14,9 +14,9 @@ import (
 
 
 const (
-	TEST_NAME_ARG_SEPARATOR = ","
-
-	defaultParallelism = 4
+	testNameArgSeparator       = ","
+	chitSpammerImageNameEnvVar = "CHIT_SPAMMER_IMAGE_NAME"
+	defaultParallelism         = 4
 )
 
 func main() {
@@ -37,6 +37,12 @@ func main() {
 		"gecko-image-name", 
 		"",
 		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
+	)
+
+	chitSpammerImageNameArg := flag.String(
+		"chit-spammer-image-name",
+		"",
+		"The name of a pre-built Byzantine Gecko image, spamming unrequested chit messages, on the local Docker engine",
 	)
 
 	testControllerImageNameArg := flag.String(
@@ -71,7 +77,11 @@ func main() {
 
 	flag.Parse()
 
-	testSuite := ava_testsuite.AvaTestSuite{}
+	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
+	testSuite := ava_testsuite.AvaTestSuite{
+		ChitSpammerImageName: *chitSpammerImageNameArg,
+		NormalImageName: *geckoImageNameArg,
+	}
 	if *doListArg {
 		testNames := []string{}
 		for name, _ := range testSuite.GetTests() {
@@ -104,21 +114,20 @@ func main() {
 		os.Exit(1)
 	}
 
-
-	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
 	var testNames []string
 	if len(testNamesArgStr) == 0 {
 		testNames = make([]string, 0, 0)
 	} else {
-		testNames = strings.Split(testNamesArgStr, TEST_NAME_ARG_SEPARATOR)
+		testNames = strings.Split(testNamesArgStr, testNameArgSeparator)
 	}
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
 		testSuite,
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
-		*controllerLogLevelArg)
+		*controllerLogLevelArg,
+		map[string]string{chitSpammerImageNameEnvVar: *chitSpammerImageNameArg})
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
