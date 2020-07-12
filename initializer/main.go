@@ -15,7 +15,7 @@ import (
 
 const (
 	TEST_NAME_ARG_SEPARATOR = ","
-	CHIT_SPAMMER_IMAGE_NAME = "gecko-byzantine-634a4d0"
+	CHIT_SPAMMER_IMAGE_NAME_ENV_VAR = "CHIT_SPAMMER_IMAGE_NAME"
 	defaultParallelism = 4
 )
 
@@ -128,7 +128,7 @@ func main() {
 		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
-		map[string]string{"CHIT_SPAMMER_IMAGE_NAME": *chitSpammerImageNameArg})
+		map[string]string{CHIT_SPAMMER_IMAGE_NAME_ENV_VAR: *chitSpammerImageNameArg})
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
