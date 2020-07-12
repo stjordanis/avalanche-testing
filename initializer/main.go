@@ -20,7 +20,8 @@ const (
 	defaultParallelism = 4
 
 	// The max additional time we'll give to a test, on top of the per-test declared timeout, for setup & teardown
-	additionalTestTimeoutBuffer = 120 * time.Second
+	// TODO once we have an isBootstrapped endpoint that works, drop this down
+	additionalTestTimeoutBuffer = 300 * time.Second
 )
 
 func main() {
