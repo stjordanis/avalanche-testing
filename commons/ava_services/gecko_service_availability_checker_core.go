@@ -28,7 +28,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 }
 
 func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
-	return 90 * time.Second
+	return 30 * time.Second
 }
 
 
