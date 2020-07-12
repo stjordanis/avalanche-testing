@@ -64,26 +64,36 @@ type TestGeckoNetworkServiceConfig struct {
 	// Whether the certs used by services with this configuration will be different or not
 	varyCerts bool
 	serviceLogLevel ava_services.GeckoLogLevel
+	// Used primarily for Byzantine tests but can also test heterogenous Gecko versions, for example.
+	imageName      string
+	snowQuorumSize int
+	snowSampleSize int
 }
 
 func NewTestGeckoNetworkServiceConfig(
 			varyCerts bool,
-			serviceLogLevel ava_services.GeckoLogLevel) *TestGeckoNetworkServiceConfig {
+			serviceLogLevel ava_services.GeckoLogLevel,
+			imageName string,
+			snowQuorumSize int,
+			snowSampleSize int) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
-		varyCerts: varyCerts,
+		varyCerts:       varyCerts,
 		serviceLogLevel: serviceLogLevel,
+		imageName:       imageName,
+		snowQuorumSize:  snowQuorumSize,
+		snowSampleSize:  snowSampleSize,
 	}
 }
 
 // ============== Loader ======================
 
 type TestGeckoNetworkLoader struct{
-	bootNodeLogLevel ava_services.GeckoLogLevel
-	isStaking       bool
-	serviceConfigs  map[int]TestGeckoNetworkServiceConfig
-	desiredServiceConfig  	map[int]int
-	snowQuorumSize  int
-	snowSampleSize  int
+	bootNodeLogLevel           ava_services.GeckoLogLevel
+	isStaking                  bool
+	serviceConfigs             map[int]TestGeckoNetworkServiceConfig
+	desiredServiceConfig       map[int]int
+	bootstrapperSnowQuorumSize int
+	bootstrapperSnowSampleSize int
 }
 
 /*
@@ -98,16 +108,16 @@ Args:
 	isStaking: Whether the network will have staking enabled
 	serviceConfigs: A mapping of service config ID -> information used to launch the service
 	desiredServiceConfigs: A map of service_id -> config_id, one per node that this network should start with
-	snowQuorumSize: The Snow consensus sample size used for nodes in the network
-	snowSampleSize: The Snow consensus quorum size used for nodes in the network
+	bootstrapperSnowQuorumSize: The Snow consensus sample size used for nodes in the network
+	bootstrapperSnowSampleSize: The Snow consensus quorum size used for nodes in the network
  */
 func NewTestGeckoNetworkLoader(
 			bootNodeLogLevel ava_services.GeckoLogLevel,
 			isStaking bool,
 			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
 			desiredServiceConfigs map[int]int,
-			snowQuorumSize int,
-			snowSampleSize int,
+			bootstrapperSnowQuorumSize int,
+			bootstrapperSnowSampleSize int,
 			) (*TestGeckoNetworkLoader, error) {
 	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
@@ -132,12 +142,12 @@ func NewTestGeckoNetworkLoader(
 	}
 
 	return &TestGeckoNetworkLoader{
-		bootNodeLogLevel: bootNodeLogLevel,
-		isStaking:       isStaking,
-		serviceConfigs:  serviceConfigsCopy,
-		desiredServiceConfig: desiredServiceConfigsCopy,
-		snowQuorumSize:  snowQuorumSize,
-		snowSampleSize:  snowSampleSize,
+		bootNodeLogLevel:           bootNodeLogLevel,
+		isStaking:                  isStaking,
+		serviceConfigs:             serviceConfigsCopy,
+		desiredServiceConfig:       desiredServiceConfigsCopy,
+		bootstrapperSnowQuorumSize: bootstrapperSnowQuorumSize,
+		bootstrapperSnowSampleSize: bootstrapperSnowSampleSize,
 	}, nil
 }
 
@@ -160,8 +170,8 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 		keyBytes := bytes.NewBufferString(keyString)
 
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(
-			loader.snowSampleSize,
-			loader.snowQuorumSize,
+			loader.bootstrapperSnowSampleSize,
+			loader.bootstrapperSnowQuorumSize,
 			loader.isStaking,
 			bootNodeIds[0:i], // Only the node IDs of the already-started nodes
 			cert_providers.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
@@ -176,15 +186,16 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 	// Add user-custom configs
 	for configId, configParams := range loader.serviceConfigs {
 		certProvider := cert_providers.NewRandomGeckoCertProvider(configParams.varyCerts)
+		imageName := configParams.imageName
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(
-			loader.snowSampleSize,
-			loader.snowQuorumSize,
+			configParams.snowSampleSize,
+			configParams.snowQuorumSize,
 			loader.isStaking,
 			bootNodeIds,
 			certProvider,
 			configParams.serviceLogLevel)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
-		if err := builder.AddTestImageConfiguration(configId, initializerCore, availabilityCheckerCore); err != nil {
+		if err := builder.AddStaticImageConfiguration(configId, imageName, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
 		}
 	}
