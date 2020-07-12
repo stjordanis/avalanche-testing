@@ -15,7 +15,7 @@ const (
 	byzantineUsername = "byzantine_gecko"
 	byzantinePassword = "byzant1n3!"
 	stakerUsername = "staker_gecko"
-	stakerPassword = "stak3r1!"
+	stakerPassword = "test34test!23"
 	normalNodeServiceId = 4
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
