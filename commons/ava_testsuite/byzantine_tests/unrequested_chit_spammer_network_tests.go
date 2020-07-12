@@ -3,7 +3,6 @@ package byzantine_tests
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,11 @@ const (
 	byzantineConfigId = 2
 	byzantineUsername = "byzantine_gecko"
 	byzantinePassword = "byzant1n3!"
+	stakerUsername = "staker_gecko"
+	stakerPassword = "stak3r1!"
 	normalNodeServiceId = 4
+	seedAmount               = int64(50000000000000)
+	stakeAmount              = int64(30000000000000)
 )
 // ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
 type StakingNetworkUnrequestedChitSpammerTest struct{
@@ -33,7 +36,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 			byzClient,
 			byzantineUsername,
 			byzantinePassword)
-		err = highLevelByzClient.GetFundsAndStartValidating(ava_testsuite.SEED_AMOUNT, ava_testsuite.STAKE_AMOUNT)
+		err = highLevelByzClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
 		}
@@ -56,9 +59,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	}
 	highLevelNormalClient := ava_networks.NewHighLevelGeckoClient(
 		normalClient,
-		ava_testsuite.STAKER_USERNAME,
-		ava_testsuite.STAKER_PASSWORD)
-	err = highLevelNormalClient.GetFundsAndStartValidating(ava_testsuite.SEED_AMOUNT, ava_testsuite.STAKE_AMOUNT)
+		stakerUsername,
+		stakerPassword,)
+	err = highLevelNormalClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
 	}
