@@ -42,7 +42,7 @@ func main() {
 	chitSpammerImageNameArg := flag.String(
 		"chit-spammer-image-name",
 		"",
-		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
+		"The name of a pre-built Byzantine Gecko image, spamming unrequested chit messages, on the local Docker engine",
 	)
 
 	testControllerImageNameArg := flag.String(

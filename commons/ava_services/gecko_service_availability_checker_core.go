@@ -22,13 +22,13 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	// HACK HACK HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
 	// TODO TODO TODO once bootstrapping checker is available, use that instead of just waiting
 	if healthInfo.Healthy {
-	 	time.Sleep(15 * time.Second)
+		time.Sleep(15 * time.Second)
 	}
 	return healthInfo.Healthy
 }
 
 func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
-	return 30 * time.Second
+	return 60 * time.Second
 }
 
 
