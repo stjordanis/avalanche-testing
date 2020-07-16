@@ -324,7 +324,7 @@ func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (testsuite.TestNet
 }
 
 func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
-	return 120 * time.Second
+	return 180 * time.Second
 }
 
 // =============== Helper functions =============================
