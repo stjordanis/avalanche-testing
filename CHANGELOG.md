@@ -2,6 +2,7 @@
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
 * Upgrade to Kurtosis version with hard test timeouts, to prevent infinite hangs
 * Added an unrequested chit spammer Byzantine test
+* Increasing timeouts in startup and in duplicate ID test to work in gecko CI
 
 # 0.4.0
 * Drop default loglevel for initializer & controller down to DEBUG
