@@ -1,4 +1,7 @@
 # TBD
+* Use Kurtosis version that allows the user to configure network width
+
+# 0.5.0
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
 * Upgrade to Kurtosis version with hard test timeouts, to prevent infinite hangs
 * Added an unrequested chit spammer Byzantine test

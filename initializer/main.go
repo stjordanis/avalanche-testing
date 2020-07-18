@@ -22,6 +22,10 @@ const (
 	// The max additional time we'll give to a test, on top of the per-test declared timeout, for setup & teardown
 	// TODO once we have an isBootstrapped endpoint that works, drop this down
 	additionalTestTimeoutBuffer = 300 * time.Second
+
+	// The number of bits to make each test network, which dictates the max number of services a test can spin up
+	// Here we choose 8 bits = 256 max services per test
+	networkWidthBits = 8
 )
 
 func main() {
@@ -133,7 +137,8 @@ func main() {
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
 		map[string]string{chitSpammerImageNameEnvVar: *chitSpammerImageNameArg},
-		additionalTestTimeoutBuffer)
+		additionalTestTimeoutBuffer,
+		networkWidthBits)
 
 	// Create the container based on the configurations, but don't start it yet.
 	allTestsSucceeded, error := testSuiteRunner.RunTests(testNames, *parallelismArg)
