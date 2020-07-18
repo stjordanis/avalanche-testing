@@ -17,7 +17,6 @@ const (
 	stakerUsername = "staker_gecko"
 	stakerPassword = "test34test!23"
 	normalNodeServiceId = 4
-	validatorPropagationSleepTime = 5 * time.Second
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 )
@@ -66,9 +65,6 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
 	}
-	// These networks take a little time to propagate current validators
-	// TODO TODO TODO Implement retries against current validators endpoint until latest added is included
-	time.Sleep(validatorPropagationSleepTime)
 	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))

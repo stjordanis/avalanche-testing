@@ -26,7 +26,6 @@ const (
 	// The configuration ID of a service where all servies made with this configuration will have the same cert
 	SAME_CERT_CONFIG_ID = 1
 
-	validatorPropagationSleepTime = 5 * time.Second
 )
 
 // ================ RPC Workflow Test ===================================
@@ -80,9 +79,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
-	// These networks take a little time to propagate current validators
-	// TODO TODO TODO Implement retries against current validators endpoint until latest added is included
-	time.Sleep(validatorPropagationSleepTime)
 	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
