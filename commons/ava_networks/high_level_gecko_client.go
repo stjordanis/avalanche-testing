@@ -155,6 +155,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) AddValidatorOnSubnet(
 	for time.Now().Unix() < stakingStartTime {
 		time.Sleep(time.Second)
 	}
+	highLevelGeckoClient.waitForValidatorAddition(nodeId, nil)
 	return nil
 }
 
@@ -297,6 +298,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	return xchainAddress, nil
 }
 
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAcceptance(txnId string) error {
 	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
@@ -314,6 +316,33 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 	return nil
 }
 
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
+func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId string, subnetIdPtr *string) error {
+	client := highLevelGeckoClient.client
+	validators, err := client.PChainApi().GetCurrentValidators(subnetIdPtr)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not get current validators")
+	}
+	for !checkValidatorInValidators(nodeId, validators) {
+		time.Sleep(time.Second)
+		validators, err = client.PChainApi().GetCurrentValidators(subnetIdPtr)
+		if err != nil {
+			return stacktrace.Propagate(err, "Could not get current validators")
+		}
+	}
+	return nil
+}
+
+func checkValidatorInValidators(nodeId string, validators []gecko_client.Validator) bool {
+	for _, validator := range validators {
+		if validator.Id == nodeId {
+			return true
+		}
+	}
+	return false
+}
+
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pchainAddress string) error {
 	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
