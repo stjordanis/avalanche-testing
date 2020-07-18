@@ -298,6 +298,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	return xchainAddress, nil
 }
 
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAcceptance(txnId string) error {
 	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
@@ -315,6 +316,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 	return nil
 }
 
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId string, subnetIdPtr *string) error {
 	client := highLevelGeckoClient.client
 	validators, err := client.PChainApi().GetCurrentValidators(subnetIdPtr)
@@ -340,6 +342,7 @@ func checkValidatorInValidators(nodeId string, validators []gecko_client.Validat
 	return false
 }
 
+// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pchainAddress string) error {
 	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
