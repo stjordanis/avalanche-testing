@@ -124,11 +124,12 @@ func main() {
 	}
 
 	testNamesArgStr := strings.TrimSpace(*testNamesArg)
-	var testNames []string
-	if len(testNamesArgStr) == 0 {
-		testNames = make([]string, 0, 0)
-	} else {
-		testNames = strings.Split(testNamesArgStr, testNameArgSeparator)
+	testNames := map[string]bool{}
+	if len(testNamesArgStr) > 0 {
+		testNamesList := strings.Split(testNamesArgStr, testNameArgSeparator)
+		for _, name := range testNamesList {
+			testNames[name] = true
+		}
 	}
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
