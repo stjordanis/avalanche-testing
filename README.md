@@ -2,6 +2,14 @@ Ava End-to-End Tests
 ====================
 This repo contains end-to-end tests for the Ava network and Gecko client using [the Kurtosis testing framework](https://github.com/kurtosis-tech/kurtosis)
 
+* [Requirements](#requirements)
+* [Running Locally](#running-locally)
+* [Developing Locally](#developing-locally)
+    * [Architecture](#architecture)
+    * [Adding A Test](#adding-a-test)
+    * [Running Locally As A Developer](#running-locally-as-a-developer)
+    * [Keeping Your Dev Environment Clean](#keeping-your-dev-environment-clean)
+
 Requirements
 ------------
 * Golang version 1.13x.x
