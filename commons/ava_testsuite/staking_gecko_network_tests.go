@@ -3,6 +3,7 @@ import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -25,13 +26,14 @@ const (
 
 	// The configuration ID of a service where all servies made with this configuration will have the same cert
 	SAME_CERT_CONFIG_ID = 1
+
 )
 
 // ================ RPC Workflow Test ===================================
 type StakingNetworkRpcWorkflowTest struct {
 	imageName string
 }
-func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context testsuite.TestContext) {
+func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	stakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
 	if err != nil {
@@ -109,7 +111,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network interface{}, context tests
 	expectedRemainingAva := strconv.FormatInt(remainingStakerAva, 10)
 	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, expectedRemainingAva))
 }
-func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
 		DELEGATOR_NODE_SERVICE_ID: NORMAL_NODE_CONFIG_ID,
@@ -124,7 +126,7 @@ func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 type StakingNetworkFullyConnectedTest struct{
 	imageName string
 }
-func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context testsuite.TestContext) {
+func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	nonBootValidatorServiceId := 0
 	nonBootNonValidatorServiceId := 1
@@ -168,7 +170,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network interface{}, context te
 	}
 }
 
-func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		// TODO Once this is split into its own file, make these constants
 		0: NORMAL_NODE_CONFIG_ID,
@@ -184,7 +186,7 @@ func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
 type StakingNetworkDuplicateNodeIdTest struct {
 	imageName string
 }
-func (f StakingNetworkDuplicateNodeIdTest) Run(network interface{}, context testsuite.TestContext) {
+func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
@@ -317,14 +319,14 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network interface{}, context test
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
 }
 
-func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	return getStakingNetworkLoader(map[int]int{
 		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
 	}, f.imageName)
 }
 
 func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
-	return 120 * time.Second
+	return 180 * time.Second
 }
 
 // =============== Helper functions =============================
@@ -333,7 +335,7 @@ func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
 Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
  */
-func getStakingNetworkLoader(desiredServices map[int]int, imageName string) (testsuite.TestNetworkLoader, error) {
+func getStakingNetworkLoader(desiredServices map[int]int, imageName string) (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, imageName, 2, 2),
 		SAME_CERT_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, imageName, 2, 2),

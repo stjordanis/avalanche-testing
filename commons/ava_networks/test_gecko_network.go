@@ -24,6 +24,8 @@ const (
 	containerStopTimeout = 30 * time.Second
 )
 type TestGeckoNetwork struct{
+	networks.Network
+
 	svcNetwork *networks.ServiceNetwork
 }
 func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.GeckoClient, error){
@@ -242,7 +244,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 	return availabilityCheckers, nil
 }
 
-func (loader TestGeckoNetworkLoader) WrapNetwork(network *networks.ServiceNetwork) (interface{}, error) {
+func (loader TestGeckoNetworkLoader) WrapNetwork(network *networks.ServiceNetwork) (networks.Network, error) {
 	return TestGeckoNetwork{
 		svcNetwork: network,
 	}, nil

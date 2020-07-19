@@ -7,6 +7,6 @@ import (
 type AvaService interface {
 	services.Service
 
-	GetStakingSocket() services.ServiceSocket
+	GetStakingSocket() ServiceSocket
 
 }

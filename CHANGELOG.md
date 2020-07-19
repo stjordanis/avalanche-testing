@@ -1,4 +1,16 @@
 # TBD
+
+# 0.6.0
+* Use Kurtosis version that allows the user to configure network width
+* Use Kurtosis version where `TestSuiteRunner.RunTests` takes in a set of tests, rather than a list
+* Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
+* Parameterize the `GeckoService` struct with ports so that it's not implicitly relying on constants from `GeckoServiceInitializerCore`
+* Fix breaks caused by small Kurtosis cleanups
+* Rework the README to do a better job explaining what this repo contains
+* Increasing timeouts in startup and in duplicate ID test to work in gecko CI
+* Add logic to wait for addition of validator in default subnet list
+
+# 0.5.0
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
 * Upgrade to Kurtosis version with hard test timeouts, to prevent infinite hangs
 * Added an unrequested chit spammer Byzantine test

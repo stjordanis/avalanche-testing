@@ -68,7 +68,11 @@ func TestWithDepsStartCommand(t *testing.T) {
 		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIp),
 	}
 
-	testDependency := GeckoService{ipAddr: "1.2.3.4"}
+	testDependency := GeckoService{
+		ipAddr: "1.2.3.4",
+		jsonRpcPort: "9650/tcp",
+		stakingPort: "9651/tcp",
+	}
 	testDependencySlice := []services.Service{
 		testDependency,
 	}
