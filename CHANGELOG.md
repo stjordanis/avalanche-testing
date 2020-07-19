@@ -1,6 +1,7 @@
 # TBD
 * Use Kurtosis version that allows the user to configure network width
 * Use Kurtosis version where `TestSuiteRunner.RunTests` takes in a set of tests, rather than a list
+* Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
 * Parameterize the `GeckoService` struct with ports so that it's not implicitly relying on constants from `GeckoServiceInitializerCore`
 
 # 0.5.0

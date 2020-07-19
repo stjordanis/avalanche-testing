@@ -2,7 +2,6 @@ package ava_services
 
 import (
 	"github.com/docker/go-connections/nat"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
 )
 
 type GeckoService struct {
@@ -11,10 +10,10 @@ type GeckoService struct {
 	jsonRpcPort nat.Port
 }
 
-func (g GeckoService) GetStakingSocket() services.ServiceSocket {
-	return *services.NewServiceSocket(g.ipAddr, g.stakingPort)
+func (g GeckoService) GetStakingSocket() ServiceSocket {
+	return *NewServiceSocket(g.ipAddr, g.stakingPort)
 }
 
-func (g GeckoService) GetJsonRpcSocket() services.ServiceSocket {
-	return *services.NewServiceSocket(g.ipAddr, g.jsonRpcPort)
+func (g GeckoService) GetJsonRpcSocket() ServiceSocket {
+	return *NewServiceSocket(g.ipAddr, g.jsonRpcPort)
 }
