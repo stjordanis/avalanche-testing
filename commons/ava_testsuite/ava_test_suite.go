@@ -1,7 +1,7 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/byzantine_tests"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/unrequested_chit_spammer_test"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 
@@ -14,7 +14,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
 	if a.ChitSpammerImageName != "" {
-		result["stakingNetworkChitSpammerTest"] = byzantine_tests.StakingNetworkUnrequestedChitSpammerTest{
+		result["stakingNetworkChitSpammerTest"] = unrequested_chit_spammer_test.StakingNetworkUnrequestedChitSpammerTest{
 			UnrequestedChitSpammerImageName: a.ChitSpammerImageName,
 			NormalImageName: a.NormalImageName,}
 	}

@@ -1,4 +1,4 @@
-package byzantine_tests
+package unrequested_chit_spammer_test
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
