@@ -1,11 +1,14 @@
-# Ava End-to-End Tests
-This repo contains end-to-end tests for the Ava network using [the Kurtosis testing framework](https://github.com/kurtosis-tech/kurtosis)
+Ava End-to-End Tests
+====================
+This repo contains end-to-end tests for the Ava network and Gecko client using [the Kurtosis testing framework](https://github.com/kurtosis-tech/kurtosis)
 
-## Requirements
+Requirements
+------------
 * Golang version 1.13x.x
 * [A Docker engine running in your environment](https://docs.docker.com/engine/install/)
 
-## Running Locally
+Running Locally
+---------------
 1. Clone this repository
 1. Run `scripts/full_rebuild_and_run.sh`
 
@@ -15,55 +18,31 @@ In your Docker engine you'll now see:
 
 You can now run `scripts/run.sh` to re-run the testing suite, using whatever arguments you like. To see the full list of supported arguments, pass in the `--help` flag to the `run.sh` script.
 
-## Developing Locally
-Some info:
-* The initializer binary is produced in `build/ava-e2e-tests` every time `scripts/rebuild_initializer_binary.sh` is run; you can run this binary with the `--help` flag to see detailed start options
-* The `run.sh` script is a convenience for calling the binary with sane default arguments (**NOTE:** you can pass in a comma-separated list of test names as the argument to run just those tests)
-* The controller Docker image is produced to the Docker image tag `kurtosistech/ava-e2e-tests_controller:latest` (at time of writing) every time `scripts/rebuild_controller_image.sh` is run
-* Every time you change:
-    1. The initializer you'll need to rerun `scripts/rebuild_initializer_binary.sh`
-    2. The controller you'll need to rerun `scripts/rebuild_controller_image.sh`
-    3. The commons code you'll need to rerun both
+Developing Locally
+------------------
+### Architecture
+This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurtosis), so you should first go through the tutorial there to familiarize yourself with the core Kurtosis concepts.
 
-### Helpful Tip
-You can use the following alias to stop & remove Docker containers of a certain type:
+In this implementation of Kurtosis, we have:
+* `AvaService` and `GeckoService` as our service interfaces
+* `GeckoServiceInitializerCore` and `GeckoServiceAvailabilityChecker` for including Gecko services in test networks
+    * `GeckoCertProvider` to allow controlling the cert that a Gecko service starts with, to allow for writing duplicate-node-ID tests
+* `TestGeckoNetwork` to encapsulate a Gecko test network of arbitrary size
+* Several tests
+* `AvaTestSuite` to contain all the tests Kurtosis can run
+* A `main.go` for running a controller Docker image under the `controller` package
+* A `main.go` for running the Kurtosis initializer under the `initializer` package
 
-```
-# alias for clearing kurtosis containers 
-clear_containers() {  docker rm $(docker stop $(docker ps -a -q --filter ancestor="$1" --format="{{.ID}}")); } 
-alias cclear=clear_containers
-```
-
-Example for clearing the test nodes and test controllers:
-```
-export GECKO_IMAGE=gecko-684ca4e
-export CONTROLLER_IMAGE=kurtosistech/ava-e2e-tests_controller
-# run the tests
-./build/ava-e2e-tests -gecko-image-name="${GECKO_IMAGE}" -test-controller-image-name="${CONTROLLER_IMAGE}"
-# ...Ctrl-C to kill the test CLI...
-# clear the docker containers initialized by the tests
-cclear ${GECKO_IMAGE} 
-cclear ${CONTROLLER_IMAGE} 
-```
-
-## Writing Tests
-This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurtosis), so you'll want to be familiar with the concepts there. In this implementation:
-* The `AvaTestSuite` struct defines the tests that will be run
-* The `AvaTestSuite` struct gets registered with the initializer and the controller in `initializer/main.go` and `controller/main.go` respectively
-* The tests, the networks the tests will run against, and the services the networks are composed of live in the `commons` package
+Additionally, this repo also contains a Gecko client (which should probably be moved to the Gecko repo).
 
 ### Adding A Test
 1. Create a new file in `commons/ava_testsuite` for your test
 1. Create a struct that implements the `testsuite.Test` interface from Kurtosis
-1. Fill in:
-    1. The function defining which network the test will use
-    1. The test logic
-1. Add the test to the `AvaTestSuite`'s `GetTests` method
+1. Fill in the interface's functions
+1. Register the test in `AvaTestSuite`'s `GetTests` method
 
-### Adding A Network
-1. Create a new file in `commons/ava_networks` for your network
-1. Create a struct representing the network and the calls a test could make against the network (e.g. `GetNodeX(i int)`)
-1. Create a struct implementing `TestNetworkLoader` with the methods that will:
-    1. For the initializer, configure your network using `GetNetworkConfig`
-    1. For the controller, create your struct from node IP information
-1. Configure tests (or write new ones) to use your network's loader
+### Running Locally As A Developer
+The `scripts/full_rebuild_and_run.sh` will rebuild and rerun both the initializer and controller Docker image; rerun this every time that you make a change. Arguments passed to this script will get passed to the initializer binary CLI as-is.
+
+### Keeping Your Dev Environment Clean
+Kurtosis intentionally doesn't delete containers and volumes, which means your local Docker environment will accumulate images, containers, and volumes. Make sure to read [the Notes section of the Kurtosis README](https://github.com/kurtosis-tech/kurtosis/tree/develop#notes) for information on how to keep your local environment clean while you develop.
