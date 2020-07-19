@@ -110,10 +110,11 @@ func main() {
 		*gatewayIpArg,
 		*testControllerIpArg,
 		testSuite,
-		*testImageNameArg)
+		*testImageNameArg,
+		*testNameArg)
 
 	logrus.Infof("Running test '%v'...", *testNameArg)
-	setupErr, testErr := controller.RunTest(*testNameArg)
+	setupErr, testErr := controller.RunTest()
 	if setupErr != nil {
 		logrus.Errorf("Test %v encountered an error during setup (test did not run):", *testNameArg)
 		fmt.Fprintln(logrus.StandardLogger().Out, setupErr)

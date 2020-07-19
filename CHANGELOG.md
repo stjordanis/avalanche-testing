@@ -3,6 +3,7 @@
 * Use Kurtosis version where `TestSuiteRunner.RunTests` takes in a set of tests, rather than a list
 * Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
 * Parameterize the `GeckoService` struct with ports so that it's not implicitly relying on constants from `GeckoServiceInitializerCore`
+* Fix breaks caused by small Kurtosis cleanups
 
 # 0.5.0
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
