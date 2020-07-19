@@ -1,6 +1,7 @@
 # TBD
 * Use Kurtosis version that allows the user to configure network width
 * Use Kurtosis version where `TestSuiteRunner.RunTests` takes in a set of tests, rather than a list
+* Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
 
 # 0.5.0
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
