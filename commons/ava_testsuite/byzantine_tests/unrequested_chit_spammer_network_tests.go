@@ -3,6 +3,7 @@ package byzantine_tests
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -25,7 +26,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 	UnrequestedChitSpammerImageName string
 	NormalImageName                 string
 }
-func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, context testsuite.TestContext) {
+func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	for i := 0; i < normalNodeServiceId; i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(i)
@@ -74,7 +75,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network interface{}, co
 	expectedNumStakers := 10
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
-func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (testsuite.TestNetworkLoader, error) {
+func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceIdConfigMap := map[int]int{}
 	for i := 0; i < normalNodeServiceId; i++ {
 		serviceIdConfigMap[i] = byzantineConfigId
@@ -93,7 +94,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration 
 Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
-func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (testsuite.TestNetworkLoader, error) {
+func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 6, 8),
 		byzantineConfigId:                   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
