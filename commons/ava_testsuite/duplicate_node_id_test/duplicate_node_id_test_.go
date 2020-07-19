@@ -2,11 +2,19 @@ package duplicate_node_id_test
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"time"
+)
+
+const (
+	normalNodeConfigId = 0
+	sameCertConfigId = 1
+
+	nodeServiceId = 0
 )
 
 type StakingNetworkDuplicateNodeIdTest struct {
@@ -146,9 +154,21 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 }
 
 func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	return getStakingNetworkLoader(map[int]int{
-		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
-	}, f.imageName)
+	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, f.imageName, 2, 2),
+		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, f.imageName, 2, 2),
+	}
+	desiredServices := map[int]int{
+		nodeServiceId: normalNodeConfigId,
+	}
+
+	return ava_networks.NewTestGeckoNetworkLoader(
+		ava_services.LOG_LEVEL_DEBUG,
+		true,
+		serviceConfigs,
+		desiredServices,
+		2,
+		2)
 }
 
 func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
