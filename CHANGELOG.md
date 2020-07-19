@@ -4,6 +4,7 @@
 * Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
 * Parameterize the `GeckoService` struct with ports so that it's not implicitly relying on constants from `GeckoServiceInitializerCore`
 * Fix breaks caused by small Kurtosis cleanups
+* Rework the README to do a better job explaining what this repo contains
 
 # 0.5.0
 * Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
