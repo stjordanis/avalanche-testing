@@ -2,6 +2,7 @@ package rpc_workflow_test
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -10,16 +11,31 @@ import (
 	"time"
 )
 
+const (
+	stakerUsername           = "staker"
+	stakerPassword           = "test34test!23"
+	delegatorUsername           = "delegator"
+	delegatorPassword           = "test34test!23"
+	seedAmount               = int64(50000000000000)
+	stakeAmount              = int64(30000000000000)
+	delegatorAmount              = int64(30000000000000)
+	nodeServiceId           = 0
+	delegatorNodeServiceId = 1
+
+	normalNodeConfigId = 0
+)
+
 type StakingNetworkRpcWorkflowTest struct {
-	imageName string
+	ImageName string
 }
+
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	stakerClient, err := castedNetwork.GetGeckoClient(NODE_SERVICE_ID)
+	stakerClient, err := castedNetwork.GetGeckoClient(nodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
-	delegatorClient, err := castedNetwork.GetGeckoClient(DELEGATOR_NODE_SERVICE_ID)
+	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
@@ -33,30 +49,30 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(
 		stakerClient,
-		STAKER_USERNAME,
-		STAKER_PASSWORD)
+		stakerUsername,
+		stakerPassword)
 	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(
 		delegatorClient,
-		DELEGATOR_USERNAME,
-		DELEGATOR_PASSWORD)
-	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+		delegatorUsername,
+		delegatorPassword)
+	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
-	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(SEED_AMOUNT)
+	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
 	}
-	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(SEED_AMOUNT)
+	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
 	// Adding stakers
-	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, STAKE_AMOUNT)
+	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
@@ -69,7 +85,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	expectedNumStakers := 6
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 	// Adding delegators
-	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, DELEGATOR_AMOUNT)
+	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
 	}
@@ -78,7 +94,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		only paid out at the end of the staking period, and the staking period must last at least
 		24 hours. This is far too long to be able to test in a CI scenario.
 	*/
-	remainingStakerAva := SEED_AMOUNT - STAKE_AMOUNT
+	remainingStakerAva := seedAmount - stakeAmount
 	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
@@ -91,12 +107,25 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	expectedRemainingAva := strconv.FormatInt(remainingStakerAva, 10)
 	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, expectedRemainingAva))
 }
+
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	return getStakingNetworkLoader(map[int]int{
-		NODE_SERVICE_ID:           NORMAL_NODE_CONFIG_ID,
-		DELEGATOR_NODE_SERVICE_ID: NORMAL_NODE_CONFIG_ID,
-	}, test.imageName)
+	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+	}
+	desiredServices := map[int]int{
+		nodeServiceId:           normalNodeConfigId,
+		delegatorNodeServiceId: normalNodeConfigId,
+	}
+
+	return ava_networks.NewTestGeckoNetworkLoader(
+		ava_services.LOG_LEVEL_DEBUG,
+		true,
+		serviceConfigs,
+		desiredServices,
+		2,
+		2)
 }
+
 func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
 	return 90 * time.Second
 }

@@ -1,74 +1,17 @@
-package ava_testsuite
+package verifier
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
-	"github.com/kurtosis-tech/kurtosis/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	STAKER_USERNAME           = "staker"
-	STAKER_PASSWORD           = "test34test!23"
-	DELEGATOR_USERNAME           = "delegator"
-	DELEGATOR_PASSWORD           = "test34test!23"
-	SEED_AMOUNT               = int64(50000000000000)
-	STAKE_AMOUNT              = int64(30000000000000)
-	DELEGATOR_AMOUNT              = int64(30000000000000)
-	NODE_SERVICE_ID           = 0
-	DELEGATOR_NODE_SERVICE_ID = 1
-
-	NORMAL_NODE_CONFIG_ID = 0
-
-	// The configuration ID of a service where all servies made with this configuration will have the same cert
-	SAME_CERT_CONFIG_ID = 1
-
-)
-
 /*
-Args:
-	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
+Struct containing logic for verifying the state of the network
+We attach these functions to a struct even though the struct doesn't have state to avoid a utils class (which
+inevitably becomes a mess of unconnected logic), and to categorize the functions around a common purpose.
  */
-func getStakingNetworkLoader(desiredServices map[int]int, imageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		NORMAL_NODE_CONFIG_ID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, imageName, 2, 2),
-		SAME_CERT_CONFIG_ID:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, imageName, 2, 2),
-	}
-	return ava_networks.NewTestGeckoNetworkLoader(
-		ava_services.LOG_LEVEL_DEBUG,
-		true,
-		serviceConfigs,
-		desiredServices,
-		2,
-		2)
-}
-
-/*
-This helper function will grab node IDs and Gecko clients
- */
-func getNodeIdsAndClients(
-			testContext testsuite.TestContext,
-			network ava_networks.TestGeckoNetwork,
-			allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
-	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
-	allNodeIds = make(map[int]string)
-	for serviceId, _ := range allServiceIds {
-		client, err := network.GetGeckoClient(serviceId)
-		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
-		}
-		allGeckoClients[serviceId] = client
-		nodeId, err := client.InfoApi().GetNodeId()
-		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
-		}
-		allNodeIds[serviceId] = nodeId
-	}
-	return
-}
+type NetworkStateVerifier struct {}
 
 /*
 Asserts that the network is fully connected, meaning:
@@ -81,8 +24,8 @@ Args:
 		staking. Most of the time this will be just the bootstrappers, but if we add more stakers then this set will
 		expand beyond the bootstrappers.
 	allNodeIds: The mapping of servcie_id -> node_id
- */
-func verifyNetworkFullyConnected(allServiceIds map[int]bool, stakerServiceIds map[int]bool, allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) error {
+*/
+func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(allServiceIds map[int]bool, stakerServiceIds map[int]bool, allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) error {
 	logrus.Tracef("All node IDs in network being verified: %v", allNodeIds)
 	for serviceId, _ := range allServiceIds {
 		_, isStaker := stakerServiceIds[serviceId]
@@ -104,7 +47,7 @@ func verifyNetworkFullyConnected(allServiceIds map[int]bool, stakerServiceIds ma
 		}
 
 		logrus.Debugf("Expecting serviceId %v to have the following peer node IDs, %v", serviceId, acceptableNodeIds)
-		if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(acceptableNodeIds), false); err != nil {
+		if err := verifier.VerifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(acceptableNodeIds), false); err != nil {
 			return stacktrace.Propagate(err, "An error occurred verifying the expected peers list")
 		}
 	}
@@ -120,8 +63,8 @@ Args:
 	acceptableNodeIds: A "set" of acceptable node IDs where, if a peer doesn't have this ID, the test will be failed
 	expectedNumPeers: The number of peers we expect this node to have
 	atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
- */
-func verifyExpectedPeers(serviceId int, client *gecko_client.GeckoClient, acceptableNodeIds map[string]bool, expectedNumPeers int, atLeast bool) error {
+*/
+func (verifier NetworkStateVerifier) VerifyExpectedPeers(serviceId int, client *gecko_client.GeckoClient, acceptableNodeIds map[string]bool, expectedNumPeers int, atLeast bool) error {
 	peers, err := client.InfoApi().GetPeers()
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId)

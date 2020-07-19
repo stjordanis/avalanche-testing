@@ -3,6 +3,8 @@ package duplicate_node_id_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
+	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -17,10 +19,11 @@ const (
 	nodeServiceId = 0
 )
 
-type StakingNetworkDuplicateNodeIdTest struct {
-	imageName string
+type DuplicateNodeIdTest struct {
+	ImageName string
+	Verifier  verifier.NetworkStateVerifier
 }
-func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context testsuite.TestContext) {
+func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
@@ -29,10 +32,10 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 	for bootServiceId, _ := range bootServiceIds {
 		allServiceIds[bootServiceId] = true
 	}
-	allServiceIds[NODE_SERVICE_ID] = true
+	allServiceIds[nodeServiceId] = true
 
 	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
-	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
@@ -46,9 +49,9 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIds)
 
 	// Add the first dupe node ID (should look normal from a network perspective
-	badServiceId1 := 1
+	badServiceId1 := nodeServiceId + 1
 	logrus.Info("Adding first node with soon-to-be-duplicated node ID...")
-	checker1, err := castedNetwork.AddService(SAME_CERT_CONFIG_ID, badServiceId1)
+	checker1, err := castedNetwork.AddService(sameCertConfigId, badServiceId1)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to create first dupe node ID service with ID %v", badServiceId1))
 	}
@@ -73,7 +76,7 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 
 	// Verify that the new node got accepted by everyone
 	logrus.Infof("Verifying that the new node with service ID %v was accepted by all bootstrappers...", badServiceId1)
-	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceId1)
@@ -81,7 +84,7 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 	// Now, add a second node with the same ID
 	badServiceId2 := 2
 	logrus.Infof("Adding second node with service ID %v which will be a duplicated node ID...", badServiceId2)
-	checker2, err := castedNetwork.AddService(SAME_CERT_CONFIG_ID, badServiceId2)
+	checker2, err := castedNetwork.AddService(sameCertConfigId, badServiceId2)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to create second dupe node ID service with ID %v", badServiceId2))
 	}
@@ -119,15 +122,15 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 
 		if _, found := bootServiceIds[serviceId]; found {
 			// Boot nodes should have the original node, one of the duplicates, and MAY have the duplicate nodes
-			acceptableNodeIds[allNodeIds[NODE_SERVICE_ID]] = true
+			acceptableNodeIds[allNodeIds[nodeServiceId]] = true
 			acceptableNodeIds[badServiceNodeId1] = true
 			acceptableNodeIds[badServiceNodeId2] = true
-			if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds)-1, true); err != nil {
+			if err := test.Verifier.VerifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds)-1, true); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
 		} else {
 			// The original non-boot node should have exactly the boot nodes
-			if err := verifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false); err != nil {
+			if err := test.Verifier.VerifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(bootServiceIds), false); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
 		}
@@ -147,21 +150,20 @@ func (f StakingNetworkDuplicateNodeIdTest) Run(network networks.Network, context
 	// Now that the first duped node is gone, verify that the original node is still connected to just boot nodes and
 	//  the second duped-ID node is now accepted by the boot nodes
 	logrus.Info("Verifying that the network has connected to the second node with a previously-duplicated node ID...")
-	if err := verifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
 }
 
-func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, f.imageName, 2, 2),
-		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, f.imageName, 2, 2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
 	desiredServices := map[int]int{
 		nodeServiceId: normalNodeConfigId,
 	}
-
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,
 		true,
@@ -171,6 +173,31 @@ func (f StakingNetworkDuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkL
 		2)
 }
 
-func (f StakingNetworkDuplicateNodeIdTest) GetTimeout() time.Duration {
+func (test DuplicateNodeIdTest) GetTimeout() time.Duration {
 	return 180 * time.Second
+}
+
+// ================ Helper functions ==================================
+/*
+This helper function will grab node IDs and Gecko clients
+*/
+func getNodeIdsAndClients(
+	testContext testsuite.TestContext,
+	network ava_networks.TestGeckoNetwork,
+	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
+	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
+	allNodeIds = make(map[int]string)
+	for serviceId, _ := range allServiceIds {
+		client, err := network.GetGeckoClient(serviceId)
+		if err != nil {
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
+		}
+		allGeckoClients[serviceId] = client
+		nodeId, err := client.InfoApi().GetNodeId()
+		if err != nil {
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
+		}
+		allNodeIds[serviceId] = nodeId
+	}
+	return
 }
