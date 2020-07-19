@@ -32,16 +32,17 @@ Developing Locally
 This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurtosis), so you should first go through the tutorial there to familiarize yourself with the core Kurtosis concepts.
 
 In this implementation of Kurtosis, we have:
-* `AvaService` and `GeckoService` as our service interfaces
-* `GeckoServiceInitializerCore` and `GeckoServiceAvailabilityChecker` for including Gecko services in test networks
-    * `GeckoCertProvider` to allow controlling the cert that a Gecko service starts with, to allow for writing duplicate-node-ID tests
-* `TestGeckoNetwork` to encapsulate a Gecko test network of arbitrary size
+* `AvaService` interface to represent the actions a test can take against a  generic service participating in the Ava network being tested
+* `GeckoService` interface to represent the actions a test can take against a Gecko Ava client participating in the Ava network being tested
+* `GeckoServiceInitializerCore` and `GeckoServiceAvailabilityChecker` for instantiating Gecko Ava clients in test networks
+    * `GeckoCertProvider` to allow controlling the cert that a Gecko node starts with, to allow for writing duplicate-node-ID tests
+* `TestGeckoNetwork` to encapsulate a test Ava network of Gecko nodes of arbitrary size
 * Several tests
 * `AvaTestSuite` to contain all the tests Kurtosis can run
 * A `main.go` for running a controller Docker image under the `controller` package
 * A `main.go` for running the Kurtosis initializer under the `initializer` package
 
-Additionally, this repo also contains a Gecko client (which should probably be moved to the Gecko repo).
+Additionally, for ease of writing tests, this repo also contains a Go client for interacting with the JSON RPC API of a Gecko service (which should probably be moved to the Gecko repo).
 
 ### Adding A Test
 1. Create a new file in `commons/ava_testsuite` for your test
