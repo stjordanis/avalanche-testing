@@ -16,7 +16,7 @@ const (
 	normalNodeConfigId = 0
 	sameCertConfigId = 1
 
-	nodeServiceId = 0
+	vanillaNodeServiceId = 0
 )
 
 type DuplicateNodeIdTest struct {
@@ -32,7 +32,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	for bootServiceId, _ := range bootServiceIds {
 		allServiceIds[bootServiceId] = true
 	}
-	allServiceIds[nodeServiceId] = true
+	allServiceIds[vanillaNodeServiceId] = true
 
 	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
 	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, bootServiceIds, allNodeIds, allGeckoClients); err != nil {
@@ -49,7 +49,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIds)
 
 	// Add the first dupe node ID (should look normal from a network perspective
-	badServiceId1 := nodeServiceId + 1
+	badServiceId1 := vanillaNodeServiceId + 1
 	logrus.Info("Adding first node with soon-to-be-duplicated node ID...")
 	checker1, err := castedNetwork.AddService(sameCertConfigId, badServiceId1)
 	if err != nil {
@@ -82,7 +82,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceId1)
 
 	// Now, add a second node with the same ID
-	badServiceId2 := 2
+	badServiceId2 := vanillaNodeServiceId + 2
 	logrus.Infof("Adding second node with service ID %v which will be a duplicated node ID...", badServiceId2)
 	checker2, err := castedNetwork.AddService(sameCertConfigId, badServiceId2)
 	if err != nil {
@@ -122,7 +122,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 
 		if _, found := bootServiceIds[serviceId]; found {
 			// Boot nodes should have the original node, one of the duplicates, and MAY have the duplicate nodes
-			acceptableNodeIds[allNodeIds[nodeServiceId]] = true
+			acceptableNodeIds[allNodeIds[vanillaNodeServiceId]] = true
 			acceptableNodeIds[badServiceNodeId1] = true
 			acceptableNodeIds[badServiceNodeId2] = true
 			if err := test.Verifier.VerifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(originalServiceIds)-1, true); err != nil {
@@ -162,7 +162,7 @@ func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
 	desiredServices := map[int]int{
-		nodeServiceId: normalNodeConfigId,
+		vanillaNodeServiceId: normalNodeConfigId,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		ava_services.LOG_LEVEL_DEBUG,

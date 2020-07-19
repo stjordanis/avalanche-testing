@@ -19,7 +19,8 @@ const (
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 	delegatorAmount              = int64(30000000000000)
-	nodeServiceId           = 0
+
+	regularNodeServiceId   = 0
 	delegatorNodeServiceId = 1
 
 	normalNodeConfigId = 0
@@ -31,7 +32,7 @@ type StakingNetworkRpcWorkflowTest struct {
 
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	stakerClient, err := castedNetwork.GetGeckoClient(nodeServiceId)
+	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
@@ -113,7 +114,7 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
 	desiredServices := map[int]int{
-		nodeServiceId:           normalNodeConfigId,
+		regularNodeServiceId:   normalNodeConfigId,
 		delegatorNodeServiceId: normalNodeConfigId,
 	}
 
