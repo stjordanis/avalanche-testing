@@ -1,4 +1,5 @@
 # TBD
+* Split `staking_network_tests` into separate files per test
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
