@@ -11,7 +11,7 @@ import (
 
 type AvaTestSuite struct {
 	ChitSpammerImageName string
-	NormalImageName string
+	GeckoImageName       string
 }
 
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
@@ -20,19 +20,19 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	if a.ChitSpammerImageName != "" {
 		result["stakingNetworkChitSpammerTest"] = unrequested_chit_spammer_test.StakingNetworkUnrequestedChitSpammerTest{
 			UnrequestedChitSpammerImageName: a.ChitSpammerImageName,
-			NormalImageName: a.NormalImageName,
+			NormalImageName: a.GeckoImageName,
 		}
 	}
 	result["stakingNetworkFullyConnectedTest"] = fully_connected_test.StakingNetworkFullyConnectedTest{
-		ImageName: a.NormalImageName,
+		ImageName: a.GeckoImageName,
 		Verifier: verifier.NetworkStateVerifier{},
 	}
 	result["stakingNetworkDuplicateNodeIdTest"] = duplicate_node_id_test.DuplicateNodeIdTest{
-		ImageName: a.NormalImageName,
+		ImageName: a.GeckoImageName,
 		Verifier: verifier.NetworkStateVerifier{},
 	}
 	result["stakingNetworkRpcWorkflowTest"] = rpc_workflow_test.StakingNetworkRpcWorkflowTest{
-		ImageName: a.NormalImageName,
+		ImageName: a.GeckoImageName,
 	}
 
 	return result

@@ -119,12 +119,13 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 	}
 
 	return ava_networks.NewTestGeckoNetworkLoader(
-		ava_services.LOG_LEVEL_DEBUG,
 		true,
-		serviceConfigs,
-		desiredServices,
+		test.ImageName,
+		ava_services.LOG_LEVEL_DEBUG,
 		2,
-		2)
+		2,
+		serviceConfigs,
+		desiredServices)
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
