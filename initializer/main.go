@@ -90,7 +90,7 @@ func main() {
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testSuite := ava_testsuite.AvaTestSuite{
 		ChitSpammerImageName: *chitSpammerImageNameArg,
-		GeckoImageName:       *geckoImageNameArg,
+		NormalImageName:      *geckoImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}

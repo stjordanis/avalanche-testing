@@ -100,7 +100,7 @@ func main() {
 	logrus.Debugf("Chit spammer image name: %s", *chitSpammerImageNameArg)
 	testSuite := ava_testsuite.AvaTestSuite{
 		ChitSpammerImageName: *chitSpammerImageNameArg,
-		GeckoImageName:       *geckoImageNameArg,
+		NormalImageName:      *geckoImageNameArg,
 	}
 	controller := controller.NewTestController(
 		*testVolumeArg,
