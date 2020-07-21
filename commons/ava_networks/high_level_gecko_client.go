@@ -27,6 +27,7 @@ const (
 type HighLevelGeckoClient struct {
 	client    *gecko_client.GeckoClient
 	geckoUser *GeckoUser
+	networkAcceptanceTimeoutInSeconds int
 }
 
 func NewHighLevelGeckoClient(
@@ -305,7 +306,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get status.")
 	}
-	for status != TRANSACTION_ACCEPTED_STATUS {
+	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && status != TRANSACTION_ACCEPTED_STATUS; i++ {
 		status, err = client.XChainApi().GetTxStatus(txnId)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get status.")
@@ -323,7 +324,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current validators")
 	}
-	for !checkValidatorInValidators(nodeId, validators) {
+	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && !checkValidatorInValidators(nodeId, validators); i++ {
 		time.Sleep(time.Second)
 		validators, err = client.PChainApi().GetCurrentValidators(subnetIdPtr)
 		if err != nil {
@@ -353,7 +354,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get balance.")
 	}
-	for balance == "0" {
+	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && balance == "0"; i++ {
 		pchainAccount, err = client.PChainApi().GetAccount(pchainAddress)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get account information.")
