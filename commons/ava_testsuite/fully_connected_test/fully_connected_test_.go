@@ -21,6 +21,8 @@ const (
 
 	nonBootValidatorServiceId = 0
 	nonBootNonValidatorServiceId = 1
+
+	networkAcceptanceTimeoutRatio = 0.3
 )
 
 type StakingNetworkFullyConnectedTest struct{
@@ -29,6 +31,7 @@ type StakingNetworkFullyConnectedTest struct{
 }
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	networkAcceptanceTimeoutInSeconds := int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds())
 	nonBootValidatorServiceId := 0
 	nonBootNonValidatorServiceId := 1
 
@@ -50,7 +53,8 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
 		nonBootValidatorClient,
 		stakerUsername,
-		stakerPassword)
+		stakerPassword,
+		networkAcceptanceTimeoutInSeconds)
 	if err := highLevelExtraStakerClient.GetFundsAndStartValidating(seedAmount, stakeAmount); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
 	}

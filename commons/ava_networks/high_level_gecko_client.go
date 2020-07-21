@@ -33,10 +33,12 @@ type HighLevelGeckoClient struct {
 func NewHighLevelGeckoClient(
 		client *gecko_client.GeckoClient,
 		username string,
-		password string) *HighLevelGeckoClient {
+		password string,
+		networkAcceptanceTimeoutInSeconds int) *HighLevelGeckoClient {
 	return &HighLevelGeckoClient{
 		client:    client,
 		geckoUser: NewGeckoUser(username, password),
+		networkAcceptanceTimeoutInSeconds: networkAcceptanceTimeoutInSeconds,
 	}
 }
 
