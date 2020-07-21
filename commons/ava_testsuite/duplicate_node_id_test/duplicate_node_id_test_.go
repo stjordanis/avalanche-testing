@@ -165,12 +165,13 @@ func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		vanillaNodeServiceId: normalNodeConfigId,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
-		ava_services.LOG_LEVEL_DEBUG,
 		true,
-		serviceConfigs,
-		desiredServices,
+		test.ImageName,
+		ava_services.LOG_LEVEL_DEBUG,
 		2,
-		2)
+		2,
+		serviceConfigs,
+		desiredServices)
 }
 
 func (test DuplicateNodeIdTest) GetTimeout() time.Duration {

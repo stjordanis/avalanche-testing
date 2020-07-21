@@ -11,7 +11,7 @@ import (
 
 type AvaTestSuite struct {
 	ChitSpammerImageName string
-	NormalImageName string
+	NormalImageName      string
 }
 
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {

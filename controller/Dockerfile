@@ -25,7 +25,7 @@ CMD ls $(dirname ${LOG_FILEPATH}) && ./test-controller \
     --test-volume=${TEST_VOLUME} \
     --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
-    --test-image-name=${TEST_IMAGE_NAME} \
+    --gecko-image-name=${GECKO_IMAGE_NAME} \
     --chit-spammer-image-name=${CHIT_SPAMMER_IMAGE_NAME} \
     --docker-network=${NETWORK_NAME} \
     --subnet-mask=${SUBNET_MASK} \

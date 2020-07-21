@@ -90,6 +90,7 @@ func NewTestGeckoNetworkServiceConfig(
 // ============== Loader ======================
 
 type TestGeckoNetworkLoader struct{
+	bootNodeImage			   string
 	bootNodeLogLevel           ava_services.GeckoLogLevel
 	isStaking                  bool
 	serviceConfigs             map[int]TestGeckoNetworkServiceConfig
@@ -106,21 +107,22 @@ NOTE: Bootstrapper nodes will be created automatically, and will show up in the 
 upon initialization.
 
 Args:
-	numNonBootNodes: The number of nodes that the network will start with on top of the boot nodes
 	isStaking: Whether the network will have staking enabled
-	serviceConfigs: A mapping of service config ID -> information used to launch the service
-	desiredServiceConfigs: A map of service_id -> config_id, one per node that this network should start with
+	bootNodeImage: The Docker image that should be used to launch the boot nodes
+	bootNodeLogLevel: The log level that the boot nodes will launch with
 	bootstrapperSnowQuorumSize: The Snow consensus sample size used for nodes in the network
 	bootstrapperSnowSampleSize: The Snow consensus quorum size used for nodes in the network
+	serviceConfigs: A mapping of service config ID -> information used to launch the service
+	desiredServiceConfigs: A map of service_id -> config_id, one per node that this network should start with
  */
 func NewTestGeckoNetworkLoader(
-			bootNodeLogLevel ava_services.GeckoLogLevel,
 			isStaking bool,
-			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
-			desiredServiceConfigs map[int]int,
+			bootNodeImage string,
+			bootNodeLogLevel ava_services.GeckoLogLevel,
 			bootstrapperSnowQuorumSize int,
 			bootstrapperSnowSampleSize int,
-			) (*TestGeckoNetworkLoader, error) {
+			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
+			desiredServiceConfigs map[int]int) (*TestGeckoNetworkLoader, error) {
 	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
 	}
@@ -144,6 +146,7 @@ func NewTestGeckoNetworkLoader(
 	}
 
 	return &TestGeckoNetworkLoader{
+		bootNodeImage: 				bootNodeImage,
 		bootNodeLogLevel:           bootNodeLogLevel,
 		isStaking:                  isStaking,
 		serviceConfigs:             serviceConfigsCopy,
@@ -180,7 +183,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			loader.bootNodeLogLevel)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
-		if err := builder.AddTestImageConfiguration(configId, initializerCore, availabilityCheckerCore); err != nil {
+		if err := builder.AddConfiguration(configId, loader.bootNodeImage, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding bootstrapper node with config ID %v", configId)
 		}
 	}
@@ -197,7 +200,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			certProvider,
 			configParams.serviceLogLevel)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
-		if err := builder.AddStaticImageConfiguration(configId, imageName, initializerCore, availabilityCheckerCore); err != nil {
+		if err := builder.AddConfiguration(configId, imageName, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
 		}
 	}
