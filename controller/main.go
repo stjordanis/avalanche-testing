@@ -35,10 +35,10 @@ func main() {
 		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
 	)
 
-	testImageNameArg := flag.String(
-		"test-image-name",
+	geckoImageNameArg := flag.String(
+		"gecko-image-name",
 		"",
-		"Name of Docker image of the service being tested",
+		"Name of Docker image of the Gecko version being tested",
 	)
 
 	chitSpammerImageNameArg := flag.String(
@@ -94,13 +94,13 @@ func main() {
 		*subnetMaskArg,
 		*gatewayIpArg,
 		*testControllerIpArg,
-		*testImageNameArg)
+		*geckoImageNameArg)
 
 
 	logrus.Debugf("Chit spammer image name: %s", *chitSpammerImageNameArg)
 	testSuite := ava_testsuite.AvaTestSuite{
 		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName: *testImageNameArg,
+		NormalImageName:      *geckoImageNameArg,
 	}
 	controller := controller.NewTestController(
 		*testVolumeArg,
@@ -110,7 +110,6 @@ func main() {
 		*gatewayIpArg,
 		*testControllerIpArg,
 		testSuite,
-		*testImageNameArg,
 		*testNameArg)
 
 	logrus.Infof("Running test '%v'...", *testNameArg)

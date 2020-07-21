@@ -16,6 +16,7 @@ import (
 
 const (
 	testNameArgSeparator       = ","
+	geckoImageNameEnvVar       = "GECKO_IMAGE_NAME"
 	chitSpammerImageNameEnvVar = "CHIT_SPAMMER_IMAGE_NAME"
 	defaultParallelism         = 4
 
@@ -89,7 +90,7 @@ func main() {
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testSuite := ava_testsuite.AvaTestSuite{
 		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName: *geckoImageNameArg,
+		NormalImageName:      *geckoImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}
@@ -134,10 +135,12 @@ func main() {
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
 		testSuite,
-		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
-		map[string]string{chitSpammerImageNameEnvVar: *chitSpammerImageNameArg},
+		map[string]string{
+			geckoImageNameEnvVar: *geckoImageNameArg,
+			chitSpammerImageNameEnvVar: *chitSpammerImageNameArg,
+		},
 		additionalTestTimeoutBuffer,
 		networkWidthBits)
 

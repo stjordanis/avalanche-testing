@@ -1,4 +1,4 @@
-package byzantine_tests
+package unrequested_chit_spammer_test
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
@@ -97,15 +97,17 @@ Args:
 func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 6, 8),
-		byzantineConfigId:                   *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
+		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
 	}
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", normalImageName)
+
 	return ava_networks.NewTestGeckoNetworkLoader(
-		ava_services.LOG_LEVEL_DEBUG,
 		true,
-		serviceConfigs,
-		desiredServices,
+		normalImageName,
+		ava_services.LOG_LEVEL_DEBUG,
 		2,
-		2)
+		2,
+		serviceConfigs,
+		desiredServices)
 }
