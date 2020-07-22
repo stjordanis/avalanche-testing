@@ -1,6 +1,7 @@
 # TBD
 * Split `staking_network_tests` into separate files per test
 * Upgrade to Kurtosis version with simplified service config definition
+* Add CI checks to make sure changelog is updated
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
