@@ -13,10 +13,10 @@ import (
 
 const (
 	// The config ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeConfigIdStart  = 987654
+	bootNodeConfigIdStart int = 987654
 
 	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeServiceIdStart = 987654
+	bootNodeServiceIdStart int = 987654
 )
 
 // ============== Network ======================
