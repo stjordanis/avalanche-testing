@@ -1,6 +1,8 @@
 # TBD
 * Split `staking_network_tests` into separate files per test
 * Upgrade to Kurtosis version with simplified service config definition
+* Add CI checks to make sure changelog is updated
+* Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
 * Make controller Docker image `tee` to the logfile, rather than redirecting all output
 
 # 0.6.0
