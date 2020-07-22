@@ -3,6 +3,7 @@
 * Upgrade to Kurtosis version with simplified service config definition
 * Add CI checks to make sure changelog is updated
 * Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
+* Significantly up test execution timeouts
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width

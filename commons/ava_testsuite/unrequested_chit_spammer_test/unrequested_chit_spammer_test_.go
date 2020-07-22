@@ -83,6 +83,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	return getByzantineNetworkLoader(serviceIdConfigMap, test.UnrequestedChitSpammerImageName, test.NormalImageName)
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
+	// TODO drop this when the availabilityChecker doesn't have a sleep
 	return 720 * time.Second
 }
 
