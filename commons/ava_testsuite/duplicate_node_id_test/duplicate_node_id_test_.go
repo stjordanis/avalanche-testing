@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	normalNodeConfigId = 0
-	sameCertConfigId = 1
+	normalNodeConfigId networks.ConfigurationID = 0
+	sameCertConfigId networks.ConfigurationID = 1
 
-	vanillaNodeServiceId = 0
+	vanillaNodeServiceId networks.ServiceID = 0
 )
 
 type DuplicateNodeIdTest struct {
@@ -28,7 +28,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 
-	allServiceIds := make(map[int]bool)
+	allServiceIds := make(map[networks.ServiceID]bool)
 	for bootServiceId, _ := range bootServiceIds {
 		allServiceIds[bootServiceId] = true
 	}
@@ -40,7 +40,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	}
 
 	// We'll need these later
-	originalServiceIds := make(map[int]bool)
+	originalServiceIds := make(map[networks.ServiceID]bool)
 	for serviceId, _ := range allServiceIds {
 		originalServiceIds[serviceId] = true
 	}
@@ -157,11 +157,11 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 }
 
 func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
-	desiredServices := map[int]int{
+	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		vanillaNodeServiceId: normalNodeConfigId,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
@@ -183,11 +183,12 @@ func (test DuplicateNodeIdTest) GetTimeout() time.Duration {
 This helper function will grab node IDs and Gecko clients
 */
 func getNodeIdsAndClients(
-	testContext testsuite.TestContext,
-	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
-	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
-	allNodeIds = make(map[int]string)
+		testContext testsuite.TestContext,
+		network ava_networks.TestGeckoNetwork,
+		allServiceIds map[networks.ServiceID]bool,
+		) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
+	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
+	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
 		client, err := network.GetGeckoClient(serviceId)
 		if err != nil {
