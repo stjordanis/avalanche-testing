@@ -17,10 +17,10 @@ const (
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 
-	normalNodeConfigId = 0
+	normalNodeConfigId networks.ConfigurationID = 0
 
-	nonBootValidatorServiceId = 0
-	nonBootNonValidatorServiceId = 1
+	nonBootValidatorServiceId networks.ServiceID = 0
+	nonBootNonValidatorServiceId networks.ServiceID = 1
 )
 
 type StakingNetworkFullyConnectedTest struct{
@@ -29,11 +29,9 @@ type StakingNetworkFullyConnectedTest struct{
 }
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	nonBootValidatorServiceId := 0
-	nonBootNonValidatorServiceId := 1
 
 	stakerIds := castedNetwork.GetAllBootServiceIds()
-	allServiceIds := make(map[int]bool)
+	allServiceIds := make(map[networks.ServiceID]bool)
 	for stakerId, _ := range stakerIds {
 		allServiceIds[stakerId] = true
 	}
@@ -72,10 +70,10 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 }
 
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
-	desiredServices := map[int]int{
+	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		nonBootValidatorServiceId: normalNodeConfigId,
 		nonBootNonValidatorServiceId: normalNodeConfigId,
 	}
@@ -100,9 +98,10 @@ This helper function will grab node IDs and Gecko clients
 func getNodeIdsAndClients(
 	testContext testsuite.TestContext,
 	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
-	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
-	allNodeIds = make(map[int]string)
+	allServiceIds map[networks.ServiceID]bool,
+) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
+	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
+	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
 		client, err := network.GetGeckoClient(serviceId)
 		if err != nil {

@@ -2,6 +2,7 @@ package verifier
 
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -25,7 +26,12 @@ Args:
 		expand beyond the bootstrappers.
 	allNodeIds: The mapping of servcie_id -> node_id
 */
-func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(allServiceIds map[int]bool, stakerServiceIds map[int]bool, allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) error {
+func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
+			allServiceIds map[networks.ServiceID]bool,
+			stakerServiceIds map[networks.ServiceID]bool,
+			allNodeIds map[networks.ServiceID]string,
+			allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient,
+			) error {
 	logrus.Tracef("All node IDs in network being verified: %v", allNodeIds)
 	for serviceId, _ := range allServiceIds {
 		_, isStaker := stakerServiceIds[serviceId]
@@ -64,7 +70,12 @@ Args:
 	expectedNumPeers: The number of peers we expect this node to have
 	atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
 */
-func (verifier NetworkStateVerifier) VerifyExpectedPeers(serviceId int, client *gecko_client.GeckoClient, acceptableNodeIds map[string]bool, expectedNumPeers int, atLeast bool) error {
+func (verifier NetworkStateVerifier) VerifyExpectedPeers(
+		serviceId networks.ServiceID,
+		client *gecko_client.GeckoClient,
+		acceptableNodeIds map[string]bool,
+		expectedNumPeers int,
+		atLeast bool) error {
 	peers, err := client.InfoApi().GetPeers()
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId)

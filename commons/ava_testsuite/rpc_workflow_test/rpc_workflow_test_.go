@@ -20,10 +20,10 @@ const (
 	stakeAmount              = int64(30000000000000)
 	delegatorAmount              = int64(30000000000000)
 
-	regularNodeServiceId   = 0
-	delegatorNodeServiceId = 1
+	regularNodeServiceId   networks.ServiceID = 0
+	delegatorNodeServiceId networks.ServiceID = 1
 
-	normalNodeConfigId = 0
+	normalNodeConfigId networks.ConfigurationID = 0
 )
 
 type StakingNetworkRpcWorkflowTest struct {
@@ -110,10 +110,10 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
 	}
-	desiredServices := map[int]int{
+	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		regularNodeServiceId:   normalNodeConfigId,
 		delegatorNodeServiceId: normalNodeConfigId,
 	}
