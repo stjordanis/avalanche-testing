@@ -28,7 +28,7 @@ type TestGeckoNetwork struct{
 
 	svcNetwork *networks.ServiceNetwork
 }
-func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.GeckoClient, error){
+func (network TestGeckoNetwork) GetGeckoClient(serviceId networks.ServiceID) (*gecko_client.GeckoClient, error){
 	node, err := network.svcNetwork.GetService(serviceId)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceId)
@@ -38,15 +38,16 @@ func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.Gec
 	return gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort()), nil
 }
 
-func (network TestGeckoNetwork) GetAllBootServiceIds() map[int]bool {
-	result := make(map[int]bool)
+func (network TestGeckoNetwork) GetAllBootServiceIds() map[networks.ServiceID]bool {
+	result := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		result[bootNodeServiceIdStart + i] = true
+		bootId := networks.ServiceID(bootNodeServiceIdStart + i)
+		result[bootId] = true
 	}
 	return result
 }
 
-func (network TestGeckoNetwork) AddService(configurationId int, serviceId int) (*services.ServiceAvailabilityChecker, error) {
+func (network TestGeckoNetwork) AddService(configurationId networks.ConfigurationID, serviceId networks.ServiceID) (*services.ServiceAvailabilityChecker, error) {
 	availabilityChecker, err := network.svcNetwork.AddService(configurationId, serviceId, network.GetAllBootServiceIds())
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred adding service with service ID %v, configuration ID %v", serviceId, configurationId)
@@ -54,7 +55,7 @@ func (network TestGeckoNetwork) AddService(configurationId int, serviceId int) (
 	return availabilityChecker, nil
 }
 
-func (network TestGeckoNetwork) RemoveService(serviceId int) error {
+func (network TestGeckoNetwork) RemoveService(serviceId networks.ServiceID) error {
 	if err := network.svcNetwork.RemoveService(serviceId, containerStopTimeout); err != nil {
 		return stacktrace.Propagate(err, "An error occurred removing service with ID %v", serviceId)
 	}
@@ -93,8 +94,8 @@ type TestGeckoNetworkLoader struct{
 	bootNodeImage			   string
 	bootNodeLogLevel           ava_services.GeckoLogLevel
 	isStaking                  bool
-	serviceConfigs             map[int]TestGeckoNetworkServiceConfig
-	desiredServiceConfig       map[int]int
+	serviceConfigs             map[networks.ConfigurationID]TestGeckoNetworkServiceConfig
+	desiredServiceConfig       map[networks.ServiceID]networks.ConfigurationID
 	bootstrapperSnowQuorumSize int
 	bootstrapperSnowSampleSize int
 }
@@ -121,25 +122,25 @@ func NewTestGeckoNetworkLoader(
 			bootNodeLogLevel ava_services.GeckoLogLevel,
 			bootstrapperSnowQuorumSize int,
 			bootstrapperSnowSampleSize int,
-			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
-			desiredServiceConfigs map[int]int) (*TestGeckoNetworkLoader, error) {
+			serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig,
+			desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestGeckoNetworkLoader, error) {
 	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
 	}
 
 	// Defensive copy
-	serviceConfigsCopy := make(map[int]TestGeckoNetworkServiceConfig)
+	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
-		if configId >= bootNodeConfigIdStart && configId < (bootNodeConfigIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
+		if int(configId) >= bootNodeConfigIdStart && int(configId) < (bootNodeConfigIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
 			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
 		}
 		serviceConfigsCopy[configId] = configParams
 	}
 
 	// Defensive copy
-	desiredServiceConfigsCopy := make(map[int]int)
+	desiredServiceConfigsCopy := make(map[networks.ServiceID]networks.ConfigurationID)
 	for serviceId, configId := range desiredServiceConfigs {
-		if serviceId >= bootNodeServiceIdStart && serviceId < (bootNodeServiceIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
+		if int(serviceId) >= bootNodeServiceIdStart && int(serviceId) < (bootNodeServiceIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
 			return nil, stacktrace.NewError("Service ID %v cannot be used as it's being used as a boot node config ID", serviceId)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
@@ -158,7 +159,6 @@ func NewTestGeckoNetworkLoader(
 
 func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkBuilder) error {
 	localNetGenesisStakers := DefaultLocalNetGenesisConfig.Stakers
-
 	bootNodeIds := make([]string, 0, len(localNetGenesisStakers))
 	for _, staker := range DefaultLocalNetGenesisConfig.Stakers {
 		bootNodeIds = append(bootNodeIds, staker.NodeID)
@@ -166,7 +166,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 
 	// Add boot node configs
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		configId := bootNodeConfigIdStart + i
+		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
 
 		certString := localNetGenesisStakers[i].TlsCert
 		keyString := localNetGenesisStakers[i].PrivateKey
@@ -213,20 +213,14 @@ Initializes the Gecko test network, spinning up the correct number of bootstrapp
 NOTE: The resulting AvailabilityChecker map will contain more IDs than the user requested as it will contain boot nodes. The IDs
 that these boot nodes are an unspecified implementation detail.
  */
-func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.ServiceNetwork) (map[int]services.ServiceAvailabilityChecker, error) {
-	availabilityCheckers := make(map[int]services.ServiceAvailabilityChecker)
-
-	localNetGenesisStakers := DefaultLocalNetGenesisConfig.Stakers
-	bootNodeIds := make([]string, 0, len(localNetGenesisStakers))
-	for _, staker := range localNetGenesisStakers {
-		bootNodeIds = append(bootNodeIds, staker.NodeID)
-	}
+func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.ServiceNetwork) (map[networks.ServiceID]services.ServiceAvailabilityChecker, error) {
+	availabilityCheckers := make(map[networks.ServiceID]services.ServiceAvailabilityChecker)
 
 	// Add the bootstrapper nodes
-	bootstrapperServiceIds := make(map[int]bool)
-	for i := 0; i < len(localNetGenesisStakers); i++ {
-		configId := bootNodeConfigIdStart + i
-		serviceId := bootNodeServiceIdStart + i
+	bootstrapperServiceIds := make(map[networks.ServiceID]bool)
+	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
+		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
+		serviceId := networks.ServiceID(bootNodeServiceIdStart + i)
 		checker, err := network.AddService(configId, serviceId, bootstrapperServiceIds)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding boot node with ID %v and config ID %v", serviceId, configId)
