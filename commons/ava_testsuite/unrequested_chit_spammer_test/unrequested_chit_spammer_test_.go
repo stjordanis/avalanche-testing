@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	normalNodeConfigId = 1
-	byzantineConfigId = 2
+	normalNodeConfigId networks.ConfigurationID = 1
+	byzantineConfigId networks.ConfigurationID = 2
 	byzantineUsername = "byzantine_gecko"
 	byzantinePassword = "byzant1n3!"
 	stakerUsername = "staker_gecko"
 	stakerPassword = "test34test!23"
-	normalNodeServiceId = 4
+	normalNodeServiceId networks.ServiceID = 4
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 )
@@ -28,8 +28,8 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	for i := 0; i < normalNodeServiceId; i++ {
-		byzClient, err := castedNetwork.GetGeckoClient(i)
+	for i := 0; i < int(normalNodeServiceId); i++ {
+		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
@@ -76,9 +76,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceIdConfigMap := map[int]int{}
-	for i := 0; i < normalNodeServiceId; i++ {
-		serviceIdConfigMap[i] = byzantineConfigId
+	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
+	for i := 0; i < int(normalNodeServiceId); i++ {
+		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
 	}
 	return getByzantineNetworkLoader(serviceIdConfigMap, test.UnrequestedChitSpammerImageName, test.NormalImageName)
 }
@@ -94,8 +94,11 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration 
 Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
-func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+func getByzantineNetworkLoader(
+			desiredServices map[networks.ServiceID]networks.ConfigurationID,
+			byzantineImageName string,
+			normalImageName string) (networks.NetworkLoader, error) {
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 6, 8),
 		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
 	}
