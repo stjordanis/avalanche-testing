@@ -21,7 +21,7 @@ COPY --from=builder /build/test-controller .
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
-CMD set -euo pipefail; ./test-controller \
+CMD set -euo pipefail && ./test-controller \
     --test-volume=${TEST_VOLUME} \
     --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
@@ -31,4 +31,4 @@ CMD set -euo pipefail; ./test-controller \
     --subnet-mask=${SUBNET_MASK} \
     --test-controller-ip=${TEST_CONTROLLER_IP} \
     --gateway-ip=${GATEWAY_IP} \
-    --log-level=${LOG_LEVEL} 2>&1 | ${LOG_FILEPATH}
+    --log-level=${LOG_LEVEL} 2>&1 | tee ${LOG_FILEPATH}
