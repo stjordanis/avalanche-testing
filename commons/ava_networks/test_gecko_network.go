@@ -2,13 +2,14 @@ package ava_networks
 
 import (
 	"bytes"
+	"time"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
-	"time"
 )
 
 const (
@@ -23,12 +24,14 @@ const (
 const (
 	containerStopTimeout = 30 * time.Second
 )
-type TestGeckoNetwork struct{
+
+type TestGeckoNetwork struct {
 	networks.Network
 
 	svcNetwork *networks.ServiceNetwork
 }
-func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.GeckoClient, error){
+
+func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.GeckoClient, error) {
 	node, err := network.svcNetwork.GetService(serviceId)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceId)
@@ -41,7 +44,7 @@ func (network TestGeckoNetwork) GetGeckoClient(serviceId int) (*gecko_client.Gec
 func (network TestGeckoNetwork) GetAllBootServiceIds() map[int]bool {
 	result := make(map[int]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		result[bootNodeServiceIdStart + i] = true
+		result[bootNodeServiceIdStart+i] = true
 	}
 	return result
 }
@@ -64,7 +67,7 @@ func (network TestGeckoNetwork) RemoveService(serviceId int) error {
 // ============= Loader Service Config ====================================
 type TestGeckoNetworkServiceConfig struct {
 	// Whether the certs used by services with this configuration will be different or not
-	varyCerts bool
+	varyCerts       bool
 	serviceLogLevel ava_services.GeckoLogLevel
 	// Used primarily for Byzantine tests but can also test heterogenous Gecko versions, for example.
 	imageName      string
@@ -73,11 +76,11 @@ type TestGeckoNetworkServiceConfig struct {
 }
 
 func NewTestGeckoNetworkServiceConfig(
-			varyCerts bool,
-			serviceLogLevel ava_services.GeckoLogLevel,
-			imageName string,
-			snowQuorumSize int,
-			snowSampleSize int) *TestGeckoNetworkServiceConfig {
+	varyCerts bool,
+	serviceLogLevel ava_services.GeckoLogLevel,
+	imageName string,
+	snowQuorumSize int,
+	snowSampleSize int) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
 		varyCerts:       varyCerts,
 		serviceLogLevel: serviceLogLevel,
@@ -89,8 +92,8 @@ func NewTestGeckoNetworkServiceConfig(
 
 // ============== Loader ======================
 
-type TestGeckoNetworkLoader struct{
-	bootNodeImage			   string
+type TestGeckoNetworkLoader struct {
+	bootNodeImage              string
 	bootNodeLogLevel           ava_services.GeckoLogLevel
 	isStaking                  bool
 	serviceConfigs             map[int]TestGeckoNetworkServiceConfig
@@ -114,15 +117,15 @@ Args:
 	bootstrapperSnowSampleSize: The Snow consensus quorum size used for nodes in the network
 	serviceConfigs: A mapping of service config ID -> information used to launch the service
 	desiredServiceConfigs: A map of service_id -> config_id, one per node that this network should start with
- */
+*/
 func NewTestGeckoNetworkLoader(
-			isStaking bool,
-			bootNodeImage string,
-			bootNodeLogLevel ava_services.GeckoLogLevel,
-			bootstrapperSnowQuorumSize int,
-			bootstrapperSnowSampleSize int,
-			serviceConfigs map[int]TestGeckoNetworkServiceConfig,
-			desiredServiceConfigs map[int]int) (*TestGeckoNetworkLoader, error) {
+	isStaking bool,
+	bootNodeImage string,
+	bootNodeLogLevel ava_services.GeckoLogLevel,
+	bootstrapperSnowQuorumSize int,
+	bootstrapperSnowSampleSize int,
+	serviceConfigs map[int]TestGeckoNetworkServiceConfig,
+	desiredServiceConfigs map[int]int) (*TestGeckoNetworkLoader, error) {
 	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
 	}
@@ -130,7 +133,7 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	serviceConfigsCopy := make(map[int]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
-		if configId >= bootNodeConfigIdStart && configId < (bootNodeConfigIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
+		if configId >= bootNodeConfigIdStart && configId < (bootNodeConfigIdStart+len(DefaultLocalNetGenesisConfig.Stakers)) {
 			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
 		}
 		serviceConfigsCopy[configId] = configParams
@@ -139,14 +142,14 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	desiredServiceConfigsCopy := make(map[int]int)
 	for serviceId, configId := range desiredServiceConfigs {
-		if serviceId >= bootNodeServiceIdStart && serviceId < (bootNodeServiceIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
+		if serviceId >= bootNodeServiceIdStart && serviceId < (bootNodeServiceIdStart+len(DefaultLocalNetGenesisConfig.Stakers)) {
 			return nil, stacktrace.NewError("Service ID %v cannot be used as it's being used as a boot node config ID", serviceId)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}
 
 	return &TestGeckoNetworkLoader{
-		bootNodeImage: 				bootNodeImage,
+		bootNodeImage:              bootNodeImage,
 		bootNodeLogLevel:           bootNodeLogLevel,
 		isStaking:                  isStaking,
 		serviceConfigs:             serviceConfigsCopy,
@@ -212,7 +215,7 @@ Initializes the Gecko test network, spinning up the correct number of bootstrapp
 
 NOTE: The resulting AvailabilityChecker map will contain more IDs than the user requested as it will contain boot nodes. The IDs
 that these boot nodes are an unspecified implementation detail.
- */
+*/
 func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.ServiceNetwork) (map[int]services.ServiceAvailabilityChecker, error) {
 	availabilityCheckers := make(map[int]services.ServiceAvailabilityChecker)
 
@@ -231,6 +234,9 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding boot node with ID %v and config ID %v", serviceId, configId)
 		}
+
+		// TODO the first node should have zero dependencies and the rest should
+		// have only the first node as a dependency
 		bootstrapperServiceIds[serviceId] = true
 		availabilityCheckers[serviceId] = *checker
 	}
