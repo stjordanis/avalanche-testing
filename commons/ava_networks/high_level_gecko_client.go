@@ -25,20 +25,20 @@ const (
 )
 
 type HighLevelGeckoClient struct {
-	client    *gecko_client.GeckoClient
-	geckoUser *GeckoUser
-	networkAcceptanceTimeoutInSeconds int
+	client                   *gecko_client.GeckoClient
+	geckoUser                *GeckoUser
+	networkAcceptanceTimeout time.Duration
 }
 
 func NewHighLevelGeckoClient(
 		client *gecko_client.GeckoClient,
 		username string,
 		password string,
-		networkAcceptanceTimeoutInSeconds int) *HighLevelGeckoClient {
+		networkAcceptanceTimeout time.Duration) *HighLevelGeckoClient {
 	return &HighLevelGeckoClient{
-		client:    client,
-		geckoUser: NewGeckoUser(username, password),
-		networkAcceptanceTimeoutInSeconds: networkAcceptanceTimeoutInSeconds,
+		client:                   client,
+		geckoUser:                NewGeckoUser(username, password),
+		networkAcceptanceTimeout: networkAcceptanceTimeout,
 	}
 }
 
@@ -308,7 +308,8 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get status.")
 	}
-	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && status != TRANSACTION_ACCEPTED_STATUS; i++ {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && status != TRANSACTION_ACCEPTED_STATUS; i++ {
 		status, err = client.XChainApi().GetTxStatus(txnId)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get status.")
@@ -316,7 +317,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 		logrus.Debugf("Status for transaction %s: %s", txnId, status)
 		time.Sleep(time.Second)
 	}
-	return nil
+	return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
 }
 
 // TODO TODO TODO Add a timeout parameter instead of waiting infinitely
@@ -326,14 +327,15 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current validators")
 	}
-	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && !checkValidatorInValidators(nodeId, validators); i++ {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && !checkValidatorInValidators(nodeId, validators); i++ {
 		time.Sleep(time.Second)
 		validators, err = client.PChainApi().GetCurrentValidators(subnetIdPtr)
 		if err != nil {
 			return stacktrace.Propagate(err, "Could not get current validators")
 		}
 	}
-	return nil
+	return stacktrace.NewError("Timed out waiting for validator %s to be accepted as a validator by the network.", nodeId)
 }
 
 func checkValidatorInValidators(nodeId string, validators []gecko_client.Validator) bool {
@@ -356,7 +358,8 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get balance.")
 	}
-	for i := 0; i < highLevelGeckoClient.networkAcceptanceTimeoutInSeconds && balance == "0"; i++ {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && balance == "0"; i++ {
 		pchainAccount, err = client.PChainApi().GetAccount(pchainAddress)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get account information.")
@@ -365,7 +368,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 		logrus.Debugf("Balance for account %s: %s", pchainAddress, balance)
 		time.Sleep(time.Second)
 	}
-	return nil
+	return stacktrace.NewError("Timed out waiting for PChain address %s to receive funds.", pchainAddress)
 }
 
 func (highLevelGeckoClient HighLevelGeckoClient) getCurrentPayerNonce(pchainAddress string) (int, error) {
