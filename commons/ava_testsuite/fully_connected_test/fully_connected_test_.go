@@ -88,7 +88,8 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 }
 
 func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	return 120 * time.Second
+	// TODO drop this when the availabilityChecker doesn't have a sleep
+	return 300 * time.Second
 }
 
 // ================ Helper functions =========================

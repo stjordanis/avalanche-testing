@@ -129,5 +129,6 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
-	return 90 * time.Second
+	// TODO drop this when the availabilityChecker doesn't have a sleep
+	return 300 * time.Second
 }
