@@ -34,7 +34,7 @@ type StakingNetworkRpcWorkflowTest struct {
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
-	networkAcceptanceTimeoutInSeconds := int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds())
+	networkAcceptanceTimeout := time.Duration(int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds()))
 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
@@ -55,12 +55,12 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		stakerClient,
 		stakerUsername,
 		stakerPassword,
-		networkAcceptanceTimeoutInSeconds)
+		networkAcceptanceTimeout)
 	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(
 		delegatorClient,
 		delegatorUsername,
 		delegatorPassword,
-		networkAcceptanceTimeoutInSeconds)
+		networkAcceptanceTimeout)
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))

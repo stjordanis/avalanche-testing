@@ -30,7 +30,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeoutInSeconds := int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds())
+	networkAcceptanceTimeout := time.Duration(int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds()))
 
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))
@@ -41,7 +41,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 			byzClient,
 			byzantineUsername,
 			byzantinePassword,
-			networkAcceptanceTimeoutInSeconds)
+			networkAcceptanceTimeout)
 		err = highLevelByzClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
@@ -67,7 +67,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		normalClient,
 		stakerUsername,
 		stakerPassword,
-		networkAcceptanceTimeoutInSeconds)
+		networkAcceptanceTimeout)
 	err = highLevelNormalClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
