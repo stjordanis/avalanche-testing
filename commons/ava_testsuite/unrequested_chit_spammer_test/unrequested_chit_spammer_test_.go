@@ -30,7 +30,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeout := time.Duration(int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds()))
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
 
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))

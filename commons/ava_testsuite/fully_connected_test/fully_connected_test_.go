@@ -30,7 +30,7 @@ type StakingNetworkFullyConnectedTest struct{
 }
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeout := time.Duration(int(networkAcceptanceTimeoutRatio * test.GetTimeout().Seconds()))
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
 
 
 	stakerIds := castedNetwork.GetAllBootServiceIds()
