@@ -317,7 +317,11 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 		logrus.Debugf("Status for transaction %s: %s", txnId, status)
 		time.Sleep(time.Second)
 	}
-	return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
+	if status != TRANSACTION_ACCEPTED_STATUS {
+		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
+	} else {
+		return nil
+	}
 }
 
 // TODO TODO TODO Add a timeout parameter instead of waiting infinitely
@@ -335,7 +339,11 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId
 			return stacktrace.Propagate(err, "Could not get current validators")
 		}
 	}
-	return stacktrace.NewError("Timed out waiting for validator %s to be accepted as a validator by the network.", nodeId)
+	if !checkValidatorInValidators(nodeId, validators) {
+		return stacktrace.NewError("Timed out waiting for validator %s to be accepted as a validator by the network.", nodeId)
+	} else {
+		return nil
+	}
 }
 
 func checkValidatorInValidators(nodeId string, validators []gecko_client.Validator) bool {
@@ -368,7 +376,11 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 		logrus.Debugf("Balance for account %s: %s", pchainAddress, balance)
 		time.Sleep(time.Second)
 	}
-	return stacktrace.NewError("Timed out waiting for PChain address %s to receive funds.", pchainAddress)
+	if balance == "0" {
+		return stacktrace.NewError("Timed out waiting for PChain address %s to receive funds.", pchainAddress)
+	} else {
+		return nil
+	}
 }
 
 func (highLevelGeckoClient HighLevelGeckoClient) getCurrentPayerNonce(pchainAddress string) (int, error) {
