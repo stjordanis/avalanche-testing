@@ -4,6 +4,7 @@
 * Add CI checks to make sure changelog is updated
 * Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
 * Significantly up test execution timeouts
+* Implement a 10-second HTTP request timeout in the Gecko client
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
