@@ -4,6 +4,7 @@
 * Add CI checks to make sure changelog is updated
 * Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
 * Significantly up test execution timeouts
+* Make controller Docker image `tee` to the logfile, rather than redirecting all output
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
