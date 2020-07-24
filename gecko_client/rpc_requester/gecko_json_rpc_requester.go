@@ -13,30 +13,9 @@ import (
 	"time"
 )
 
-// ============= RPC Requester ===================
 const (
 	JSON_RPC_VERSION = "2.0"
-	REQUEST_TIMEOUT = 30 * time.Second
 )
-
-type GeckoJsonRpcRequester struct {
-	ipAddr string
-	port nat.Port
-	client http.Client
-}
-
-func NewGeckoJsonRpcRequester(ipAddr string, port nat.Port) *GeckoJsonRpcRequester {
-	client := http.Client{
-		// TODO Make this configurable
-		Timeout: REQUEST_TIMEOUT,
-	}
-	return &GeckoJsonRpcRequester{
-		ipAddr: ipAddr,
-		port: port,
-		client: client,
-	}
-}
-
 
 // This needs to be public so the JSON package can serialize it
 type JsonRpcRequest struct {
@@ -57,6 +36,23 @@ type JsonRpcResponse struct {
 	Error          JsonRpcError           `json: "error"`
 	Result         map[string]interface{} `json: "result"`
 	Id             int                    `json:"id"`
+}
+
+type GeckoJsonRpcRequester struct {
+	ipAddr string
+	port nat.Port
+	client http.Client
+}
+
+func NewGeckoJsonRpcRequester(ipAddr string, port nat.Port, requestTimeout time.Duration) *GeckoJsonRpcRequester {
+	client := http.Client{
+		Timeout: requestTimeout,
+	}
+	return &GeckoJsonRpcRequester{
+		ipAddr: ipAddr,
+		port: port,
+		client: client,
+	}
 }
 
 
