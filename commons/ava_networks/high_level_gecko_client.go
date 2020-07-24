@@ -33,6 +33,9 @@ type HighLevelGeckoClient struct {
 		Gecko client (XChain transaction acceptance, Ava transfer to PChain, etc). There is
 		only one timeout for each kind of state change in order to reduce the complexity of
 		configuring timeouts throughout the test suite.
+		Also, each state change is roughly the same - we're waiting not only for
+		a transaction to be considered accepted by the network and also for the nodes
+		internal state to reflect that acceptance.
 	 */
 	networkAcceptanceTimeout time.Duration
 }
