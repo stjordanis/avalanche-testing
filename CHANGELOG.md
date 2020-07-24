@@ -1,6 +1,7 @@
 # TBD
 * Split `staking_network_tests` into separate files per test
 * Upgrade to Kurtosis version with simplified service config definition
+* Implement network consensus timeouts in high level gecko client as fractions of total test timeout
 * Add CI checks to make sure changelog is updated
 * Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
 * Significantly up test execution timeouts

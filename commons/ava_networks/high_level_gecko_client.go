@@ -25,17 +25,30 @@ const (
 )
 
 type HighLevelGeckoClient struct {
-	client    *gecko_client.GeckoClient
-	geckoUser *GeckoUser
+	client                   *gecko_client.GeckoClient
+	geckoUser                *GeckoUser
+	/*
+		This timeout represents the time the HighLevelGeckoClient will wait for some state
+		change in the network to be understood as accepted and implemented by the underlying
+		Gecko client (XChain transaction acceptance, Ava transfer to PChain, etc). There is
+		only one timeout for each kind of state change in order to reduce the complexity of
+		configuring timeouts throughout the test suite.
+		Also, each state change is roughly the same - we're waiting not only for
+		a transaction to be considered accepted by the network and also for the nodes
+		internal state to reflect that acceptance.
+	 */
+	networkAcceptanceTimeout time.Duration
 }
 
 func NewHighLevelGeckoClient(
 		client *gecko_client.GeckoClient,
 		username string,
-		password string) *HighLevelGeckoClient {
+		password string,
+		networkAcceptanceTimeout time.Duration) *HighLevelGeckoClient {
 	return &HighLevelGeckoClient{
-		client:    client,
-		geckoUser: NewGeckoUser(username, password),
+		client:                   client,
+		geckoUser:                NewGeckoUser(username, password),
+		networkAcceptanceTimeout: networkAcceptanceTimeout,
 	}
 }
 
@@ -283,7 +296,7 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 			we retry based on the contents of the error message from the XChain call if the pchain transaction
 			has not yet reached consensus
 		*/
-		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait fro transaction acceptance
+		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait for transaction acceptance
 		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
 			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
 			time.Sleep(IMPORT_AVA_TO_XCHAIN_TIMEOUT)
@@ -298,14 +311,14 @@ func (highLevelGeckoClient HighLevelGeckoClient) TransferAvaPChainToXChain(
 	return xchainAddress, nil
 }
 
-// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAcceptance(txnId string) error {
 	client := highLevelGeckoClient.client
 	status, err := client.XChainApi().GetTxStatus(txnId)
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get status.")
 	}
-	for status != TRANSACTION_ACCEPTED_STATUS {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && status != TRANSACTION_ACCEPTED_STATUS; i++ {
 		status, err = client.XChainApi().GetTxStatus(txnId)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get status.")
@@ -313,24 +326,32 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForXchainTransactionAccepta
 		logrus.Debugf("Status for transaction %s: %s", txnId, status)
 		time.Sleep(time.Second)
 	}
-	return nil
+	if status != TRANSACTION_ACCEPTED_STATUS {
+		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
+	} else {
+		return nil
+	}
 }
 
-// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForValidatorAddition(nodeId string, subnetIdPtr *string) error {
 	client := highLevelGeckoClient.client
 	validators, err := client.PChainApi().GetCurrentValidators(subnetIdPtr)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current validators")
 	}
-	for !checkValidatorInValidators(nodeId, validators) {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && !checkValidatorInValidators(nodeId, validators); i++ {
 		time.Sleep(time.Second)
 		validators, err = client.PChainApi().GetCurrentValidators(subnetIdPtr)
 		if err != nil {
 			return stacktrace.Propagate(err, "Could not get current validators")
 		}
 	}
-	return nil
+	if !checkValidatorInValidators(nodeId, validators) {
+		return stacktrace.NewError("Timed out waiting for validator %s to be accepted as a validator by the network.", nodeId)
+	} else {
+		return nil
+	}
 }
 
 func checkValidatorInValidators(nodeId string, validators []gecko_client.Validator) bool {
@@ -342,7 +363,6 @@ func checkValidatorInValidators(nodeId string, validators []gecko_client.Validat
 	return false
 }
 
-// TODO TODO TODO Add a timeout parameter instead of waiting infinitely
 func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pchainAddress string) error {
 	client := highLevelGeckoClient.client
 	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
@@ -353,7 +373,8 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 	if err != nil {
 		return stacktrace.Propagate(err,"Failed to get balance.")
 	}
-	for balance == "0" {
+	pollStartTime := time.Now()
+	for i := 0; time.Since(pollStartTime) < highLevelGeckoClient.networkAcceptanceTimeout && balance == "0"; i++ {
 		pchainAccount, err = client.PChainApi().GetAccount(pchainAddress)
 		if err != nil {
 			return stacktrace.Propagate(err,"Failed to get account information.")
@@ -362,7 +383,11 @@ func (highLevelGeckoClient HighLevelGeckoClient) waitForPchainNonZeroBalance(pch
 		logrus.Debugf("Balance for account %s: %s", pchainAddress, balance)
 		time.Sleep(time.Second)
 	}
-	return nil
+	if balance == "0" {
+		return stacktrace.NewError("Timed out waiting for PChain address %s to receive funds.", pchainAddress)
+	} else {
+		return nil
+	}
 }
 
 func (highLevelGeckoClient HighLevelGeckoClient) getCurrentPayerNonce(pchainAddress string) (int, error) {
