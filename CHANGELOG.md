@@ -1,6 +1,27 @@
 # TBD
+* Split `staking_network_tests` into separate files per test
+* Upgrade to Kurtosis version with simplified service config definition
+* Implement network consensus timeouts in high level gecko client as fractions of total test timeout
+* Add CI checks to make sure changelog is updated
+* Upgrade to Kurtosis version using custom structs for service/config IDs (rather than ints)
+* Significantly up test execution timeouts
+* Make controller Docker image `tee` to the logfile, rather than redirecting all output
 * Switch to using the `Info.isBootstrapped` endpoint to check for node liveness
-* Add 30s timeout to Gecko client requests
+
+# 0.6.0
+* Use Kurtosis version that allows the user to configure network width
+* Use Kurtosis version where `TestSuiteRunner.RunTests` takes in a set of tests, rather than a list
+* Move `ServiceSocket`, which is Ava-specific, to this repo from Kurtosis
+* Parameterize the `GeckoService` struct with ports so that it's not implicitly relying on constants from `GeckoServiceInitializerCore`
+* Fix breaks caused by small Kurtosis cleanups
+* Rework the README to do a better job explaining what this repo contains
+* Increasing timeouts in startup and in duplicate ID test to work in gecko CI
+* Add logic to wait for addition of validator in default subnet list
+
+# 0.5.0
+* Make the fully-connected-node test actually test staker registration by ensuring a second node sees the newly-registered-as-staker node
+* Upgrade to Kurtosis version with hard test timeouts, to prevent infinite hangs
+* Added an unrequested chit spammer Byzantine test
 
 # 0.4.0
 * Drop default loglevel for initializer & controller down to DEBUG

@@ -169,7 +169,11 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 }
 
 func (core GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
-	return GeckoService{ipAddr: ipAddr}
+	return GeckoService{
+		ipAddr:      ipAddr,
+		stakingPort: stakingPort,
+		jsonRpcPort: httpPort,
+	}
 }
 
 func (core GeckoServiceInitializerCore) GetTestVolumeMountpoint() string {
