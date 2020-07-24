@@ -10,21 +10,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // ============= RPC Requester ===================
 const (
 	JSON_RPC_VERSION = "2.0"
 )
-
-type jsonRpcRequester interface {
-	makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error)
-}
-
-type geckoJsonRpcRequester struct {
-	ipAddr string
-	port nat.Port
-}
 
 // This needs to be public so the JSON package can serialize it
 type JsonRpcRequest struct {
@@ -45,6 +37,26 @@ type JsonRpcResponse struct {
 	Error JsonRpcError `json: "error"`
 	Result map[string]interface{} `json: "result"`
 	Id             int                `json:"id"`
+}
+
+type jsonRpcRequester interface {
+	makeRpcRequest(endpoint string, method string, params map[string]interface{}) ([]byte, error)
+}
+
+type geckoJsonRpcRequester struct {
+	ipAddr string
+	port nat.Port
+	client http.Client
+}
+
+func newGeckoJsonRpcRequester(ipAddr string, port nat.Port, requestTimeout time.Duration) *geckoJsonRpcRequester {
+	return &geckoJsonRpcRequester{
+		ipAddr: ipAddr,
+		port:   port,
+		client: http.Client{
+			Timeout: requestTimeout,
+		},
+	}
 }
 
 
