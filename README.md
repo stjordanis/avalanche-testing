@@ -18,13 +18,13 @@ Requirements
 Running Locally
 ---------------
 1. Clone this repository
-1. Run `scripts/full_rebuild_and_run.sh`
+1. Run `scripts/full_rebuild_and_run.sh` and wait for it to finish (which will take a while)
 
-In your Docker engine you'll now see:
-* A set of running Docker containers representing the nodes of the test networks
-* A set of stopped Docker containers for the test controllers, one for each test
+This command will spin up multiple Docker containers during its operation, and you can examine container logs via either your Docker engine dashboard GUI or the `docker container ls` and `docker container logs`.
 
-You can now run `scripts/run.sh` to re-run the testing suite, using whatever arguments you like. To see the full list of supported arguments, pass in the `--help` flag to the `run.sh` script.
+NOTE: The Ava E2E test suite defaults to running 4 tests in parallel to speed up test suite execution time. If your machine has less cores, you should reduce this parallelism to _at maximum_ the number of cores on your machine, else the extra context-switching will slow down test execution and potentially cause spurious failures. To set the paralleism, pass the `--parallelism=N` argument to `full_rebuild_and_run.sh` (where "N" is the desired number of threads).
+
+Once `full_rebuild_and_run.sh` has finished, you can now execute `scripts/run.sh` to re-run the testing suite without needing to rebuild. `run.sh` will accept arguments to modify test suite execution; to see the full list of supported arguments, pass in the `--help` flag.
 
 Developing Locally
 ------------------
@@ -51,9 +51,6 @@ Additionally, for ease of writing tests, this repo also contains a Go client for
 
 ### Running Your Code
 The `scripts/full_rebuild_and_run.sh` will rebuild and rerun both the initializer and controller Docker image; rerun this every time that you make a change. Arguments passed to this script will get passed to the initializer binary CLI as-is.
-
-### Parallelism
-The Ava E2E test suite defaults to running 4 tests in parallel to speed up test suite execution time. If your machine has less cores, you should reduce this parallelism to _at maximum_ the number of cores on your machine else the extra context-switching will slow down test execution and potentially cause spurious failures.
 
 ### Keeping Your Dev Environment Clean
 Kurtosis intentionally doesn't delete containers and volumes, which means your local Docker environment will accumulate images, containers, and volumes. Make sure to read [the Notes section of the Kurtosis README](https://github.com/kurtosis-tech/kurtosis/tree/develop#notes) for information on how to keep your local environment clean while you develop.
