@@ -7,6 +7,7 @@
 * Significantly up test execution timeouts
 * Make controller Docker image `tee` to the logfile, rather than redirecting all output
 * Implement a 10-second HTTP request timeout in the Gecko client
+* Upgraded to Kurtosis that allows the setup buffer to be configured at a per-test level, and gave a generous setup buffer for as long as the Gecko availability checker core has a `time.Sleep` in it
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width

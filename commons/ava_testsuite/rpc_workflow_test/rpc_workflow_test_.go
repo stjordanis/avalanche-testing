@@ -34,7 +34,7 @@ type StakingNetworkRpcWorkflowTest struct {
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
-	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
@@ -133,7 +133,11 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		desiredServices)
 }
 
-func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep
-	return 300 * time.Second
+func (test StakingNetworkRpcWorkflowTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
+}
+
+func (test StakingNetworkRpcWorkflowTest) GetSetupBuffer() time.Duration {
+	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
+	return 6 * time.Minute
 }
