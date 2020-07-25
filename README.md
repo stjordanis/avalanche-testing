@@ -28,7 +28,6 @@ You can now run `scripts/run.sh` to re-run the testing suite, using whatever arg
 
 Developing Locally
 ------------------
-### Architecture
 This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurtosis), so you should first go through the tutorial there to familiarize yourself with the core Kurtosis concepts.
 
 In this implementation of Kurtosis, we have:
@@ -50,8 +49,11 @@ Additionally, for ease of writing tests, this repo also contains a Go client for
 1. Fill in the interface's functions
 1. Register the test in `AvaTestSuite`'s `GetTests` method
 
-### Running Locally As A Developer
+### Running Your Code
 The `scripts/full_rebuild_and_run.sh` will rebuild and rerun both the initializer and controller Docker image; rerun this every time that you make a change. Arguments passed to this script will get passed to the initializer binary CLI as-is.
+
+### Parallelism
+The Ava E2E test suite defaults to running 4 tests in parallel to speed up test suite execution time. If your machine has less cores, you should reduce this parallelism to _at maximum_ the number of cores on your machine else the extra context-switching will slow down test execution and potentially cause spurious failures.
 
 ### Keeping Your Dev Environment Clean
 Kurtosis intentionally doesn't delete containers and volumes, which means your local Docker environment will accumulate images, containers, and volumes. Make sure to read [the Notes section of the Kurtosis README](https://github.com/kurtosis-tech/kurtosis/tree/develop#notes) for information on how to keep your local environment clean while you develop.
