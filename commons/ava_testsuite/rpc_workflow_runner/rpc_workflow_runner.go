@@ -25,6 +25,12 @@ const (
 	IMPORT_AVA_TO_XCHAIN_TIMEOUT = time.Second
 )
 
+/*
+	RpcWorkflowRunner executes standard testing workflows like funding accounts from
+	genesis and adding nodes as validators, using the a given gecko client handle as the
+	entry point to the test network. It runs the RpcWorkflows using the credential
+	set in the GeckoUser field.
+ */
 type RpcWorkflowRunner struct {
 	client                   *gecko_client.GeckoClient
 	geckoUser                *GeckoUser
