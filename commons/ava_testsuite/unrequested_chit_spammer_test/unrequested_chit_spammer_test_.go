@@ -34,6 +34,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
 
+	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))
 		if err != nil {
@@ -54,6 +55,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		}
 		logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	}
+	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
+
+	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
 	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigId, normalNodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add normal node with high quorum and sample to network."))
@@ -74,6 +78,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
 	}
+	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
+
+	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
@@ -82,20 +89,29 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
+	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
+
 }
 
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+	// Define normal node and byzantine node configurations
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
+		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true,
+			ava_services.LOG_LEVEL_DEBUG,
+			test.UnrequestedChitSpammerImageName,
+			2,
+			2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true,
+			ava_services.LOG_LEVEL_DEBUG,
+			test.NormalImageName,
+			6,
+			8),
+	}
+	// Define the map from service->configuration for the network
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
 	}
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.NormalImageName, 6, 8),
-		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.UnrequestedChitSpammerImageName, 2, 2),
-	}
-	logrus.Debugf("Byzantine Image Name: %s", test.NormalImageName)
-	logrus.Debugf("Normal Image Name: %s", test.UnrequestedChitSpammerImageName)
-
 	return ava_networks.NewTestGeckoNetworkLoader(
 		true,
 		test.NormalImageName,
