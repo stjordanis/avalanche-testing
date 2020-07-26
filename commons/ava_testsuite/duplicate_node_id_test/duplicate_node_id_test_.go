@@ -1,6 +1,8 @@
 package duplicate_node_id_test
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
@@ -9,12 +11,11 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 const (
 	normalNodeConfigId = 0
-	sameCertConfigId = 1
+	sameCertConfigId   = 1
 
 	vanillaNodeServiceId = 0
 )
@@ -23,6 +24,7 @@ type DuplicateNodeIdTest struct {
 	ImageName string
 	Verifier  verifier.NetworkStateVerifier
 }
+
 func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
@@ -158,8 +160,22 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 
 func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
-		sameCertConfigId:   *ava_networks.NewTestGeckoNetworkServiceConfig(false, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+			true,
+			ava_services.LOG_LEVEL_DEBUG,
+			test.ImageName,
+			2,
+			2,
+			make(map[string]string),
+		),
+		sameCertConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+			false,
+			ava_services.LOG_LEVEL_DEBUG,
+			test.ImageName,
+			2,
+			2,
+			make(map[string]string),
+		),
 	}
 	desiredServices := map[int]int{
 		vanillaNodeServiceId: normalNodeConfigId,
@@ -185,7 +201,7 @@ This helper function will grab node IDs and Gecko clients
 func getNodeIdsAndClients(
 	testContext testsuite.TestContext,
 	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient){
+	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) {
 	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
 	allNodeIds = make(map[int]string)
 	for serviceId, _ := range allServiceIds {

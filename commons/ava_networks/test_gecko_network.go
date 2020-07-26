@@ -73,6 +73,7 @@ type TestGeckoNetworkServiceConfig struct {
 	imageName      string
 	snowQuorumSize int
 	snowSampleSize int
+	cliArgs        map[string]string // CLI Args to pass directly to Gecko
 }
 
 func NewTestGeckoNetworkServiceConfig(
@@ -80,13 +81,15 @@ func NewTestGeckoNetworkServiceConfig(
 	serviceLogLevel ava_services.GeckoLogLevel,
 	imageName string,
 	snowQuorumSize int,
-	snowSampleSize int) *TestGeckoNetworkServiceConfig {
+	snowSampleSize int,
+	cliArgs map[string]string) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
 		varyCerts:       varyCerts,
 		serviceLogLevel: serviceLogLevel,
 		imageName:       imageName,
 		snowQuorumSize:  snowQuorumSize,
 		snowSampleSize:  snowSampleSize,
+		cliArgs:         cliArgs,
 	}
 }
 
@@ -181,9 +184,11 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			loader.bootstrapperSnowSampleSize,
 			loader.bootstrapperSnowQuorumSize,
 			loader.isStaking,
-			bootNodeIds[0:i], // Only the node IDs of the already-started nodes
+			make(map[string]string), // No additional CLI args for the default network
+			bootNodeIds[0:i],        // Only the node IDs of the already-started nodes
 			cert_providers.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
-			loader.bootNodeLogLevel)
+			loader.bootNodeLogLevel,
+		)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 
 		if err := builder.AddConfiguration(configId, loader.bootNodeImage, initializerCore, availabilityCheckerCore); err != nil {
@@ -195,13 +200,16 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 	for configId, configParams := range loader.serviceConfigs {
 		certProvider := cert_providers.NewRandomGeckoCertProvider(configParams.varyCerts)
 		imageName := configParams.imageName
+
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(
 			configParams.snowSampleSize,
 			configParams.snowQuorumSize,
 			loader.isStaking,
+			configParams.cliArgs,
 			bootNodeIds,
 			certProvider,
-			configParams.serviceLogLevel)
+			configParams.serviceLogLevel,
+		)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
 		if err := builder.AddConfiguration(configId, imageName, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding Gecko node configuration with ID %v", configId)
@@ -241,8 +249,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 		availabilityCheckers[serviceId] = *checker
 	}
 
-	// User-requested nodes
-
+	// Additional user defined nodes
 	for serviceId, configId := range loader.desiredServiceConfig {
 		checker, err := network.AddService(configId, serviceId, bootstrapperServiceIds)
 		if err != nil {

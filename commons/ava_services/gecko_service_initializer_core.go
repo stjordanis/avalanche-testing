@@ -35,6 +35,7 @@ type GeckoServiceInitializerCore struct {
 	snowSampleSize      int
 	snowQuorumSize      int
 	stakingTlsEnabled   bool
+	cliArgs             map[string]string
 	bootstrapperNodeIds []string
 	certProvider        cert_providers.GeckoCertProvider
 	logLevel            GeckoLogLevel
@@ -60,6 +61,7 @@ func NewGeckoServiceInitializerCore(
 	snowSampleSize int,
 	snowQuorumSize int,
 	stakingTlsEnabled bool,
+	cliArgs map[string]string,
 	bootstrapperNodeIds []string,
 	certProvider cert_providers.GeckoCertProvider,
 	logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
@@ -73,6 +75,7 @@ func NewGeckoServiceInitializerCore(
 		snowSampleSize:      snowSampleSize,
 		snowQuorumSize:      snowQuorumSize,
 		stakingTlsEnabled:   stakingTlsEnabled,
+		cliArgs:             cliArgs,
 		bootstrapperNodeIds: bootstrapperIdsCopy,
 		certProvider:        certProvider,
 		logLevel:            logLevel,
@@ -115,7 +118,8 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		return nil, stacktrace.NewError(
 			"Gecko service is being started with %v dependencies but only %v boot node IDs have been configured",
 			numDependencies,
-			numBootNodeIds)
+			numBootNodeIds,
+		)
 	}
 
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
@@ -164,6 +168,12 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips="+joinedSockets)
+	}
+
+	// Append additional CLI arguments
+	// These are added as is with no additional checking
+	for param, argument := range core.cliArgs {
+		commandList = append(commandList, fmt.Sprintf("--%s=%s", param, argument))
 	}
 
 	logrus.Debugf("Command list: %+v", commandList)

@@ -1,19 +1,19 @@
 package gecko_client
 
 type UnsignedTransactionInfo struct {
-	UnsignedTx string 	`json:"unsignedTx"`
+	UnsignedTx string `json:"unsignedTx"`
 }
 
 type TransactionInfo struct {
-	Tx string 	`json:"tx"`
+	Tx string `json:"tx"`
 }
 
 type SignTransactionInfo struct {
-	Tx string 	`json:"Tx"`
+	Tx string `json:"Tx"`
 }
 
 type TransactionIDInfo struct {
-	TxID string 	`json:"txID"`
+	TxID string `json:"txID"`
 }
 
 // ============= Blockchain ====================
@@ -31,7 +31,7 @@ type CreateBlockchainResponse struct {
 }
 
 type BlockchainStatus struct {
-	Status string	`json:"status"`
+	Status string `json:"status"`
 }
 
 type BlockchainIDList struct {
@@ -43,27 +43,27 @@ type BlockchainList struct {
 }
 
 type GetBlockchainStatusResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result BlockchainStatus	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string           `json:"jsonrpc"`
+	Result         BlockchainStatus `json:"result"`
+	Id             int              `json:"id"`
 }
 
 type Blockchain struct {
-	Id string `json: "id"`
-	Name string `json: "name"`
+	Id       string `json: "id"`
+	Name     string `json: "name"`
 	SubnetID string `json: "subnetID"`
-	VmID string `json: "vmID"`
+	VmID     string `json: "vmID"`
 }
 
 type GetBlockchainsResponse struct {
-	JsonRpcVersion string                  `json:"jsonrpc"`
+	JsonRpcVersion string         `json:"jsonrpc"`
 	Result         BlockchainList `json:"result"`
-	Id             int                     `json:"id"`
+	Id             int            `json:"id"`
 }
 
 // ============= Accounts ====================
 type AccountAddressInfo struct {
-	Address string 	`json:"address"`
+	Address string `json:"address"`
 }
 
 type CreateAccountResponse struct {
@@ -79,19 +79,19 @@ type ImportKeyResponse struct {
 }
 
 type PrivateKeyInfo struct {
-	PrivateKey string	`json:"privateKey"`
+	PrivateKey string `json:"privateKey"`
 }
 
 type ExportKeyResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result PrivateKeyInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string         `json:"jsonrpc"`
+	Result         PrivateKeyInfo `json:"result"`
+	Id             int            `json:"id"`
 }
 
 type AccountInfo struct {
-	Address string 	`json:"address"`
-	Nonce string 	`json:"nonce"`
-	Balance string 	`json:"balance"`
+	Address string `json:"address"`
+	Nonce   string `json:"nonce"`
+	Balance string `json:"balance"`
 }
 
 type GetAccountResponse struct {
@@ -101,7 +101,7 @@ type GetAccountResponse struct {
 }
 
 type AccountList struct {
-	Accounts	[]AccountInfo	`json:"accounts"`
+	Accounts []AccountInfo `json:"accounts"`
 }
 
 type ListAccountsResponse struct {
@@ -112,55 +112,55 @@ type ListAccountsResponse struct {
 
 // ============= Validators ====================
 type Validator struct {
-	StartTime string `json:"startTime"`
-	EndTime string	`json:"endTime"`
-	StakeAmount string	`json:"stakeAmount"`
-	Id string	`json:"id"`
+	StartTime   string `json:"startTime"`
+	EndTime     string `json:"endTime"`
+	StakeAmount string `json:"stakeAmount"`
+	Id          string `json:"id"`
 }
 
 type ValidatorList struct {
-	Validators []Validator	`json:"validators"`
+	Validators []Validator `json:"validators"`
 }
 
 type GetValidatorsResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result ValidatorList	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string        `json:"jsonrpc"`
+	Result         ValidatorList `json:"result"`
+	Id             int           `json:"id"`
 }
 
 type ValidatorIdsList struct {
-	Validators []string	`json:"validators"`
+	Validators []string `json:"validators"`
 }
 
 type SampleValidatorsResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result ValidatorIdsList	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string           `json:"jsonrpc"`
+	Result         ValidatorIdsList `json:"result"`
+	Id             int              `json:"id"`
 }
 
 type AddDefaultSubnetValidatorResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result UnsignedTransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 type AddNonDefaultSubnetValidatorResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result UnsignedTransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 type AddDefaultSubnetDelegator struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result UnsignedTransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 // ============= Subnets ========================
 type Subnet struct {
-	Id string `json:"id"`
+	Id          string   `json:"id"`
 	ControlKeys []string `json:"controlKeys"`
-	Threshold string `json:"threshold"`
+	Threshold   string   `json:"threshold"`
 }
 
 type SubnetID struct {
@@ -168,50 +168,49 @@ type SubnetID struct {
 }
 
 type SubnetList struct {
-	Subnets []Subnet	`json:"subnets"`
+	Subnets []Subnet `json:"subnets"`
 }
 
 type GetSubnetsResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result SubnetList	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string     `json:"jsonrpc"`
+	Result         SubnetList `json:"result"`
+	Id             int        `json:"id"`
 }
 
 type ValidatedByResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result SubnetID	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string   `json:"jsonrpc"`
+	Result         SubnetID `json:"result"`
+	Id             int      `json:"id"`
 }
 
 type ValidatesResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result BlockchainIDList	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string           `json:"jsonrpc"`
+	Result         BlockchainIDList `json:"result"`
+	Id             int              `json:"id"`
 }
-
 
 // ============= AVA Transfers ========================
 
 type ExportAVAResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result UnsignedTransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string                  `json:"jsonrpc"`
+	Result         UnsignedTransactionInfo `json:"result"`
+	Id             int                     `json:"id"`
 }
 
 type ImportAVAResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result TransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string          `json:"jsonrpc"`
+	Result         TransactionInfo `json:"result"`
+	Id             int             `json:"id"`
 }
 
 type SignResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result SignTransactionInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string              `json:"jsonrpc"`
+	Result         SignTransactionInfo `json:"result"`
+	Id             int                 `json:"id"`
 }
 
 type IssueTxResponse struct {
-	JsonRpcVersion string	`json:"jsonrpc"`
-	Result TransactionIDInfo	`json:"result"`
-	Id int	`json:"id"`
+	JsonRpcVersion string            `json:"jsonrpc"`
+	Result         TransactionIDInfo `json:"result"`
+	Id             int               `json:"id"`
 }

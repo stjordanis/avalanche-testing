@@ -3,6 +3,7 @@ module github.com/kurtosis-tech/ava-e2e-tests
 go 1.13
 
 require (
+	github.com/ava-labs/gecko v0.5.7
 	github.com/docker/go-connections v0.4.0
 	github.com/imroc/req v0.3.0 // indirect
 	github.com/kurtosis-tech/kurtosis v0.0.0-20200721003725-75273434eaf4

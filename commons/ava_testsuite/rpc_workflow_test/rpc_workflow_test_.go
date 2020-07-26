@@ -1,24 +1,25 @@
 package rpc_workflow_test
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 const (
-	stakerUsername           = "staker"
-	stakerPassword           = "test34test!23"
-	delegatorUsername           = "delegator"
-	delegatorPassword           = "test34test!23"
-	seedAmount               = int64(50000000000000)
-	stakeAmount              = int64(30000000000000)
-	delegatorAmount              = int64(30000000000000)
+	stakerUsername    = "staker"
+	stakerPassword    = "test34test!23"
+	delegatorUsername = "delegator"
+	delegatorPassword = "test34test!23"
+	seedAmount        = int64(50000000000000)
+	stakeAmount       = int64(30000000000000)
+	delegatorAmount   = int64(30000000000000)
 
 	regularNodeServiceId   = 0
 	delegatorNodeServiceId = 1
@@ -111,7 +112,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, nil),
 	}
 	desiredServices := map[int]int{
 		regularNodeServiceId:   normalNodeConfigId,
