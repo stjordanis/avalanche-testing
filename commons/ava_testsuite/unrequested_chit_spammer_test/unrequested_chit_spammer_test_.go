@@ -23,11 +23,13 @@ const (
 
 	networkAcceptanceTimeoutRatio = 0.3
 )
+
 // ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
 type StakingNetworkUnrequestedChitSpammerTest struct{
 	UnrequestedChitSpammerImageName string
 	NormalImageName                 string
 }
+
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
@@ -81,43 +83,31 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	expectedNumStakers := 10
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 }
+
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
 	}
-	return getByzantineNetworkLoader(serviceIdConfigMap, test.UnrequestedChitSpammerImageName, test.NormalImageName)
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.NormalImageName, 6, 8),
+		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.UnrequestedChitSpammerImageName, 2, 2),
+	}
+	logrus.Debugf("Byzantine Image Name: %s", test.NormalImageName)
+	logrus.Debugf("Normal Image Name: %s", test.UnrequestedChitSpammerImageName)
+
+	return ava_networks.NewTestGeckoNetworkLoader(
+		true,
+		test.NormalImageName,
+		ava_services.LOG_LEVEL_DEBUG,
+		2,
+		2,
+		serviceConfigs,
+		serviceIdConfigMap)
 }
+
 func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
 	// TODO drop this when the availabilityChecker doesn't have a sleep
 	return 720 * time.Second
 }
 
-
-
-// =============== Helper functions =============================
-
-/*
-Args:
-	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
-*/
-func getByzantineNetworkLoader(
-			desiredServices map[networks.ServiceID]networks.ConfigurationID,
-			byzantineImageName string,
-			normalImageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 6, 8),
-		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, byzantineImageName, 2, 2),
-	}
-	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
-	logrus.Debugf("Normal Image Name: %s", normalImageName)
-
-	return ava_networks.NewTestGeckoNetworkLoader(
-		true,
-		normalImageName,
-		ava_services.LOG_LEVEL_DEBUG,
-		2,
-		2,
-		serviceConfigs,
-		desiredServices)
-}

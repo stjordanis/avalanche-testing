@@ -32,6 +32,7 @@ type StakingNetworkRpcWorkflowTest struct {
 }
 
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
+	// ====================================== SETUP ======================================
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
@@ -61,6 +62,9 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		delegatorUsername,
 		delegatorPassword,
 		networkAcceptanceTimeout)
+	// ====================================== SETUP ======================================
+
+	// ====================================== RPC WORKFLOW ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
@@ -82,6 +86,9 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
+	// ====================================== RPC WORKFLOW ===============================
+
+
 	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
