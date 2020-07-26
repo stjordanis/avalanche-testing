@@ -7,6 +7,7 @@
 * Significantly up test execution timeouts
 * Make controller Docker image `tee` to the logfile, rather than redirecting all output
 * Implement a 10-second HTTP request timeout in the Gecko client
+* Rename HighLevelGeckoClient to RpcWorkflowRunner and move to ava_testsuite package
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
