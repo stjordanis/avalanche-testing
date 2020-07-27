@@ -54,7 +54,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(stakerClient, stakerUsername, stakerPassword, networkAcceptanceTimeout)
 	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(delegatorClient, delegatorUsername, delegatorPassword, networkAcceptanceTimeout)
-	// =============================== SETUP GECKO CLIENTS ======================================
 
 	// ====================================== ADD VALIDATOR ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
@@ -78,7 +77,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
 	}
-	// ====================================== ADD VALIDATOR ===============================
 
 	// ====================================== VERIFY NETWORK STATE ===============================
 	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
@@ -89,7 +87,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 6
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
-	// ====================================== VERIFY NETWORK STATE ===============================
 
 	// ========================= ADD DELEGATOR AND TRANSFER FUNDS TO XCHAIN ======================
 	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
@@ -106,7 +103,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
 	}
-	// ========================= ADD DELEGATOR AND TRANSFER FUNDS TO XCHAIN ======================
 
 	// ================================ VERIFY NETWORK STATE =====================================
 	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
@@ -116,7 +112,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	actualRemainingAva := xchainAccountInfo.Balance
 	expectedRemainingAva := strconv.FormatInt(remainingStakerAva, 10)
 	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, expectedRemainingAva))
-	// ================================ VERIFY NETWORK STATE =====================================
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {

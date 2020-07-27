@@ -55,7 +55,6 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		}
 		logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	}
-	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
 	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigId, normalNodeServiceId)
@@ -78,7 +77,6 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed add client as a validator."))
 	}
-	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
 
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
@@ -89,7 +87,6 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
-	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 
 }
 
