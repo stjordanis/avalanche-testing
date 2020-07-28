@@ -44,6 +44,7 @@ type StakingNetworkConflictingTxsVertexTest struct {
 // in processing.
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	logrus.Info("Changes are being reflected")
 
 	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceId)
 	if err != nil {
@@ -186,7 +187,14 @@ Args:
 */
 func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
 	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, normalImageName, 2, 2, make(map[string]string)),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+			true,
+			ava_services.LOG_LEVEL_DEBUG,
+			normalImageName,
+			2,
+			2,
+			make(map[string]string),
+		),
 		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,

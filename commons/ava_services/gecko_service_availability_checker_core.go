@@ -25,6 +25,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 		logrus.Info(stacktrace.Propagate(err, "Error occurred in getting liveness info"))
 		return false
 	}
+	logrus.Infof("Service reported healthy: %v", healthInfo.Healthy)
 
 	return healthInfo.Healthy
 }
