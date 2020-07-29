@@ -10,6 +10,9 @@ import (
 
 type GeckoServiceAvailabilityCheckerCore struct {}
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
+	// NOTE: we don't check the dependencies intentionally, because we don't need to - a Gecko service won't report itself
+	//  as up until its bootstrappers are up
+
 	castedService := toCheck.(GeckoService)
 	jsonRpcSocket := castedService.GetJsonRpcSocket()
 	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
