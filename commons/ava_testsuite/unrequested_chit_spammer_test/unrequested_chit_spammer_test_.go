@@ -3,6 +3,7 @@ package unrequested_chit_spammer_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -37,7 +38,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
-		highLevelByzClient := ava_networks.NewHighLevelGeckoClient(
+		highLevelByzClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 			byzClient,
 			byzantineUsername,
 			byzantinePassword,
@@ -63,7 +64,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed to get staker client."))
 	}
-	highLevelNormalClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelNormalClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		normalClient,
 		stakerUsername,
 		stakerPassword,

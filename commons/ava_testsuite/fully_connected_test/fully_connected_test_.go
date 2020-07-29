@@ -3,6 +3,7 @@ package fully_connected_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
@@ -48,7 +49,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	}
 
 	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceId]
-	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelExtraStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		nonBootValidatorClient,
 		stakerUsername,
 		stakerPassword,

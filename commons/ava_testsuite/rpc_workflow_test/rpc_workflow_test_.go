@@ -3,6 +3,7 @@ package rpc_workflow_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -51,12 +52,12 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
-	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		stakerClient,
 		stakerUsername,
 		stakerPassword,
 		networkAcceptanceTimeout)
-	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelDelegatorClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		delegatorClient,
 		delegatorUsername,
 		delegatorPassword,
@@ -105,7 +106,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
 	}
-	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
+	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
 	}
