@@ -303,7 +303,8 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 			we retry based on the contents of the error message from the XChain call if the pchain transaction
 			has not yet reached consensus
 		*/
-		// TODO TODO TODO When the PChain transaction status endpoint is deployed, use that to wait for transaction acceptance
+		// TODO When the PChain transaction status endpoint is deployed, use that to wait for transaction acceptance
+		//  (See https://github.com/ava-labs/gecko/issues/296)
 		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
 			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
 			time.Sleep(IMPORT_AVA_TO_XCHAIN_TIMEOUT)
