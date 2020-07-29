@@ -3,18 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
-	"os"
 )
 
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors:               true,
-		FullTimestamp:             true,
+		ForceColors:   true,
+		FullTimestamp: true,
 	})
 
 	testVolumeArg := flag.String(
@@ -41,10 +42,10 @@ func main() {
 		"Name of Docker image of the Gecko version being tested",
 	)
 
-	chitSpammerImageNameArg := flag.String(
-		"chit-spammer-image-name",
+	byzantineImageNameArg := flag.String(
+		"byzantine-image-name",
 		"",
-		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
+		"The name of a pre-built byzantine Gecko image, either on the local Docker engine or in Docker Hub",
 	)
 
 	dockerNetworkArg := flag.String(
@@ -78,7 +79,6 @@ func main() {
 	)
 	flag.Parse()
 
-
 	logLevelPtr := logging.LevelFromString(*logLevelArg)
 	if logLevelPtr == nil {
 		// It's a little goofy that we're logging an error before we've set the loglevel, but we do so at the highest
@@ -96,11 +96,10 @@ func main() {
 		*testControllerIpArg,
 		*geckoImageNameArg)
 
-
-	logrus.Debugf("Chit spammer image name: %s", *chitSpammerImageNameArg)
+	logrus.Debugf("Byzantine image name: %s", *byzantineImageNameArg)
 	testSuite := ava_testsuite.AvaTestSuite{
-		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName:      *geckoImageNameArg,
+		ByzantineImageName: *byzantineImageNameArg,
+		NormalImageName:    *geckoImageNameArg,
 	}
 	controller := controller.NewTestController(
 		*testVolumeArg,
