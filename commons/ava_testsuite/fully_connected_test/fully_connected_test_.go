@@ -1,6 +1,8 @@
 package fully_connected_test
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
@@ -9,30 +11,29 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
-	"time"
 )
 
 const (
-	stakerUsername           = "staker"
-	stakerPassword           = "test34test!23"
-	seedAmount               = int64(50000000000000)
-	stakeAmount              = int64(30000000000000)
+	stakerUsername = "staker"
+	stakerPassword = "test34test!23"
+	seedAmount     = int64(50000000000000)
+	stakeAmount    = int64(30000000000000)
 
 	normalNodeConfigId networks.ConfigurationID = 0
 
-	networkAcceptanceTimeoutRatio = 0.3
-	nonBootValidatorServiceId networks.ServiceID = "validator-service"
-	nonBootNonValidatorServiceId networks.ServiceID = "non-validator-service"
+	networkAcceptanceTimeoutRatio                    = 0.3
+	nonBootValidatorServiceId     networks.ServiceID = "validator-service"
+	nonBootNonValidatorServiceId  networks.ServiceID = "non-validator-service"
 )
 
-type StakingNetworkFullyConnectedTest struct{
+type StakingNetworkFullyConnectedTest struct {
 	ImageName string
 	Verifier  verifier.NetworkStateVerifier
 }
+
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
-
 
 	stakerIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds := make(map[networks.ServiceID]bool)
@@ -76,10 +77,10 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, nil),
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
-		nonBootValidatorServiceId: normalNodeConfigId,
+		nonBootValidatorServiceId:    normalNodeConfigId,
 		nonBootNonValidatorServiceId: normalNodeConfigId,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
@@ -109,7 +110,7 @@ func getNodeIdsAndClients(
 	testContext testsuite.TestContext,
 	network ava_networks.TestGeckoNetwork,
 	allServiceIds map[networks.ServiceID]bool,
-) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
+) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient) {
 	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
 	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
