@@ -3,6 +3,7 @@ package rpc_workflow_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -34,9 +35,9 @@ type StakingNetworkRpcWorkflowTest struct {
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	// =============================== SETUP GECKO CLIENTS ======================================
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
-
 	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
+
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
@@ -52,10 +53,17 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
-	highLevelStakerClient := ava_networks.NewHighLevelGeckoClient(stakerClient, stakerUsername, stakerPassword, networkAcceptanceTimeout)
-	highLevelDelegatorClient := ava_networks.NewHighLevelGeckoClient(delegatorClient, delegatorUsername, delegatorPassword, networkAcceptanceTimeout)
-
 	// ====================================== ADD VALIDATOR ===============================
+	highLevelStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
+		stakerClient,
+		stakerUsername,
+		stakerPassword,
+		networkAcceptanceTimeout)
+	highLevelDelegatorClient := rpc_workflow_runner.NewRpcWorkflowRunner(
+		delegatorClient,
+		delegatorUsername,
+		delegatorPassword,
+		networkAcceptanceTimeout)
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
@@ -105,7 +113,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 
 	// ================================ VERIFY NETWORK STATE =====================================
-	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, ava_networks.AVA_ASSET_ID)
+	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
 	}
@@ -135,7 +143,11 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		desiredServices)
 }
 
-func (test StakingNetworkRpcWorkflowTest) GetTimeout() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep
-	return 300 * time.Second
+func (test StakingNetworkRpcWorkflowTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
+}
+
+func (test StakingNetworkRpcWorkflowTest) GetSetupBuffer() time.Duration {
+	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
+	return 6 * time.Minute
 }

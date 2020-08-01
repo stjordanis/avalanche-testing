@@ -3,6 +3,7 @@ package unrequested_chit_spammer_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -32,7 +33,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct{
 
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
 	for i := 0; i < int(normalNodeServiceId); i++ {
@@ -40,7 +41,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
-		highLevelByzClient := ava_networks.NewHighLevelGeckoClient(
+		highLevelByzClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 			byzClient,
 			byzantineUsername,
 			byzantinePassword,
@@ -68,7 +69,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err,"Failed to get staker client."))
 	}
-	highLevelNormalClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelNormalClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		normalClient,
 		stakerUsername,
 		stakerPassword,
@@ -109,6 +110,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	for i := 0; i < int(normalNodeServiceId); i++ {
 		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
 	}
+	logrus.Debugf("Byzantine Image Name: %s", test.UnrequestedChitSpammerImageName)
+	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
+
 	return ava_networks.NewTestGeckoNetworkLoader(
 		true,
 		test.NormalImageName,
@@ -119,8 +123,12 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 		serviceIdConfigMap)
 }
 
-func (test StakingNetworkUnrequestedChitSpammerTest) GetTimeout() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep
-	return 720 * time.Second
+func (test StakingNetworkUnrequestedChitSpammerTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
 }
 
+func (test StakingNetworkUnrequestedChitSpammerTest) GetSetupBuffer() time.Duration {
+	// TODO drop this when the availabilityChecker doesn't have a sleep, because we spin up a *bunch* of nodes before test
+	//  execution starts
+	return 12 * time.Minute
+}

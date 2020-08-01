@@ -3,6 +3,7 @@ package fully_connected_test
 import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
@@ -30,7 +31,7 @@ type StakingNetworkFullyConnectedTest struct{
 }
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetTimeout().Nanoseconds()))
+	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 
 	stakerIds := castedNetwork.GetAllBootServiceIds()
@@ -48,7 +49,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	}
 
 	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceId]
-	highLevelExtraStakerClient := ava_networks.NewHighLevelGeckoClient(
+	highLevelExtraStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		nonBootValidatorClient,
 		stakerUsername,
 		stakerPassword,
@@ -91,9 +92,13 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 		desiredServices)
 }
 
-func (test StakingNetworkFullyConnectedTest) GetTimeout() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep
-	return 300 * time.Second
+func (test StakingNetworkFullyConnectedTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
+}
+
+func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
+	// TODO drop this when the availabilityChecker doesn't have a sleep (because we spin up a bunch of nodes before running the test)
+	return 6 * time.Minute
 }
 
 // ================ Helper functions =========================

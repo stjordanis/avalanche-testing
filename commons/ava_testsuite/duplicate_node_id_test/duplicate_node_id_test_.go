@@ -174,9 +174,13 @@ func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		desiredServices)
 }
 
-func (test DuplicateNodeIdTest) GetTimeout() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep
-	return 300 * time.Second
+func (test DuplicateNodeIdTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
+}
+
+func (test DuplicateNodeIdTest) GetSetupBuffer() time.Duration {
+	// TODO drop this when the availabilityChecker doesn't have a sleep (because we spin up a bunch of nodes before execution)
+	return 6 * time.Minute
 }
 
 // ================ Helper functions ==================================

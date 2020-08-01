@@ -10,6 +10,9 @@ import (
 
 type GeckoServiceAvailabilityCheckerCore struct {}
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
+	// NOTE: we don't check the dependencies intentionally, because we don't need to - a Gecko service won't report itself
+	//  as up until its bootstrappers are up
+
 	castedService := toCheck.(GeckoService)
 	jsonRpcSocket := castedService.GetJsonRpcSocket()
 	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
@@ -20,7 +23,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	}
 
 	// HACK HACK HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
-	// TODO TODO TODO once bootstrapping checker is available, use that instead of just waiting
+	// TODO TODO TODO once isReadiness endpoint is available, use that instead of just waiting
 	if healthInfo.Healthy {
 		time.Sleep(15 * time.Second)
 	}
