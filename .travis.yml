@@ -15,4 +15,4 @@ before_install:
 
 script:
   - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash .ci/check_for_changelog_in_diff.sh; fi
-  - .ci/run_and_validate_pchain_test.sh
+  - .ci/run_and_validate_e2e_tests.sh
