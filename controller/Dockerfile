@@ -27,7 +27,7 @@ CMD set -euo pipefail && ./test-controller \
     --test=${TEST_NAME} \
     --gecko-image-name=${GECKO_IMAGE_NAME} \
     --chit-spammer-image-name=${CHIT_SPAMMER_IMAGE_NAME} \
-    --docker-network=${NETWORK_NAME} \
+    --docker-network=${NETWORK_ID} \
     --subnet-mask=${SUBNET_MASK} \
     --test-controller-ip=${TEST_CONTROLLER_IP} \
     --gateway-ip=${GATEWAY_IP} \
