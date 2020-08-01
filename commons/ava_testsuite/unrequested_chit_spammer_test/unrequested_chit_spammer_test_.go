@@ -8,6 +8,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
 
@@ -18,7 +19,9 @@ const (
 	byzantinePassword = "byzant1n3!"
 	stakerUsername = "staker_gecko"
 	stakerPassword = "test34test!23"
-	normalNodeServiceId networks.ServiceID = 4
+	normalNodeServiceId networks.ServiceID = "normal-node"
+	byzantineNodePrefix string = "byzantine-node-"
+	numberOfByzantineNodes = 4
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 
@@ -36,8 +39,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
-	for i := 0; i < int(normalNodeServiceId); i++ {
-		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))
+	for i := 0; i < numberOfByzantineNodes; i++ {
+		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i)))
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
@@ -107,8 +110,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	}
 	// Define the map from service->configuration for the network
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
-	for i := 0; i < int(normalNodeServiceId); i++ {
-		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
+	for i := 0; i < numberOfByzantineNodes; i++ {
+		serviceIdConfigMap[networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i))] = byzantineConfigId
 	}
 	logrus.Debugf("Byzantine Image Name: %s", test.UnrequestedChitSpammerImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)

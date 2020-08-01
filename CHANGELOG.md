@@ -12,6 +12,7 @@
 * Bugfix on Travis CI checks for CHANGELOG entries
 * Add comments and documentation in RPC workflow and chit spammer tests
 * Using network ID in controller image rather than network name
+* Changing service IDs to strings rather than integers
 * Update function interface for GetStartCommand according to net.IP change in kurtosis
 
 # 0.6.0
