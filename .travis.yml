@@ -14,5 +14,5 @@ before_install:
   - export PATH="${PATH}:${HOME}/.local/bin" # this puts user-installed pip packages on path
 
 script:
-  - .ci/check_for_changelog_in_diff.sh
-  - .ci/run_and_validate_pchain_test.sh
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash .ci/check_for_changelog_in_diff.sh; fi
+  - .ci/run_and_validate_e2e_tests.sh
