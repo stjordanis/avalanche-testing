@@ -11,6 +11,7 @@
 * Rename HighLevelGeckoClient to RpcWorkflowRunner and move to ava_testsuite package
 * Bugfix on Travis CI checks for CHANGELOG entries
 * Using network ID in controller image rather than network name
+* Update function interface for GetStartCommand according to net.IP change in kurtosis
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
