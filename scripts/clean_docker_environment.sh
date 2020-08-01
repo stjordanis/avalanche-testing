@@ -1,5 +1,6 @@
 set -euo pipefail
 
+read -p "This script will remove unused, untagged Docker images and optionally all your Docker containers (ENTER to continue, Ctrl-C to quit) "
 read -p "Stop & clear *ALL* your Docker containers before cleaning old images? (Y/n) " yn
 case $yn in
     [Yy]* ) do_clear_containers=true;;
