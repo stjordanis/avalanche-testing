@@ -53,7 +53,6 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
-	// ====================================== ADD VALIDATOR ===============================
 	highLevelStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		stakerClient,
 		stakerUsername,
@@ -64,6 +63,8 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		delegatorUsername,
 		delegatorPassword,
 		networkAcceptanceTimeout)
+  
+	// ====================================== ADD VALIDATOR ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
