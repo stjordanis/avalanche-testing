@@ -85,7 +85,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 }
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
-	for i := 0; i < int(normalNodeServiceId); i++ {
+	for i := 0; i < numberOfByzantineNodes; i++ {
 		serviceIdConfigMap[networks.ServiceID(i)] = byzantineConfigId
 	}
 	return getByzantineNetworkLoader(serviceIdConfigMap, test.UnrequestedChitSpammerImageName, test.NormalImageName)

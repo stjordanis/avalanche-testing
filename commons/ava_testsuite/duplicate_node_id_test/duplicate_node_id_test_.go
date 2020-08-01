@@ -17,6 +17,8 @@ const (
 	sameCertConfigId networks.ConfigurationID = 1
 
 	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
+	badServiceId1 networks.ServiceID = "bad-service-1"
+	badServiceId2 networks.ServiceID = "bad-service-2"
 )
 
 type DuplicateNodeIdTest struct {
@@ -49,7 +51,6 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIds)
 
 	// Add the first dupe node ID (should look normal from a network perspective
-	badServiceId1 := vanillaNodeServiceId + 1
 	logrus.Info("Adding first node with soon-to-be-duplicated node ID...")
 	checker1, err := castedNetwork.AddService(sameCertConfigId, badServiceId1)
 	if err != nil {
@@ -82,7 +83,6 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceId1)
 
 	// Now, add a second node with the same ID
-	badServiceId2 := vanillaNodeServiceId + 2
 	logrus.Infof("Adding second node with service ID %v which will be a duplicated node ID...", badServiceId2)
 	checker2, err := castedNetwork.AddService(sameCertConfigId, badServiceId2)
 	if err != nil {
