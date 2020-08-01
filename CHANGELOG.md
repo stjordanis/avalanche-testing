@@ -11,6 +11,7 @@
 * Rename HighLevelGeckoClient to RpcWorkflowRunner and move to ava_testsuite package
 * Bugfix on Travis CI checks for CHANGELOG entries
 * Using network ID in controller image rather than network name
+* Added a script to clean Docker environment
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
