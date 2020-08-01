@@ -21,8 +21,8 @@ const (
 	stakeAmount              = int64(30000000000000)
 	delegatorAmount              = int64(30000000000000)
 
-	regularNodeServiceId   networks.ServiceID = 0
-	delegatorNodeServiceId networks.ServiceID = 1
+	regularNodeServiceId   networks.ServiceID = "validator-node"
+	delegatorNodeServiceId networks.ServiceID = "delegator-node"
 
 	networkAcceptanceTimeoutRatio = 0.3
 	normalNodeConfigId networks.ConfigurationID = 0

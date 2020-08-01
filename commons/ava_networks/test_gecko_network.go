@@ -8,6 +8,8 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,7 +18,7 @@ const (
 	bootNodeConfigIdStart int = 987654
 
 	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeServiceIdStart int = 987654
+	bootNodeServiceIdPrefix string = "boot-node-"
 )
 
 // ============== Network ======================
@@ -41,7 +43,7 @@ func (network TestGeckoNetwork) GetGeckoClient(serviceId networks.ServiceID) (*g
 func (network TestGeckoNetwork) GetAllBootServiceIds() map[networks.ServiceID]bool {
 	result := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		bootId := networks.ServiceID(bootNodeServiceIdStart + i)
+		bootId := networks.ServiceID(bootNodeServiceIdPrefix + strconv.Itoa(i))
 		result[bootId] = true
 	}
 	return result
@@ -140,8 +142,8 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	desiredServiceConfigsCopy := make(map[networks.ServiceID]networks.ConfigurationID)
 	for serviceId, configId := range desiredServiceConfigs {
-		if int(serviceId) >= bootNodeServiceIdStart && int(serviceId) < (bootNodeServiceIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
-			return nil, stacktrace.NewError("Service ID %v cannot be used as it's being used as a boot node config ID", serviceId)
+		if strings.HasPrefix(string(serviceId), bootNodeServiceIdPrefix) {
+			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot nodes.", serviceId, bootNodeServiceIdPrefix)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}
@@ -220,7 +222,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 	bootstrapperServiceIds := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
 		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
-		serviceId := networks.ServiceID(bootNodeServiceIdStart + i)
+		serviceId := networks.ServiceID(bootNodeServiceIdPrefix + strconv.Itoa(i))
 		checker, err := network.AddService(configId, serviceId, bootstrapperServiceIds)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "Error occurred when adding boot node with ID %v and config ID %v", serviceId, configId)

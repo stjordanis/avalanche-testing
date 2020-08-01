@@ -21,8 +21,8 @@ const (
 	normalNodeConfigId networks.ConfigurationID = 0
 
 	networkAcceptanceTimeoutRatio = 0.3
-	nonBootValidatorServiceId networks.ServiceID = 0
-	nonBootNonValidatorServiceId networks.ServiceID = 1
+	nonBootValidatorServiceId networks.ServiceID = "validator-service"
+	nonBootNonValidatorServiceId networks.ServiceID = "non-validator-service"
 )
 
 type StakingNetworkFullyConnectedTest struct{

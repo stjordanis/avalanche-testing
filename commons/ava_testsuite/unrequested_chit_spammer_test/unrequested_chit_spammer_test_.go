@@ -18,7 +18,8 @@ const (
 	byzantinePassword = "byzant1n3!"
 	stakerUsername = "staker_gecko"
 	stakerPassword = "test34test!23"
-	normalNodeServiceId networks.ServiceID = 4
+	normalNodeServiceId networks.ServiceID = "normal-node"
+	numberOfByzantineNodes = 4
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 
@@ -33,7 +34,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
-	for i := 0; i < int(normalNodeServiceId); i++ {
+	for i := 0; i < numberOfByzantineNodes; i++ {
 		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(i))
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))

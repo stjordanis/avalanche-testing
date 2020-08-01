@@ -16,7 +16,7 @@ const (
 	normalNodeConfigId networks.ConfigurationID = 0
 	sameCertConfigId networks.ConfigurationID = 1
 
-	vanillaNodeServiceId networks.ServiceID = 0
+	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
 )
 
 type DuplicateNodeIdTest struct {
