@@ -1,4 +1,6 @@
 # TBD
+
+# 0.7.0
 * Split `staking_network_tests` into separate files per test
 * Upgrade to Kurtosis version with simplified service config definition
 * Implement network consensus timeouts in high level gecko client as fractions of total test timeout
