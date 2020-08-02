@@ -10,11 +10,17 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 
+/*
+An implementation of testsuite.TestSuite for Ava
+ */
 type AvaTestSuite struct {
 	ByzantineImageName string
 	NormalImageName    string
 }
 
+/*
+An implementation of testsuite.TestSuite that returns the tests registered with this test suite
+ */
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 

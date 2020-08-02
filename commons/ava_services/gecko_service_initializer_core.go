@@ -16,6 +16,7 @@ import (
 const (
 	httpPort             nat.Port = "9650/tcp"
 	stakingPort          nat.Port = "9651/tcp"
+
 	stakingTlsCertFileId          = "staking-tls-cert"
 	stakingTlsKeyFileId           = "staking-tls-key"
 
@@ -24,7 +25,6 @@ const (
 
 // ========= Loglevel Enum ========================
 type GeckoLogLevel string
-
 const (
 	LOG_LEVEL_VERBOSE GeckoLogLevel = "verbo"
 	LOG_LEVEL_DEBUG   GeckoLogLevel = "debug"
@@ -32,13 +32,31 @@ const (
 )
 
 // ========= Initializer Core ========================
+/*
+An implementation of Kurtosis' services.ServiceInitializerCore used for initializing a Gecko service
+ */
 type GeckoServiceInitializerCore struct {
+	// Snow protocol sample size that the Gecko node will be run with
 	snowSampleSize      int
+
+	// Snow protocol quorum size that the Gecko node will be run with
 	snowQuorumSize      int
+
+	// Whether the Gecko node will start with TLS staking enabled or not
 	stakingTlsEnabled   bool
+
+	// TODO Switch these to be named properties of this struct, so that we're being explicit about what arguments
+	//  are consumed
+	// A set of CLI args that will be passed as-is to the Gecko service
 	cliArgs             map[string]string
+
+	// The Ava node IDs of the bootstrappers that the Gecko service should bootstrap from
 	bootstrapperNodeIds []string
+
+	// Cert provider that should be used when initializing the Gecko service
 	certProvider        cert_providers.GeckoCertProvider
+
+	// Log level that the Gecko service should start with
 	logLevel            GeckoLogLevel
 }
 
@@ -49,6 +67,7 @@ Args:
 	snowSampleSize: Sample size for Snow consensus protocol
 	snowQuroumSize: Quorum size for Snow consensus protocol
 	stakingTlsEnabled: Whether this node will use staking & TLS
+	cliArgs: A mapping of cli_arg -> cli_arg_value that will be passed as-is to the Gecko node
 	bootstrapperNodeIds: The node IDs of the bootstrapper nodes that this node will connect to. While this *seems* unintuitive
 		why this would be required, it's because Gecko doesn't actually use certs. So, to prevent against man-in-the-middle attacks,
 		the user is required to manually specify the node IDs of the nodese it's connecting to.
@@ -59,13 +78,13 @@ Returns:
 	An intializer core for creating Gecko nodes with the specified parameers.
 */
 func NewGeckoServiceInitializerCore(
-	snowSampleSize int,
-	snowQuorumSize int,
-	stakingTlsEnabled bool,
-	cliArgs map[string]string,
-	bootstrapperNodeIds []string,
-	certProvider cert_providers.GeckoCertProvider,
-	logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
+		snowSampleSize int,
+		snowQuorumSize int,
+		stakingTlsEnabled bool,
+		cliArgs map[string]string,
+		bootstrapperNodeIds []string,
+		certProvider cert_providers.GeckoCertProvider,
+		logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
 	for _, nodeId := range bootstrapperNodeIds {
@@ -83,6 +102,9 @@ func NewGeckoServiceInitializerCore(
 	}
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to declare Gecko's used ports
+ */
 func (core GeckoServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
 	return map[nat.Port]bool{
 		httpPort:    true,
@@ -90,16 +112,23 @@ func (core GeckoServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
 	}
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to declare the files Gecko needs
+*/
 func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 	if core.stakingTlsEnabled {
 		return map[string]bool{
 			stakingTlsCertFileId: true,
 			stakingTlsKeyFileId:  true,
 		}
+	} else {
+		return make(map[string]bool)
 	}
-	return make(map[string]bool)
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to initialize the files Gecko needs
+*/
 func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
@@ -112,6 +141,9 @@ func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[strin
 	return nil
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to build the command line that will be used to launch a Gecko service
+*/
 func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr net.IP, dependencies []services.Service) ([]string, error) {
 	numBootNodeIds := len(core.bootstrapperNodeIds)
 	numDependencies := len(dependencies)
@@ -181,6 +213,10 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 	return commandList, nil
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to take the IP address of the Docker container that Kurtosis
+	launches Gecko inside and wrap it with our GeckoService implementation of AvaService
+*/
 func (core GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
 	return GeckoService{
 		ipAddr:      ipAddr,
@@ -189,6 +225,10 @@ func (core GeckoServiceInitializerCore) GetServiceFromIp(ipAddr string) services
 	}
 }
 
+/*
+Implementation of services.ServiceInitializerCore function to declare the path on the Gecko Docker image where the test
+	Docker volume should be mounted on
+*/
 func (core GeckoServiceInitializerCore) GetTestVolumeMountpoint() string {
 	return testVolumeMountpoint
 }

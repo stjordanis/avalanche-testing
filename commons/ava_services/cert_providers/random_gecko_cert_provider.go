@@ -37,7 +37,7 @@ var rootCert = x509.Certificate{
 }
 
 /*
-A provider for Gecko service certs, with all certs signed by the same root CA
+An implementation of GeckoCertProvider that provides certs signed by the same root CA
  */
 type RandomGeckoCertProvider struct {
 	nextSerialNumber int64
@@ -48,7 +48,8 @@ type RandomGeckoCertProvider struct {
 Creates a new cert provider that can optionally return either the same cert every time, or different ones
 
 Args:
-	varyCerts: Whether to produce a different cert on each call to GetCertAndKey, or the same randomly-generated cert
+	varyCerts: True to produce a different cert on each call to GetCertAndKey, or false to yield the same
+		randomly-generated cert each time
  */
 func NewRandomGeckoCertProvider(varyCerts bool) *RandomGeckoCertProvider {
 	return &RandomGeckoCertProvider{
@@ -57,6 +58,14 @@ func NewRandomGeckoCertProvider(varyCerts bool) *RandomGeckoCertProvider {
 	}
 }
 
+/*
+Implementation of GeckoCertProvider function that yields a new cert and private key based off the configuration parameters
+	the user defined at construction time
+
+Returns:
+	certPemBytes: The bytes of the generated cert
+	keyPemBytes: The bytes of the private key that was generated alongside the cert
+ */
 func (r *RandomGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
 	if (r.varyCerts) {

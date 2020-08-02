@@ -9,12 +9,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Implements ServiceAvailabilityCheckerCore
+/*
+An implementation of services.ServiceAvailabilityCheckerCore that defines the criteria for a Gecko service being available
+ */
 type GeckoServiceAvailabilityCheckerCore struct{}
 
-// Set 20 second initial delay to allow the initial health check
-// func (g GeckoServiceAvailabilityCheckerCore) InitialDelay() time.Duration { return 20 * time.Second }
-
+/*
+An implementation of services.ServiceAvailabilityCheckerCore#IsServiceUp that returns true when the Gecko healthcheck
+	reports that the node is available
+ */
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
 	// NOTE: we don't check the dependencies intentionally, because we don't need to - a Gecko service won't report itself
 	//  as up until its bootstrappers are up
