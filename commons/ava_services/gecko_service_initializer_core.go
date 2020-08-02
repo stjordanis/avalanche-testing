@@ -7,6 +7,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+	"net"
 	"os"
 	"strings"
 )
@@ -106,7 +107,7 @@ func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[strin
 	return nil
 }
 
-func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr string, dependencies []services.Service) ([]string, error) {
+func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr net.IP, dependencies []services.Service) ([]string, error) {
 	numBootNodeIds := len(core.bootstrapperNodeIds)
 	numDependencies := len(dependencies)
 	if numDependencies != numBootNodeIds {
@@ -116,7 +117,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 			numBootNodeIds)
 	}
 
-	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr)
+	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr.String())
 	commandList := []string{
 		"/gecko/build/ava",
 		publicIpFlag,
