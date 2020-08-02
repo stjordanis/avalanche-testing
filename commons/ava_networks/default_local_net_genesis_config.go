@@ -1,17 +1,15 @@
 package ava_networks
 
+
+
 /*
-	For the default testnet, there are five bootstrappers. They have hardcoded bootstrapperIDs that correspond to their TLS certs.
-	This must be hardcoded because Gecko requires specifying the bootstrapperID
-	along with the bootstrapperIP when connecting to bootstrappers in TLS mode.
+When using Gecko with the 'local' testnet option, the P-chain comes preloaded with five bootstrapper nodes whose node
+	IDs are hardcoded in Gecko source. Node IDs are determined based off the TLS keys of the nodes, so to ensure that
+	we can launch nodes with the same node ID (to validate, else we wouldn't be able to validate at all), the Gecko
+	source code also provides the private keys for these nodes.
 
-	The hardcoded IDs in this file are the known Gecko ID for a node using the private key and cert in this file.
-	They are also hardcoded in the gecko source code as the IDs for the initial stakers of the default testnet.
+This struct contains the private keys and node IDs that come from Gecko for the 5 bootstrapper nodes.
 */
-
-
-// Genesis information about the network when running in 'local' mode, which comes from hardcodeed information in
-//  the Gecko source
 var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 	Stakers: defaultStakers,
 	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in tests
