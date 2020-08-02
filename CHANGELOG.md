@@ -14,6 +14,7 @@
 * Using network ID in controller image rather than network name
 * Changing service IDs to strings rather than integers
 * Update function interface for GetStartCommand according to net.IP change in kurtosis
+* Added a script to clean Docker environment
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width
