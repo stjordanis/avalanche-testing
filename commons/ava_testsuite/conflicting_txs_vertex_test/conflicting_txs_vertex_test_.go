@@ -22,8 +22,8 @@ const (
 	byzantineConflictingTxsVertex = "conflicting-txs-vertex"
 	stakerUsername                = "staker_gecko"
 	stakerPassword                = "test34test!23"
-	byzantineNodeServiceId        = 0
-	normalNodeServiceId           = 1
+	byzantineNodeServiceId networks.ServiceID = "byzantine-node"
+	normalNodeServiceId networks.ServiceID = "normal-node"
 	seedAmount                    = int64(50000000000000)
 	stakeAmount                   = int64(30000000000000)
 )
@@ -168,15 +168,20 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 
 func (test StakingNetworkConflictingTxsVertexTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Provision a byzantine and normal node
-	desiredServices := map[int]int{}
+	desiredServices := map[networks.ServiceID]networks.ConfigurationID{}
 	desiredServices[byzantineNodeServiceId] = byzantineConfigId
 	desiredServices[normalNodeServiceId] = normalNodeConfigId
 
 	return getByzantineNetworkLoader(desiredServices, test.ByzantineImageName, test.NormalImageName)
 }
 
-func (test StakingNetworkConflictingTxsVertexTest) GetTimeout() time.Duration {
-	return 120 * time.Second
+func (test StakingNetworkConflictingTxsVertexTest) GetExecutionTimeout() time.Duration {
+	return 3 * time.Minute
+}
+
+func (test StakingNetworkConflictingTxsVertexTest) GetSetupBuffer() time.Duration {
+	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
+	return 6 * time.Minute
 }
 
 // =============== Helper functions =============================
@@ -185,8 +190,8 @@ func (test StakingNetworkConflictingTxsVertexTest) GetTimeout() time.Duration {
 Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
-func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.ConfigurationID, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
@@ -217,3 +222,4 @@ func getByzantineNetworkLoader(desiredServices map[int]int, byzantineImageName s
 		desiredServices,
 	)
 }
+
