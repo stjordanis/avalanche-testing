@@ -10,18 +10,14 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"time"
 )
 
 
 const (
 	testNameArgSeparator       = ","
+	geckoImageNameEnvVar       = "GECKO_IMAGE_NAME"
 	chitSpammerImageNameEnvVar = "CHIT_SPAMMER_IMAGE_NAME"
 	defaultParallelism         = 4
-
-	// The max additional time we'll give to a test, on top of the per-test declared timeout, for setup & teardown
-	// TODO once we have an isBootstrapped endpoint that works, drop this down
-	additionalTestTimeoutBuffer = 300 * time.Second
 
 	// The number of bits to make each test network, which dictates the max number of services a test can spin up
 	// Here we choose 8 bits = 256 max services per test
@@ -89,7 +85,7 @@ func main() {
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testSuite := ava_testsuite.AvaTestSuite{
 		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName: *geckoImageNameArg,
+		NormalImageName:      *geckoImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}
@@ -134,11 +130,12 @@ func main() {
 
 	testSuiteRunner := initializer.NewTestSuiteRunner(
 		testSuite,
-		*geckoImageNameArg,
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
-		map[string]string{chitSpammerImageNameEnvVar: *chitSpammerImageNameArg},
-		additionalTestTimeoutBuffer,
+		map[string]string{
+			geckoImageNameEnvVar: *geckoImageNameArg,
+			chitSpammerImageNameEnvVar: *chitSpammerImageNameArg,
+		},
 		networkWidthBits)
 
 	// Create the container based on the configurations, but don't start it yet.
