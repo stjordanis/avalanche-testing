@@ -3,15 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"sort"
-	"strings"
-	"time"
-
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
+	"os"
+	"sort"
+	"strings"
 )
 
 const (
@@ -19,10 +17,6 @@ const (
 	geckoImageNameEnvVar     = "GECKO_IMAGE_NAME"
 	byzantineImageNameEnvVar = "BYZANTINE_IMAGE_NAME"
 	defaultParallelism       = 4
-
-	// The max additional time we'll give to a test, on top of the per-test declared timeout, for setup & teardown
-	// TODO once we have an isBootstrapped endpoint that works, drop this down
-	additionalTestTimeoutBuffer = 300 * time.Second
 
 	// The number of bits to make each test network, which dictates the max number of services a test can spin up
 	// Here we choose 8 bits = 256 max services per test
@@ -140,7 +134,6 @@ func main() {
 			geckoImageNameEnvVar:     *geckoImageNameArg,
 			byzantineImageNameEnvVar: *byzantineImageNameArg,
 		},
-		additionalTestTimeoutBuffer,
 		networkWidthBits)
 
 	// Create the container based on the configurations, but don't start it yet.

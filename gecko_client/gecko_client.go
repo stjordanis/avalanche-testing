@@ -2,8 +2,12 @@ package gecko_client
 
 import (
 	"github.com/docker/go-connections/nat"
+	"time"
 )
 
+const (
+	requestTimeout = 10 * time.Second
+)
 
 type GeckoClient struct {
 	pChainApi   PChainApi
@@ -14,11 +18,7 @@ type GeckoClient struct {
 }
 
 func NewGeckoClient(ipAddr string, port nat.Port) *GeckoClient {
-	rpcRequester := geckoJsonRpcRequester{
-		ipAddr: ipAddr,
-		port:   port,
-	}
-
+	rpcRequester := newGeckoJsonRpcRequester(ipAddr, port, requestTimeout)
 	return clientFromRequester(rpcRequester)
 }
 

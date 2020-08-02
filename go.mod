@@ -6,7 +6,7 @@ require (
 	github.com/ava-labs/gecko v0.5.7
 	github.com/docker/go-connections v0.4.0
 	github.com/imroc/req v0.3.0 // indirect
-	github.com/kurtosis-tech/kurtosis v0.0.0-20200721003725-75273434eaf4
+	github.com/kurtosis-tech/kurtosis v0.0.0-20200801231609-1aac12c61866
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a // indirect
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
 	github.com/sirupsen/logrus v1.6.0

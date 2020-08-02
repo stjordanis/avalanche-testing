@@ -14,10 +14,12 @@ import (
 )
 
 const (
-	normalNodeConfigId = 0
-	sameCertConfigId   = 1
+	normalNodeConfigId networks.ConfigurationID = 0
+	sameCertConfigId networks.ConfigurationID = 1
 
-	vanillaNodeServiceId = 0
+	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
+	badServiceId1 networks.ServiceID = "bad-service-1"
+	badServiceId2 networks.ServiceID = "bad-service-2"
 )
 
 type DuplicateNodeIdTest struct {
@@ -30,7 +32,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 
 	bootServiceIds := castedNetwork.GetAllBootServiceIds()
 
-	allServiceIds := make(map[int]bool)
+	allServiceIds := make(map[networks.ServiceID]bool)
 	for bootServiceId, _ := range bootServiceIds {
 		allServiceIds[bootServiceId] = true
 	}
@@ -42,7 +44,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	}
 
 	// We'll need these later
-	originalServiceIds := make(map[int]bool)
+	originalServiceIds := make(map[networks.ServiceID]bool)
 	for serviceId, _ := range allServiceIds {
 		originalServiceIds[serviceId] = true
 	}
@@ -51,7 +53,6 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIds)
 
 	// Add the first dupe node ID (should look normal from a network perspective
-	badServiceId1 := vanillaNodeServiceId + 1
 	logrus.Info("Adding first node with soon-to-be-duplicated node ID...")
 	checker1, err := castedNetwork.AddService(sameCertConfigId, badServiceId1)
 	if err != nil {
@@ -84,7 +85,6 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceId1)
 
 	// Now, add a second node with the same ID
-	badServiceId2 := vanillaNodeServiceId + 2
 	logrus.Infof("Adding second node with service ID %v which will be a duplicated node ID...", badServiceId2)
 	checker2, err := castedNetwork.AddService(sameCertConfigId, badServiceId2)
 	if err != nil {
@@ -159,7 +159,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 }
 
 func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[int]ava_networks.TestGeckoNetworkServiceConfig{
+	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
@@ -177,7 +177,7 @@ func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, erro
 			make(map[string]string),
 		),
 	}
-	desiredServices := map[int]int{
+	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		vanillaNodeServiceId: normalNodeConfigId,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
@@ -190,8 +190,13 @@ func (test DuplicateNodeIdTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		desiredServices)
 }
 
-func (test DuplicateNodeIdTest) GetTimeout() time.Duration {
-	return 180 * time.Second
+func (test DuplicateNodeIdTest) GetExecutionTimeout() time.Duration {
+	return 5 * time.Minute
+}
+
+func (test DuplicateNodeIdTest) GetSetupBuffer() time.Duration {
+	// TODO drop this when the availabilityChecker doesn't have a sleep (because we spin up a bunch of nodes before execution)
+	return 6 * time.Minute
 }
 
 // ================ Helper functions ==================================
@@ -199,11 +204,12 @@ func (test DuplicateNodeIdTest) GetTimeout() time.Duration {
 This helper function will grab node IDs and Gecko clients
 */
 func getNodeIdsAndClients(
-	testContext testsuite.TestContext,
-	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[int]bool) (allNodeIds map[int]string, allGeckoClients map[int]*gecko_client.GeckoClient) {
-	allGeckoClients = make(map[int]*gecko_client.GeckoClient)
-	allNodeIds = make(map[int]string)
+		testContext testsuite.TestContext,
+		network ava_networks.TestGeckoNetwork,
+		allServiceIds map[networks.ServiceID]bool,
+		) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
+	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
+	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
 		client, err := network.GetGeckoClient(serviceId)
 		if err != nil {

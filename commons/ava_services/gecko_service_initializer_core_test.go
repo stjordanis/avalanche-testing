@@ -8,9 +8,12 @@ import (
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/stretchr/testify/assert"
+	"net"
 )
 
-const TEST_PUBLIC_IP = "172.17.0.2"
+
+var testPublicIp = net.ParseIP("172.17.0.2")
+
 
 func TestNoDepsStartCommand(t *testing.T) {
 	initializerCore := NewGeckoServiceInitializerCore(
@@ -24,17 +27,17 @@ func TestNoDepsStartCommand(t *testing.T) {
 
 	expected := []string{
 		"/gecko/build/ava",
-		"--public-ip=" + TEST_PUBLIC_IP,
+		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",
-		"--http-host=" + TEST_PUBLIC_IP,
+		"--http-host=" + testPublicIp.String(),
 		"--staking-port=9651",
 		"--log-level=info",
 		"--snow-sample-size=1",
 		"--snow-quorum-size=1",
 		"--staking-tls-enabled=false",
 	}
-	actual, err := initializerCore.GetStartCommand(make(map[string]string), TEST_PUBLIC_IP, make([]services.Service, 0))
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIp, make([]services.Service, 0))
 	assert.NoError(t, err, "An error occurred getting the start command")
 	assert.Equal(t, expected, actual)
 }
@@ -57,10 +60,10 @@ func TestWithDepsStartCommand(t *testing.T) {
 
 	expected := []string{
 		"/gecko/build/ava",
-		"--public-ip=" + TEST_PUBLIC_IP,
+		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",
-		"--http-host=" + TEST_PUBLIC_IP,
+		"--http-host=" + testPublicIp.String(),
 		"--staking-port=9651",
 		"--log-level=info",
 		"--snow-sample-size=1",
@@ -77,7 +80,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 	testDependencySlice := []services.Service{
 		testDependency,
 	}
-	actual, err := initializerCore.GetStartCommand(make(map[string]string), TEST_PUBLIC_IP, testDependencySlice)
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIp, testDependencySlice)
 	assert.NoError(t, err, "An error occurred getting the start command")
 	assert.Equal(t, expected, actual)
 }
