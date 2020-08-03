@@ -44,7 +44,6 @@ type StakingNetworkConflictingTxsVertexTest struct {
 // in processing.
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	logrus.Info("Changes are being reflected")
 
 	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceId)
 	if err != nil {
@@ -85,7 +84,8 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 	status, err := byzantineXChainAPI.GetTxStatus(nonConflictId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, fmt.Sprintf("Failed to get status of Transaction: %s", nonConflictId)))
-	} else if status != choices.Accepted.String() {
+	}
+	if status != choices.Accepted.String() {
 		context.Fatal(stacktrace.Propagate(err, fmt.Sprintf("Transaction: %s was not accepted, status: %s", nonConflictId, status)))
 	}
 

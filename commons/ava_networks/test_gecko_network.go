@@ -187,7 +187,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			loader.bootstrapperSnowSampleSize,
 			loader.bootstrapperSnowQuorumSize,
 			loader.isStaking,
-			make(map[string]string), // No additional CLI args for the default network
+			make(map[string]string), // No additional CLI args for the bootstrapper nodes
 			bootNodeIds[0:i],        // Only the node IDs of the already-started nodes
 			cert_providers.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
 			loader.bootNodeLogLevel,

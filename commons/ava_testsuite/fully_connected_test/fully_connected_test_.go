@@ -77,7 +77,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, nil),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		nonBootValidatorServiceId:    normalNodeConfigId,

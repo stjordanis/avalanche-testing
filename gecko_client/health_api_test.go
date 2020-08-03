@@ -4,13 +4,15 @@ import (
 	"testing"
 )
 
+type healthTest struct {
+	resultString    string
+	expectedChecks  int
+	expectedHealthy bool
+	nilError        bool
+}
+
 func TestGetLiveness(t *testing.T) {
-	tests := []struct {
-		resultString    string
-		expectedChecks  int
-		expectedHealthy bool
-		nilError        bool
-	}{
+	tests := []healthTest{
 		{
 			resultString: `{
             "jsonrpc":"2.0",
