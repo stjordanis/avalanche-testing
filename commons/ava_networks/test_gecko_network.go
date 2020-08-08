@@ -133,7 +133,7 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
-		if int(configId) >= bootNodeConfigIdPrefix && int(configId) < (bootNodeConfigIdPrefix+ len(DefaultLocalNetGenesisConfig.Stakers)) {
+		if strings.HasPrefix(string(configId), bootNodeConfigIdPrefix) {
 			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
 		}
 		serviceConfigsCopy[configId] = configParams
