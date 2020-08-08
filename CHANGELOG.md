@@ -1,4 +1,5 @@
 # TBD
+* Switch configuration IDs to strings instead of ints
 
 # 0.7.0
 * Split `staking_network_tests` into separate files per test
