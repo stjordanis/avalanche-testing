@@ -1,4 +1,5 @@
 # TBD
+* Pull in Kurtosis version that will print test outputs they finish, rather than waiting for all tests to finish
 
 # 0.7.0
 * Split `staking_network_tests` into separate files per test
