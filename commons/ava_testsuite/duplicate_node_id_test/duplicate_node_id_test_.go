@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	normalNodeConfigId networks.ConfigurationID = 0
-	sameCertConfigId   networks.ConfigurationID = 1
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	sameCertConfigId networks.ConfigurationID = "same-cert-config"
 
 	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
 	badServiceId1 networks.ServiceID = "bad-service-1"

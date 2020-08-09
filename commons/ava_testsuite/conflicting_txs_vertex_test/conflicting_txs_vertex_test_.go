@@ -15,17 +15,17 @@ import (
 )
 
 const (
-	normalNodeConfigId            = 1
-	byzantineConfigId             = 2
-	byzantineUsername             = "byzantine_gecko"
-	byzantinePassword             = "byzant1n3!"
-	byzantineConflictingTxsVertex = "conflicting-txs-vertex"
-	stakerUsername                = "staker_gecko"
-	stakerPassword                = "test34test!23"
-	byzantineNodeServiceId        = "byzantine-node"
-	normalNodeServiceId           = "virtuous-node"
-	seedAmount                    = int64(50000000000000)
-	stakeAmount                   = int64(30000000000000)
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	byzantineConfigId networks.ConfigurationID  = "byzantine-config"
+	byzantineUsername                           = "byzantine_gecko"
+	byzantinePassword                           = "byzant1n3!"
+	byzantineConflictingTxsVertex               = "conflicting-txs-vertex"
+	stakerUsername                              = "staker_gecko"
+	stakerPassword                              = "test34test!23"
+	byzantineNodeServiceId                      = "byzantine-node"
+	normalNodeServiceId                         = "virtuous-node"
+	seedAmount                                  = int64(50000000000000)
+	stakeAmount                                 = int64(30000000000000)
 )
 
 // ================ Byzantine Test - Conflicting Transactions in a Vertex Test ===================================
