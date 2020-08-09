@@ -134,7 +134,10 @@ func NewTestGeckoNetworkLoader(
 	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
 		if strings.HasPrefix(string(configId), bootNodeConfigIdPrefix) {
-			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
+			return nil, stacktrace.NewError("Config ID %v cannot be used because prefix %v is reserved for boot node configurations. Choose a configuration id that does not begin with %v.",
+											configId,
+											bootNodeConfigIdPrefix,
+											bootNodeConfigIdPrefix)
 		}
 		serviceConfigsCopy[configId] = configParams
 	}
@@ -143,7 +146,10 @@ func NewTestGeckoNetworkLoader(
 	desiredServiceConfigsCopy := make(map[networks.ServiceID]networks.ConfigurationID)
 	for serviceId, configId := range desiredServiceConfigs {
 		if strings.HasPrefix(string(serviceId), bootNodeServiceIdPrefix) {
-			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot nodes.", serviceId, bootNodeServiceIdPrefix)
+			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot node services. Choose a service id that does not begin with %v.",
+											serviceId,
+											bootNodeServiceIdPrefix,
+											bootNodeServiceIdPrefix)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}
