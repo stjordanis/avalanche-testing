@@ -1,5 +1,6 @@
 # TBD
 * Switch configuration IDs to strings instead of ints
+* Bump kurtosis version to get cleanup on ctrl-c
 * Pull in Kurtosis version that will print test outputs they finish, rather than waiting for all tests to finish
 
 # 0.7.0
