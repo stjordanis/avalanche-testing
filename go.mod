@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/docker/go-connections v0.4.0
 	github.com/imroc/req v0.3.0 // indirect
-	github.com/kurtosis-tech/kurtosis v0.0.0-20200809142725-1ccb8b0c3d77
+	github.com/kurtosis-tech/kurtosis v0.0.0-20200809221418-752912adee5a
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a // indirect
 	github.com/palantir/stacktrace v0.0.0-20161112013806-78658fd2d177
 	github.com/sirupsen/logrus v1.6.0
