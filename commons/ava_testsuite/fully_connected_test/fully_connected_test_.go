@@ -18,7 +18,7 @@ const (
 	seedAmount               = int64(50000000000000)
 	stakeAmount              = int64(30000000000000)
 
-	normalNodeConfigId networks.ConfigurationID = 0
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
 
 	networkAcceptanceTimeoutRatio = 0.3
 	nonBootValidatorServiceId networks.ServiceID = "validator-service"

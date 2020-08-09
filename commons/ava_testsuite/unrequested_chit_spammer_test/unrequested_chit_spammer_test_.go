@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	normalNodeConfigId networks.ConfigurationID = 1
-	byzantineConfigId networks.ConfigurationID = 2
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	byzantineConfigId networks.ConfigurationID = "byzantine-config"
 	byzantineUsername = "byzantine_gecko"
 	byzantinePassword = "byzant1n3!"
 	stakerUsername = "staker_gecko"
