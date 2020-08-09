@@ -25,7 +25,7 @@ const (
 	delegatorNodeServiceId networks.ServiceID = "delegator-node"
 
 	networkAcceptanceTimeoutRatio = 0.3
-	normalNodeConfigId networks.ConfigurationID = 0
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
 )
 
 type StakingNetworkRpcWorkflowTest struct {
