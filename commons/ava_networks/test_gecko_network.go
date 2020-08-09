@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	// The config ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeConfigIdStart int = 987654
+	// The prefix for boot node configuration IDs, with an integer appended to specify each one
+	bootNodeConfigIdPrefix string = "boot-node-config-"
 
-	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
+	// The prefix for boot node service IDs, with an integer appended to specify each one
 	bootNodeServiceIdPrefix string = "boot-node-"
 )
 
@@ -133,8 +133,11 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
-		if int(configId) >= bootNodeConfigIdStart && int(configId) < (bootNodeConfigIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
-			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
+		if strings.HasPrefix(string(configId), bootNodeConfigIdPrefix) {
+			return nil, stacktrace.NewError("Config ID %v cannot be used because prefix %v is reserved for boot node configurations. Choose a configuration id that does not begin with %v.",
+											configId,
+											bootNodeConfigIdPrefix,
+											bootNodeConfigIdPrefix)
 		}
 		serviceConfigsCopy[configId] = configParams
 	}
@@ -143,7 +146,10 @@ func NewTestGeckoNetworkLoader(
 	desiredServiceConfigsCopy := make(map[networks.ServiceID]networks.ConfigurationID)
 	for serviceId, configId := range desiredServiceConfigs {
 		if strings.HasPrefix(string(serviceId), bootNodeServiceIdPrefix) {
-			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot nodes.", serviceId, bootNodeServiceIdPrefix)
+			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot node services. Choose a service id that does not begin with %v.",
+											serviceId,
+											bootNodeServiceIdPrefix,
+											bootNodeServiceIdPrefix)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}
@@ -168,7 +174,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 
 	// Add boot node configs
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
+		configId := networks.ConfigurationID(bootNodeConfigIdPrefix + strconv.Itoa(i))
 
 		certString := localNetGenesisStakers[i].TlsCert
 		keyString := localNetGenesisStakers[i].PrivateKey
@@ -221,7 +227,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 	// Add the bootstrapper nodes
 	bootstrapperServiceIds := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
+		configId := networks.ConfigurationID(bootNodeConfigIdPrefix + strconv.Itoa(i))
 		serviceId := networks.ServiceID(bootNodeServiceIdPrefix + strconv.Itoa(i))
 		checker, err := network.AddService(configId, serviceId, bootstrapperServiceIds)
 		if err != nil {
