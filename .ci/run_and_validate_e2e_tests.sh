@@ -15,7 +15,7 @@ E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"
 BYZANTINE_IMAGE_ARG="--byzantine-image-name=${BYZANTINE_IMAGE}"
 GECKO_IMAGE_ARG="--gecko-image-name=${DEFAULT_GECKO_IMAGE}"
 return_code=0
-if ! bash "${E2E_TEST_COMMAND}" "${BYZANTINE_IMAGE_ARG}" "${DEFAULT_GECKO_IMAGE}"; then
+if ! bash "${E2E_TEST_COMMAND}" "${BYZANTINE_IMAGE_ARG}" "${GECKO_IMAGE_ARG}"; then
     echo "Ava E2E tests failed"
     return_code=1
 else
