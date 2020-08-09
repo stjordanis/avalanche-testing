@@ -7,9 +7,12 @@ DOCKER_REPO="964377072876.dkr.ecr.us-east-1.amazonaws.com"
 # login to AWS for byzantine images
 aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" | docker login --username AWS --password-stdin "${DOCKER_REPO}"
 
-DEFAULT_CONTROLLER_TAG="kurtosistech/ava-e2e-tests_controller"   # TODO This is hardcoded in the full_rebuild_and_run.sh script - this should be parameterized!!!!
-GECKO_IMAGE="${DOCKER_REPO}/gecko-internal:latest"
-BYZANTINE_IMAGE="${DOCKER_REPO}/gecko-byzantine:latest"
+DEFAULT_CONTROLLER_TAG="avaplatform/avalanche-e2e-tests_controller"
+
+# Use stable version of Denali for CI
+GECKO_IMAGE="avaplatform/gecko:denali-9e341440"
+# Use stable version of gecko-byzantine based on denali for CI
+BYZANTINE_IMAGE="$DOCKER_REPO/gecko-byzantine:denali-7db87b4-9e341440"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 #  so we have to do the pull here
