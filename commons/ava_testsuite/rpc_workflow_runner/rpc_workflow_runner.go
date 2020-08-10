@@ -1,8 +1,8 @@
 package rpc_workflow_runner
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
-	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 	"strconv"

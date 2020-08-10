@@ -3,7 +3,7 @@ package ava_services
 import (
 	"time"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"

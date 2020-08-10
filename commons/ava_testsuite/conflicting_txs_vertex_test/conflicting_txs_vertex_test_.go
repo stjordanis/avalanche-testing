@@ -6,8 +6,8 @@ import (
 
 	"github.com/ava-labs/gecko/snow/choices"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
