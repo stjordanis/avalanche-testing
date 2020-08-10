@@ -106,7 +106,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 			2,
 			2,
 			map[string]string{
-				"byzantine-behavior": "chit-spammer",
+				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
 		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true,
@@ -136,11 +136,11 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 }
 
 func (test StakingNetworkUnrequestedChitSpammerTest) GetExecutionTimeout() time.Duration {
-	return 5 * time.Minute
+	// TODO drop this when the availabilityChecker doesn't have a sleep, because we spin up a *bunch* of byzantine
+	// nodes during test execution
+	return 10 * time.Minute
 }
 
 func (test StakingNetworkUnrequestedChitSpammerTest) GetSetupBuffer() time.Duration {
-	// TODO drop this when the availabilityChecker doesn't have a sleep, because we spin up a *bunch* of nodes before test
-	//  execution starts
-	return 12 * time.Minute
+	return 4 * time.Minute
 }
