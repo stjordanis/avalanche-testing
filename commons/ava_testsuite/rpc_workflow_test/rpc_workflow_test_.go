@@ -1,6 +1,9 @@
 package rpc_workflow_test
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
@@ -8,18 +11,16 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 const (
-	stakerUsername           = "staker"
-	stakerPassword           = "test34test!23"
-	delegatorUsername           = "delegator"
-	delegatorPassword           = "test34test!23"
-	seedAmount               = int64(50000000000000)
-	stakeAmount              = int64(30000000000000)
-	delegatorAmount              = int64(30000000000000)
+	stakerUsername    = "staker"
+	stakerPassword    = "test34test!23"
+	delegatorUsername = "delegator"
+	delegatorPassword = "test34test!23"
+	seedAmount        = int64(50000000000000)
+	stakeAmount       = int64(30000000000000)
+	delegatorAmount   = int64(30000000000000)
 
 	regularNodeServiceId   networks.ServiceID = "validator-node"
 	delegatorNodeServiceId networks.ServiceID = "delegator-node"
@@ -63,7 +64,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		delegatorUsername,
 		delegatorPassword,
 		networkAcceptanceTimeout)
-  
+
 	// ====================================== ADD VALIDATOR ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
@@ -126,7 +127,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{

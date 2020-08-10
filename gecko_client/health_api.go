@@ -2,29 +2,29 @@ package gecko_client
 
 import (
 	"encoding/json"
+
 	"github.com/palantir/stacktrace"
+
+	"github.com/ava-labs/gecko/api/health"
 )
 
 const (
 	healthApiEndpoint = "ext/health"
 )
 
-
 type HealthApi struct {
 	rpcRequester jsonRpcRequester
 }
 
-func (api HealthApi) GetLiveness() (LivenessInfo, error) {
+func (api HealthApi) GetLiveness() (health.GetLivenessReply, error) {
+	var response GetLivenessResponse
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(healthApiEndpoint, "health.getLiveness", make(map[string]interface{}))
 	if err != nil {
-		return LivenessInfo{}, stacktrace.Propagate(err, "Error getting liveness")
+		return health.GetLivenessReply{}, stacktrace.Propagate(err, "Error getting liveness")
 	}
 
-	var response GetLivenessResponse
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
-		return LivenessInfo{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
+		return health.GetLivenessReply{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
 	return response.Result, nil
 }
-
-

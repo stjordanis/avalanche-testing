@@ -2,14 +2,15 @@ package ava_services
 
 import (
 	"fmt"
+	"net"
+	"os"
+	"strings"
+
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"net"
-	"os"
-	"strings"
 )
 
 const (
@@ -23,6 +24,7 @@ const (
 
 // ========= Loglevel Enum ========================
 type GeckoLogLevel string
+
 const (
 	LOG_LEVEL_VERBOSE GeckoLogLevel = "verbo"
 	LOG_LEVEL_DEBUG   GeckoLogLevel = "debug"
@@ -34,6 +36,7 @@ type GeckoServiceInitializerCore struct {
 	snowSampleSize      int
 	snowQuorumSize      int
 	stakingTlsEnabled   bool
+	additionalCLIArgs   map[string]string
 	bootstrapperNodeIds []string
 	certProvider        cert_providers.GeckoCertProvider
 	logLevel            GeckoLogLevel
@@ -54,14 +57,15 @@ Args:
 
 Returns:
 	An intializer core for creating Gecko nodes with the specified parameers.
- */
+*/
 func NewGeckoServiceInitializerCore(
-			snowSampleSize int,
-			snowQuorumSize int,
-			stakingTlsEnabled bool,
-			bootstrapperNodeIds []string,
-			certProvider cert_providers.GeckoCertProvider,
-			logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
+	snowSampleSize int,
+	snowQuorumSize int,
+	stakingTlsEnabled bool,
+	additionalCLIArgs map[string]string,
+	bootstrapperNodeIds []string,
+	certProvider cert_providers.GeckoCertProvider,
+	logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
 	for _, nodeId := range bootstrapperNodeIds {
@@ -69,12 +73,13 @@ func NewGeckoServiceInitializerCore(
 	}
 
 	return &GeckoServiceInitializerCore{
-		snowSampleSize:    snowSampleSize,
-		snowQuorumSize:    snowQuorumSize,
-		stakingTlsEnabled: stakingTlsEnabled,
+		snowSampleSize:      snowSampleSize,
+		snowQuorumSize:      snowQuorumSize,
+		stakingTlsEnabled:   stakingTlsEnabled,
+		additionalCLIArgs:   additionalCLIArgs,
 		bootstrapperNodeIds: bootstrapperIdsCopy,
-		certProvider: certProvider,
-		logLevel:          logLevel,
+		certProvider:        certProvider,
+		logLevel:            logLevel,
 	}
 }
 
@@ -110,11 +115,12 @@ func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[strin
 func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr net.IP, dependencies []services.Service) ([]string, error) {
 	numBootNodeIds := len(core.bootstrapperNodeIds)
 	numDependencies := len(dependencies)
-	if numDependencies != numBootNodeIds {
+	if numDependencies > numBootNodeIds {
 		return nil, stacktrace.NewError(
 			"Gecko service is being started with %v dependencies but only %v boot node IDs have been configured",
 			numDependencies,
-			numBootNodeIds)
+			numBootNodeIds,
+		)
 	}
 
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr.String())
@@ -123,7 +129,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		publicIpFlag,
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort.Int()),
-		fmt.Sprintf("--http-host=%s", publicIpAddr),
+		"--http-host=", // Leave empty to make API openly accessible
 		fmt.Sprintf("--staking-port=%d", stakingPort.Int()),
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
@@ -147,7 +153,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		//  the user explicitly passing in the node ID of the bootstrapper it wants. This prevents man-in-the-middle
 		//  attacks, just like using a cert would. Us hardcoding this bootstrapper ID here is the equivalent
 		//  of a user knowing the node ID in advance, which provides the same level of protection.
-		commandList = append(commandList, "--bootstrap-ids=" + strings.Join(core.bootstrapperNodeIds, ","))
+		commandList = append(commandList, "--bootstrap-ids="+strings.Join(core.bootstrapperNodeIds, ","))
 	}
 
 	if len(dependencies) > 0 {
@@ -162,7 +168,13 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
-		commandList = append(commandList, "--bootstrap-ips=" + joinedSockets)
+		commandList = append(commandList, "--bootstrap-ips="+joinedSockets)
+	}
+
+	// Append additional CLI arguments
+	// These are added as is with no additional checking
+	for param, argument := range core.additionalCLIArgs {
+		commandList = append(commandList, fmt.Sprintf("--%s=%s", param, argument))
 	}
 
 	logrus.Debugf("Command list: %+v", commandList)
