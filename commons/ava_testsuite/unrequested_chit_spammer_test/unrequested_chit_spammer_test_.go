@@ -14,19 +14,21 @@ import (
 )
 
 const (
-	normalNodeConfigId networks.ConfigurationID = "normal-config"
-	byzantineConfigId networks.ConfigurationID = "byzantine-config"
-	byzantineUsername = "byzantine_gecko"
-	byzantinePassword = "byzant1n3!"
-	stakerUsername = "staker_gecko"
-	stakerPassword = "test34test!23"
-	normalNodeServiceId networks.ServiceID = "normal-node"
-	byzantineNodePrefix string = "byzantine-node-"
-	numberOfByzantineNodes = 4
-	seedAmount               = int64(50000000000000)
-	stakeAmount              = int64(30000000000000)
+	normalNodeConfigId     networks.ConfigurationID = "normal-config"
+	byzantineConfigId      networks.ConfigurationID = "byzantine-config"
+	byzantineUsername                               = "byzantine_gecko"
+	byzantinePassword                               = "byzant1n3!"
+	stakerUsername                                  = "staker_gecko"
+	stakerPassword                                  = "test34test!23"
+	normalNodeServiceId    networks.ServiceID       = "normal-node"
+	byzantineNodePrefix    string                   = "byzantine-node-"
+	numberOfByzantineNodes                          = 4
+	seedAmount                                      = int64(50000000000000)
+	stakeAmount                                     = int64(30000000000000)
 
 	networkAcceptanceTimeoutRatio = 0.3
+	byzantineBehavior             = "byzantine-behavior"
+	chitSpammerBehavior           = "chit-spammer"
 )
 
 // ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
