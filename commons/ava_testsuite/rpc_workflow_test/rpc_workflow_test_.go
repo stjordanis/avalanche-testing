@@ -1,12 +1,12 @@
 package rpc_workflow_test
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
+	"github.com/ava-labs/gecko/utils/constants"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -18,15 +18,15 @@ const (
 	stakerPassword    = "test34test!23"
 	delegatorUsername = "delegator"
 	delegatorPassword = "test34test!23"
-	seedAmount        = int64(50000000000000)
-	stakeAmount       = int64(30000000000000)
-	delegatorAmount   = int64(30000000000000)
+	seedAmount        = uint64(50000000000000)
+	stakeAmount       = uint64(30000000000000)
+	delegatorAmount   = uint64(30000000000000)
 
 	regularNodeServiceId   networks.ServiceID = "validator-node"
 	delegatorNodeServiceId networks.ServiceID = "delegator-node"
 
-	networkAcceptanceTimeoutRatio = 0.3
-	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	networkAcceptanceTimeoutRatio                          = 0.3
+	normalNodeConfigId            networks.ConfigurationID = "normal-config"
 )
 
 type StakingNetworkRpcWorkflowTest struct {
@@ -46,11 +46,11 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
-	stakerNodeId, err := stakerClient.InfoApi().GetNodeId()
+	stakerNodeId, err := stakerClient.InfoAPI().GetNodeID()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
 	}
-	delegatorNodeId, err := delegatorClient.InfoApi().GetNodeId()
+	delegatorNodeId, err := delegatorClient.InfoAPI().GetNodeID()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
 	}
@@ -89,7 +89,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 
 	// ====================================== VERIFY NETWORK STATE ===============================
-	currentStakers, err := stakerClient.PChainApi().GetCurrentValidators(nil)
+	currentStakers, err := stakerClient.PChainAPI().GetCurrentValidators(constants.DefaultSubnetID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
@@ -115,13 +115,12 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 
 	// ================================ VERIFY NETWORK STATE =====================================
-	xchainAccountInfo, err := stakerClient.XChainApi().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
+	balanceInfo, err := stakerClient.XChainAPI().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
 	}
-	actualRemainingAva := xchainAccountInfo.Balance
-	expectedRemainingAva := strconv.FormatInt(remainingStakerAva, 10)
-	context.AssertTrue(actualRemainingAva == expectedRemainingAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, expectedRemainingAva))
+	actualRemainingAva := uint64(balanceInfo.Balance)
+	context.AssertTrue(actualRemainingAva == remainingStakerAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, remainingStakerAva))
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {

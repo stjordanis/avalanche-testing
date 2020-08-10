@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -11,8 +11,8 @@ import (
 Struct containing logic for verifying the state of the network
 We attach these functions to a struct even though the struct doesn't have state to avoid a utils class (which
 inevitably becomes a mess of unconnected logic), and to categorize the functions around a common purpose.
- */
-type NetworkStateVerifier struct {}
+*/
+type NetworkStateVerifier struct{}
 
 /*
 Asserts that the network is fully connected, meaning:
@@ -27,11 +27,11 @@ Args:
 	allNodeIds: The mapping of servcie_id -> node_id
 */
 func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
-			allServiceIds map[networks.ServiceID]bool,
-			stakerServiceIds map[networks.ServiceID]bool,
-			allNodeIds map[networks.ServiceID]string,
-			allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient,
-			) error {
+	allServiceIds map[networks.ServiceID]bool,
+	stakerServiceIds map[networks.ServiceID]bool,
+	allNodeIds map[networks.ServiceID]string,
+	allGeckoClients map[networks.ServiceID]*apis.Client,
+) error {
 	logrus.Tracef("All node IDs in network being verified: %v", allNodeIds)
 	for serviceId, _ := range allServiceIds {
 		_, isStaker := stakerServiceIds[serviceId]
@@ -71,12 +71,12 @@ Args:
 	atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
 */
 func (verifier NetworkStateVerifier) VerifyExpectedPeers(
-		serviceId networks.ServiceID,
-		client *gecko_client.GeckoClient,
-		acceptableNodeIds map[string]bool,
-		expectedNumPeers int,
-		atLeast bool) error {
-	peers, err := client.InfoApi().GetPeers()
+	serviceId networks.ServiceID,
+	client *apis.Client,
+	acceptableNodeIds map[string]bool,
+	expectedNumPeers int,
+	atLeast bool) error {
+	peers, err := client.InfoAPI().Peers()
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to get peers from service with ID %v", serviceId)
 	}
@@ -104,9 +104,9 @@ func (verifier NetworkStateVerifier) VerifyExpectedPeers(
 
 	// Verify that IDs of the peers we have are in our list of acceptable IDs
 	for _, peer := range peers {
-		_, found := acceptableNodeIds[peer.Id]
+		_, found := acceptableNodeIds[peer.ID.String()]
 		if !found {
-			return stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.Id)
+			return stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.ID.String())
 		}
 	}
 	return nil

@@ -7,6 +7,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
+	"github.com/ava-labs/gecko/ids"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -23,8 +24,8 @@ const (
 	normalNodeServiceId    networks.ServiceID       = "normal-node"
 	byzantineNodePrefix    string                   = "byzantine-node-"
 	numberOfByzantineNodes                          = 4
-	seedAmount                                      = int64(50000000000000)
-	stakeAmount                                     = int64(30000000000000)
+	seedAmount                                      = uint64(50000000000000)
+	stakeAmount                                     = uint64(30000000000000)
 
 	networkAcceptanceTimeoutRatio = 0.3
 	byzantineBehavior             = "byzantine-behavior"
@@ -56,7 +57,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
 		}
-		currentStakers, err := byzClient.PChainApi().GetCurrentValidators(nil)
+		currentStakers, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 		}
@@ -86,7 +87,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	}
 
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
-	currentStakers, err := normalClient.PChainApi().GetCurrentValidators(nil)
+	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}

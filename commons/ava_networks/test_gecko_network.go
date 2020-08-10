@@ -2,6 +2,7 @@ package ava_networks
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"strconv"
@@ -9,7 +10,8 @@ import (
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/avalanche-e2e-tests/utils/constants"
 
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
@@ -34,7 +36,7 @@ const (
 /*
 A struct type wrapping Kurtosis' ServiceNetwork that is meant to be the interface tests use for interacting with Ava
 	networks of Gecko nodes
- */
+*/
 type TestGeckoNetwork struct {
 	networks.Network
 
@@ -42,16 +44,17 @@ type TestGeckoNetwork struct {
 }
 
 /*
-Gets the Gecko client for the node with the given service ID
- */
-func (network TestGeckoNetwork) GetGeckoClient(serviceId networks.ServiceID) (*gecko_client.GeckoClient, error) {
+Gets the API Client for the node with the given service ID
+*/
+func (network TestGeckoNetwork) GetGeckoClient(serviceId networks.ServiceID) (*apis.Client, error) {
 	node, err := network.svcNetwork.GetService(serviceId)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceId)
 	}
 	geckoService := node.Service.(ava_services.GeckoService)
 	jsonRpcSocket := geckoService.GetJsonRpcSocket()
-	return gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort()), nil
+	uri := fmt.Sprintf("http://%s:%d", jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort().Int())
+	return apis.NewClient(uri, constants.DefaultRequestTimeout), nil
 }
 
 /*
@@ -59,7 +62,7 @@ Gets the service IDs of all the boot nodes in the network
 
 Returns:
 	A "set" of service IDs, one for each boot node
- */
+*/
 func (network TestGeckoNetwork) GetAllBootServiceIds() map[networks.ServiceID]bool {
 	result := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
@@ -78,7 +81,7 @@ Args:
 
 Returns:
 	An availability checker that will return true when teh newly-added service is available
- */
+*/
 func (network TestGeckoNetwork) AddService(configurationId networks.ConfigurationID, serviceId networks.ServiceID) (*services.ServiceAvailabilityChecker, error) {
 	availabilityChecker, err := network.svcNetwork.AddService(configurationId, serviceId, network.GetAllBootServiceIds())
 	if err != nil {
@@ -92,7 +95,7 @@ Deletes the service with the given service ID from the network
 
 Args:
 	serviceId: The ID of the service to remove from the network
- */
+*/
 func (network TestGeckoNetwork) RemoveService(serviceId networks.ServiceID) error {
 	if err := network.svcNetwork.RemoveService(serviceId, containerStopTimeout); err != nil {
 		return stacktrace.Propagate(err, "An error occurred removing service with ID %v", serviceId)
@@ -106,18 +109,18 @@ func (network TestGeckoNetwork) RemoveService(serviceId networks.ServiceID) erro
 /*
 This is Gecko-specific layer of abstraction atop Kurtosis' service configurations that makes it a
 	bit easier for users to define network service configurations specifically for Gecko nodes
- */
+*/
 type TestGeckoNetworkServiceConfig struct {
 	// Whether the certs used by Gecko services created with this configuration will be different or not (which is used
 	//  for testing how the network performs using duplicate node IDs)
-	varyCerts       bool
+	varyCerts bool
 
 	// The log level that the Gecko service should use
 	serviceLogLevel ava_services.GeckoLogLevel
 
 	// The image name that Gecko services started from this configuration should use
 	// Used primarily for Byzantine tests but can also test heterogenous Gecko versions, for example.
-	imageName      string
+	imageName string
 
 	// The Snow protocol quroum size that Gecko services started from this configuration should have
 	snowQuorumSize int
@@ -127,7 +130,7 @@ type TestGeckoNetworkServiceConfig struct {
 
 	// TODO Make these named parameters, so we don't have an arbitrary bag of extra CLI args!
 	// A list of extra CLI args that should be passed to the Gecko services started with this configuration
-	additionalCLIArgs        map[string]string
+	additionalCLIArgs map[string]string
 }
 
 /*
@@ -142,20 +145,20 @@ Args:
 	snowQuroumSize: The Snow protocol quorum size that Gecko services started with this configuration will use
 	snowSampleSize: The Snow protocol sample size that Gecko services started with this configuration will use
 	cliArgs: A key-value mapping of extra CLI args that will be passed to Gecko services started with this configuration
- */
+*/
 func NewTestGeckoNetworkServiceConfig(
-		varyCerts bool,
-		serviceLogLevel ava_services.GeckoLogLevel,
-		imageName string,
-		snowQuorumSize int,
-		snowSampleSize int,
-		additionalCLIArgs map[string]string) *TestGeckoNetworkServiceConfig {
+	varyCerts bool,
+	serviceLogLevel ava_services.GeckoLogLevel,
+	imageName string,
+	snowQuorumSize int,
+	snowSampleSize int,
+	additionalCLIArgs map[string]string) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
-		varyCerts:       varyCerts,
-		serviceLogLevel: serviceLogLevel,
-		imageName:       imageName,
-		snowQuorumSize:  snowQuorumSize,
-		snowSampleSize:  snowSampleSize,
+		varyCerts:         varyCerts,
+		serviceLogLevel:   serviceLogLevel,
+		imageName:         imageName,
+		snowQuorumSize:    snowQuorumSize,
+		snowSampleSize:    snowSampleSize,
 		additionalCLIArgs: additionalCLIArgs,
 	}
 }
@@ -165,23 +168,22 @@ func NewTestGeckoNetworkServiceConfig(
 // ========================================================================================================
 /*
 An implementation of Kurtosis' NetworkLoader interface that's used for creating the test network of Gecko services
- */
+*/
 type TestGeckoNetworkLoader struct {
 	// The Docker image that should be used for the Gecko boot nodes
-	bootNodeImage              string
+	bootNodeImage string
 
 	// The log level that the Gecko boot nodes should use
-	bootNodeLogLevel           ava_services.GeckoLogLevel
+	bootNodeLogLevel ava_services.GeckoLogLevel
 
 	// Whether the nodes that get added to the network (boot node and otherwise) will have staking enabled
-	isStaking                  bool
-
+	isStaking bool
 
 	// A registry of the service configurations available for use in this network
-	serviceConfigs             map[networks.ConfigurationID]TestGeckoNetworkServiceConfig
+	serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig
 
 	// A mapping of (service ID) -> (service config ID) for the services that the network will initialize with
-	desiredServiceConfig       map[networks.ServiceID]networks.ConfigurationID
+	desiredServiceConfig map[networks.ServiceID]networks.ConfigurationID
 
 	// The Snow quorum size that the bootstrapper nodes of the network will use
 	bootstrapperSnowQuorumSize int
@@ -255,7 +257,7 @@ func NewTestGeckoNetworkLoader(
 
 /*
 Function implemented from networks.NetworkLoader that will define the network's service configurations that will be used
- */
+*/
 func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkBuilder) error {
 	localNetGenesisStakers := DefaultLocalNetGenesisConfig.Stakers
 	bootNodeIds := make([]string, 0, len(localNetGenesisStakers))
@@ -317,7 +319,7 @@ Implementation of a networks.NetworkLoader function that initializes the Gecko t
 
 NOTE: The resulting services.ServiceAvailabilityChecker map will contain more IDs than the user requested as it will
 	contain boot nodes. The IDs that these boot nodes are an unspecified implementation detail.
- */
+*/
 func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.ServiceNetwork) (map[networks.ServiceID]services.ServiceAvailabilityChecker, error) {
 	availabilityCheckers := make(map[networks.ServiceID]services.ServiceAvailabilityChecker)
 
@@ -350,7 +352,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 
 /*
 Implementation of a networks.NetworkLoader function that wraps the underlying networks.ServiceNetwork with the TestGeckoNetwork
- */
+*/
 func (loader TestGeckoNetworkLoader) WrapNetwork(network *networks.ServiceNetwork) (networks.Network, error) {
 	return TestGeckoNetwork{
 		svcNetwork: network,

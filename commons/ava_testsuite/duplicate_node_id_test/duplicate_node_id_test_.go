@@ -6,7 +6,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -15,11 +15,11 @@ import (
 
 const (
 	normalNodeConfigId networks.ConfigurationID = "normal-config"
-	sameCertConfigId networks.ConfigurationID = "same-cert-config"
+	sameCertConfigId   networks.ConfigurationID = "same-cert-config"
 
 	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
-	badServiceId1 networks.ServiceID = "bad-service-1"
-	badServiceId2 networks.ServiceID = "bad-service-2"
+	badServiceId1        networks.ServiceID = "bad-service-1"
+	badServiceId2        networks.ServiceID = "bad-service-2"
 )
 
 type DuplicateNodeIdTest struct {
@@ -69,7 +69,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	}
 	allGeckoClients[badServiceId1] = badServiceClient1
 
-	badServiceNodeId1, err := badServiceClient1.InfoApi().GetNodeId()
+	badServiceNodeId1, err := badServiceClient1.InfoAPI().GetNodeID()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId1))
 	}
@@ -101,7 +101,7 @@ func (test DuplicateNodeIdTest) Run(network networks.Network, context testsuite.
 	}
 	allGeckoClients[badServiceId2] = badServiceClient2
 
-	badServiceNodeId2, err := badServiceClient2.InfoApi().GetNodeId()
+	badServiceNodeId2, err := badServiceClient2.InfoAPI().GetNodeID()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get node ID from first dupe node ID service with ID %v", badServiceId2))
 	}
@@ -207,8 +207,8 @@ func getNodeIdsAndClients(
 	testContext testsuite.TestContext,
 	network ava_networks.TestGeckoNetwork,
 	allServiceIds map[networks.ServiceID]bool,
-) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient) {
-	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
+) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
+	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
 		client, err := network.GetGeckoClient(serviceId)
@@ -216,7 +216,7 @@ func getNodeIdsAndClients(
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
 		}
 		allGeckoClients[serviceId] = client
-		nodeId, err := client.InfoApi().GetNodeId()
+		nodeId, err := client.InfoAPI().GetNodeID()
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
 		}

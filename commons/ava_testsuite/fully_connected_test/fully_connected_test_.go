@@ -7,7 +7,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -16,8 +16,8 @@ import (
 const (
 	stakerUsername = "staker"
 	stakerPassword = "test34test!23"
-	seedAmount     = int64(50000000000000)
-	stakeAmount    = int64(30000000000000)
+	seedAmount     = uint64(50000000000000)
+	stakeAmount    = uint64(30000000000000)
 
 	normalNodeConfigId networks.ConfigurationID = "normal-config"
 
@@ -107,11 +107,11 @@ func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
 This helper function will grab node IDs and Gecko clients
 */
 func getNodeIdsAndClients(
-		testContext testsuite.TestContext,
-		network ava_networks.TestGeckoNetwork,
-		allServiceIds map[networks.ServiceID]bool,
-		) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
-	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
+	testContext testsuite.TestContext,
+	network ava_networks.TestGeckoNetwork,
+	allServiceIds map[networks.ServiceID]bool,
+) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
+	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
 		client, err := network.GetGeckoClient(serviceId)
@@ -119,7 +119,7 @@ func getNodeIdsAndClients(
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
 		}
 		allGeckoClients[serviceId] = client
-		nodeId, err := client.InfoApi().GetNodeId()
+		nodeId, err := client.InfoAPI().GetNodeID()
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
 		}

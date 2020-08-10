@@ -1,28 +1,29 @@
 package rpc_workflow_runner
 
 import (
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
-	"github.com/palantir/stacktrace"
-	"github.com/sirupsen/logrus"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/gecko/api"
+	"github.com/ava-labs/gecko/ids"
+	"github.com/ava-labs/gecko/snow/choices"
+	"github.com/ava-labs/gecko/vms/platformvm"
+	"github.com/palantir/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	GENESIS_USERNAME            = "genesis"
-	GENESIS_PASSWORD            = "genesis34!23"
-	TRANSACTION_ACCEPTED_STATUS = "Accepted"
-	AVA_ASSET_ID = "AVA"
-	TIME_UNTIL_STAKING_BEGINS = 20 * time.Second
-	TIME_UNTIL_STAKING_ENDS = 72 * time.Hour
-	TIME_UNTIL_DELEGATING_BEGINS = 20 * time.Second
-	TIME_UNTIL_DELEGATING_ENDS = 72 * time.Hour
-	DELEGATION_FEE_RATE = 500000
-	XCHAIN_ADDRESS_PREFIX = "X-"
-	NO_IMPORT_INPUTS_ERROR_STR = "problem issuing transaction: no import inputs"
-	IMPORT_AVA_TO_XCHAIN_TIMEOUT = time.Second
+	GENESIS_USERNAME         = "genesis"
+	GENESIS_PASSWORD         = "genesis34!23"
+	AVA_ASSET_ID             = "AVA"
+	DefaultStakingDelay      = 20 * time.Second
+	DefaultStakingPeriod     = 72 * time.Hour
+	DefaultDelegationDelay   = 20 * time.Second // Time until delegation period should begin
+	DefaultDelegationPeriod  = 72 * time.Hour
+	DefaultDelegationFeeRate = 500000
+	XChainAddressPrefix      = "X-"
 )
 
 /*
@@ -30,10 +31,10 @@ const (
 	genesis and adding nodes as validators, using the a given gecko client handle as the
 	entry point to the test network. It runs the RpcWorkflows using the credential
 	set in the GeckoUser field.
- */
+*/
 type RpcWorkflowRunner struct {
-	client                   *gecko_client.GeckoClient
-	geckoUser                *GeckoUser
+	client    *apis.Client
+	geckoUser api.UserPass
 	/*
 		This timeout represents the time the RpcWorkflowRunner will wait for some state
 		change in the network to be understood as accepted and implemented by the underlying
@@ -43,40 +44,34 @@ type RpcWorkflowRunner struct {
 		Also, each state change is roughly the same - we're waiting not only for
 		a transaction to be considered accepted by the network and also for the nodes
 		internal state to reflect that acceptance.
-	 */
+	*/
 	networkAcceptanceTimeout time.Duration
 }
 
 func NewRpcWorkflowRunner(
-		client *gecko_client.GeckoClient,
-		username string,
-		password string,
-		networkAcceptanceTimeout time.Duration) *RpcWorkflowRunner {
+	client *apis.Client,
+	username string,
+	password string,
+	networkAcceptanceTimeout time.Duration) *RpcWorkflowRunner {
 	return &RpcWorkflowRunner{
-		client:                   client,
-		geckoUser:                NewGeckoUser(username, password),
+		client: client,
+		geckoUser: api.UserPass{
+			Username: username,
+			Password: password,
+		},
 		networkAcceptanceTimeout: networkAcceptanceTimeout,
 	}
-}
-
-type GeckoUser struct {
-	username string
-	password string
-}
-
-func NewGeckoUser(username string, password string) *GeckoUser {
-	return &GeckoUser{username: username, password: password}
 }
 
 /*
 	High level function that takes a regular node with no Ava and funds it from genesis,
 	transfers those funds to the PChain, and registers it as a validator on the default subnet.
- */
+*/
 func (runner RpcWorkflowRunner) GetFundsAndStartValidating(
-	    seedAmount int64,
-	    stakeAmount int64) error {
+	seedAmount uint64,
+	stakeAmount uint64) error {
 	client := runner.client
-	stakerNodeId, err := client.InfoApi().GetNodeId()
+	stakerNodeId, err := client.InfoAPI().GetNodeID()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get staker node ID.")
 	}
@@ -101,122 +96,99 @@ func (runner RpcWorkflowRunner) GetFundsAndStartValidating(
 }
 
 func (runner RpcWorkflowRunner) AddDelegatorOnSubnet(
-		delegateeNodeId string,
-		pchainAddress string,
-		stakeAmount int64,
-		) error {
+	delegateeNodeId string,
+	pchainAddress string,
+	stakeAmount uint64,
+) error {
 	client := runner.client
-	currentPayerNonce, err := runner.getCurrentPayerNonce(pchainAddress)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get payer nonce from address %s", pchainAddress)
-	}
-	delegatorStartTime := time.Now().Add(TIME_UNTIL_DELEGATING_BEGINS).Unix()
-	addDelegatorUnsignedTxn, err := client.PChainApi().AddDefaultSubnetDelegator(
+	delegatorStartTime := time.Now().Add(DefaultDelegationDelay)
+	startTime := uint64(delegatorStartTime.Unix())
+	endTime := uint64(delegatorStartTime.Add(DefaultDelegationPeriod).Unix())
+	addDelegatorTxID, err := client.PChainAPI().AddDefaultSubnetDelegator(
+		runner.geckoUser,
+		pchainAddress,
 		delegateeNodeId,
-		delegatorStartTime,
-		time.Now().Add(TIME_UNTIL_DELEGATING_ENDS).Unix(),
 		stakeAmount,
-		currentPayerNonce + 1,
-		pchainAddress)
+		startTime,
+		endTime,
+	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", pchainAddress)
 	}
-	addDelegatorSignedTxn, err := client.PChainApi().Sign(
-		addDelegatorUnsignedTxn,
-		pchainAddress,
-		runner.geckoUser.username,
-		runner.geckoUser.password)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to sign delegator transaction.")
+	if err := runner.waitForPChainTransactionAcceptance(addDelegatorTxID); err != nil {
+		return stacktrace.Propagate(err, "Failed to accept AddDefaultSubnetDelegator tx: %s", addDelegatorTxID)
 	}
-	_, err = client.PChainApi().IssueTx(addDelegatorSignedTxn)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to issue staker transaction.")
-	}
-	for time.Now().Unix() < delegatorStartTime {
-		time.Sleep(time.Second)
-	}
+
+	// Sleep until delegator starts validating
+	time.Sleep(time.Until(delegatorStartTime))
 	return nil
 }
 
 func (runner RpcWorkflowRunner) AddValidatorOnSubnet(
-		nodeId string,
-		pchainAddress string,
-		stakeAmount int64) error {
+	nodeId string,
+	pchainAddress string,
+	stakeAmount uint64) error {
+	// Replace with simple call to AddDefaultSubnetValidator
 	client := runner.client
-	currentPayerNonce, err := runner.getCurrentPayerNonce(pchainAddress)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get payer nonce from address %s", pchainAddress)
-	}
-	stakingStartTime := time.Now().Add(TIME_UNTIL_STAKING_BEGINS).Unix()
-	addStakerUnsignedTxn, err := client.PChainApi().AddDefaultSubnetValidator(
-		nodeId,
-		stakingStartTime,
-		time.Now().Add(TIME_UNTIL_STAKING_ENDS).Unix(),
-		stakeAmount,
-		currentPayerNonce + 1,
+	stakingStartTime := time.Now().Add(DefaultStakingDelay)
+	startTime := uint64(stakingStartTime.Unix())
+	endTime := uint64(stakingStartTime.Add(DefaultStakingPeriod).Unix())
+	addStakerTxID, err := client.PChainAPI().AddDefaultSubnetValidator(
+		runner.geckoUser,
 		pchainAddress,
-		DELEGATION_FEE_RATE)
+		nodeId,
+		stakeAmount,
+		startTime,
+		endTime,
+		DefaultDelegationFeeRate,
+	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to add default subnet staker %s", nodeId)
 	}
-	addStakerSignedTxn, err := client.PChainApi().Sign(
-		addStakerUnsignedTxn,
-		pchainAddress,
-		runner.geckoUser.username,
-		runner.geckoUser.password)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to sign staker transaction.")
+
+	if err := runner.waitForPChainTransactionAcceptance(addStakerTxID); err != nil {
+		return stacktrace.Propagate(err, "Failed to confirm AddDefaultSubnetValidator Tx: %s", addStakerTxID)
 	}
-	_, err = client.PChainApi().IssueTx(addStakerSignedTxn)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to issue staker transaction.")
-	}
-	for time.Now().Unix() < stakingStartTime {
-		time.Sleep(time.Second)
-	}
-	runner.waitForValidatorAddition(nodeId, nil)
+
 	return nil
 }
-
 
 /*
 	Creates a new account on the XChain under the username and password.
 	Transfers funds from the genesis account to the new XChain account using the Genesis private key.
 	Returns the new, funded XChain account address.
- */
+*/
 func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
-		amount int64) (string, error) {
+	amount uint64) (string, error) {
 	client := runner.client
-	username := runner.geckoUser.username
-	password := runner.geckoUser.password
-	_, err := client.KeystoreApi().CreateUser(username, password)
+	keystore := client.KeystoreAPI()
+	_, err := keystore.CreateUser(runner.geckoUser)
 	if err != nil {
 		stacktrace.Propagate(err, "Could not create user.")
 	}
-	_, err = client.KeystoreApi().CreateUser(GENESIS_USERNAME, GENESIS_PASSWORD)
+	_, err = keystore.CreateUser(runner.geckoUser)
 	if err != nil {
 		stacktrace.Propagate(err, "Could not create genesis user.")
 	}
-	nodeId, err := client.InfoApi().GetNodeId()
+	nodeId, err := client.InfoAPI().GetNodeID()
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Could not get node id")
 	}
-	genesisAccountAddress, err := client.XChainApi().ImportKey(
-		GENESIS_USERNAME,
-		GENESIS_PASSWORD,
+	genesisAccountAddress, err := client.XChainAPI().ImportKey(
+		runner.geckoUser,
 		ava_networks.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
 	logrus.Debugf("Adding Node %s as a validator.", nodeId)
 	logrus.Debugf("Genesis Address: %s.", genesisAccountAddress)
-	testAccountAddress, err := client.XChainApi().CreateAddress(username, password)
+	testAccountAddress, err := client.XChainAPI().CreateAddress(runner.geckoUser)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create address on XChain.")
 	}
 	logrus.Debugf("Test account address: %s", testAccountAddress)
-	txnId, err := client.XChainApi().Send(amount, AVA_ASSET_ID, testAccountAddress, GENESIS_USERNAME, GENESIS_PASSWORD)
+
+	txnId, err := client.XChainAPI().Send(runner.geckoUser, amount, AVA_ASSET_ID, testAccountAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
@@ -228,20 +200,19 @@ func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
 }
 
 /*
-	Creates a new account on the PChain under the username and password.
-	Transfers funds from an XChain account owned by that username and password to the new PChain account.
+	Creates a new account on the PChain for geckoUser
+	Transfers funds from an XChain account owned by geckoUser to the new PChain account.
 	Returns the new, funded PChain account address.
 */
 func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
-		amount int64) (string, error) {
+	amount uint64) (string, error) {
 	client := runner.client
-	username := runner.geckoUser.username
-	password := runner.geckoUser.password
-	pchainAddress, err := client.PChainApi().CreateAccount(username, password, nil)
+	pchainAddress, err := client.PChainAPI().CreateAddress(runner.geckoUser)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to create new account on PChain")
+		return "", stacktrace.Propagate(err, "Failed to create new address on PChain")
 	}
-	txnId, err := client.XChainApi().ExportAVA(pchainAddress, amount, username, password)
+
+	txnId, err := client.XChainAPI().ExportAVA(runner.geckoUser, amount, pchainAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
@@ -249,69 +220,41 @@ func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	currentPayerNonce, err := runner.getCurrentPayerNonce(pchainAddress)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to get payer nonce from address %s", pchainAddress)
-	}
-	txnId, err = client.PChainApi().ImportAVA(username, password, pchainAddress, currentPayerNonce + 1)
+
+	importTxID, err := client.PChainAPI().ImportAVA(runner.geckoUser, pchainAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
-	txnId, err = client.PChainApi().IssueTx(txnId)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
+	if err := runner.waitForPChainTransactionAcceptance(importTxID); err != nil {
+		return "", stacktrace.Propagate(err, "Failed to Accept ImportTx: %s", importTxID)
 	}
-	runner.waitForPchainNonZeroBalance(pchainAddress)
+	// runner.waitForPchainNonZeroBalance(pchainAddress)
 	return pchainAddress, nil
 }
 
 /*
-	Transfers funds from a Phain account owned by that username and password to an XChain account.
+	Transfers funds from a PChain account owned by geckoUser to an XChain account.
 	Returns the XChain account address.
 */
 func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 	// RpcWorkflowRunner must own both pchainAddress and xchainAddress.
-		pchainAddress string,
-		xchainAddress string,
-		amount int64) (string, error) {
+	pchainAddress string,
+	xchainAddress string,
+	amount uint64) (string, error) {
 	client := runner.client
-	username := runner.geckoUser.username
-	password := runner.geckoUser.password
-	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XCHAIN_ADDRESS_PREFIX)
-	currentPayerNonce, err := runner.getCurrentPayerNonce(pchainAddress)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to get current payer nonce from pchainAddress %v", pchainAddress)
-	}
+	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XChainAddressPrefix)
+
 	// PChain API only accepts the XChain address without the xchain prefix.
-	unsignedTxnId, err := client.PChainApi().ExportAVA(amount, xchainAddressWithoutPrefix, currentPayerNonce + 1)
+	exportTxID, err := client.PChainAPI().ExportAVA(runner.geckoUser, xchainAddressWithoutPrefix, amount)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to xchainAddress %s", xchainAddress)
 	}
-	signedTxnId, err := client.PChainApi().Sign(unsignedTxnId, pchainAddress, username, password)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to sign export AVA transaction.")
+	if err := runner.waitForPChainTransactionAcceptance(exportTxID); err != nil {
+		return "", stacktrace.Propagate(err, "Failed to accept ExportTx: %s", exportTxID)
 	}
-	_, err = client.PChainApi().IssueTx(signedTxnId)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "Failed to issue importAVA transaction.")
-	}
+
 	// XChain API only accepts the XChain address with the xchain prefix.
-	txnId, err := client.XChainApi().ImportAVA(xchainAddress, username, password)
-	for err != nil {
-		/*
-			HACK HACK HACK because the PChain does not have a way to verify transaction acceptence yet,
-			we retry based on the contents of the error message from the XChain call if the pchain transaction
-			has not yet reached consensus
-		*/
-		// TODO When the PChain transaction status endpoint is deployed, use that to wait for transaction acceptance
-		//  (See https://github.com/ava-labs/gecko/issues/296)
-		if strings.Contains(err.Error(), NO_IMPORT_INPUTS_ERROR_STR) {
-			txnId, err = client.XChainApi().ImportAVA(xchainAddress, username, password)
-			time.Sleep(IMPORT_AVA_TO_XCHAIN_TIMEOUT)
-		} else {
-			return "", stacktrace.Propagate(err, "Failed import AVA to xchainAddress %s", xchainAddress)
-		}
-	}
+	txnId, err := client.XChainAPI().ImportAVA(runner.geckoUser, xchainAddress)
 	err = runner.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
@@ -319,93 +262,48 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 	return xchainAddress, nil
 }
 
-func (runner RpcWorkflowRunner) waitForXchainTransactionAcceptance(txnId string) error {
+func (runner RpcWorkflowRunner) waitForXchainTransactionAcceptance(txnId ids.ID) error {
 	client := runner.client
-	status, err := client.XChainApi().GetTxStatus(txnId)
+	status, err := client.XChainAPI().GetTxStatus(txnId)
 	if err != nil {
-		return stacktrace.Propagate(err,"Failed to get status.")
+		return stacktrace.Propagate(err, "Failed to get status.")
 	}
 	pollStartTime := time.Now()
-	for i := 0; time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != TRANSACTION_ACCEPTED_STATUS; i++ {
-		status, err = client.XChainApi().GetTxStatus(txnId)
+	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != choices.Accepted {
+		status, err = client.XChainAPI().GetTxStatus(txnId)
 		if err != nil {
-			return stacktrace.Propagate(err,"Failed to get status.")
+			return stacktrace.Propagate(err, "Failed to get status.")
 		}
 		logrus.Debugf("Status for transaction %s: %s", txnId, status)
 		time.Sleep(time.Second)
 	}
-	if status != TRANSACTION_ACCEPTED_STATUS {
+	if status != choices.Accepted {
 		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
 	} else {
 		return nil
 	}
 }
 
-func (runner RpcWorkflowRunner) waitForValidatorAddition(nodeId string, subnetIdPtr *string) error {
-	client := runner.client
-	validators, err := client.PChainApi().GetCurrentValidators(subnetIdPtr)
-	if err != nil {
-		return stacktrace.Propagate(err, "Could not get current validators")
-	}
+func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) error {
+	client := runner.client.PChainAPI()
 	pollStartTime := time.Now()
-	for i := 0; time.Since(pollStartTime) < runner.networkAcceptanceTimeout && !checkValidatorInValidators(nodeId, validators); i++ {
-		time.Sleep(time.Second)
-		validators, err = client.PChainApi().GetCurrentValidators(subnetIdPtr)
-		if err != nil {
-			return stacktrace.Propagate(err, "Could not get current validators")
-		}
+
+	status, err := client.GetTxStatus(txID)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to get tx status")
 	}
-	if !checkValidatorInValidators(nodeId, validators) {
-		return stacktrace.NewError("Timed out waiting for validator %s to be accepted as a validator by the network.", nodeId)
+
+	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != platformvm.Committed {
+		time.Sleep(time.Second)
+		status, err = client.GetTxStatus(txID)
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to get status")
+		}
+		logrus.Debugf("Status for transaction: %s: %s", txID, status)
+	}
+	if status != platformvm.Committed {
+		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
 	} else {
 		return nil
 	}
-}
-
-func checkValidatorInValidators(nodeId string, validators []gecko_client.Validator) bool {
-	for _, validator := range validators {
-		if validator.Id == nodeId {
-			return true
-		}
-	}
-	return false
-}
-
-func (runner RpcWorkflowRunner) waitForPchainNonZeroBalance(pchainAddress string) error {
-	client := runner.client
-	pchainAccount, err := client.PChainApi().GetAccount(pchainAddress)
-	if err != nil {
-		return stacktrace.Propagate(err, "Could not get PChain account information")
-	}
-	balance := pchainAccount.Balance
-	if err != nil {
-		return stacktrace.Propagate(err,"Failed to get balance.")
-	}
-	pollStartTime := time.Now()
-	for i := 0; time.Since(pollStartTime) < runner.networkAcceptanceTimeout && balance == "0"; i++ {
-		pchainAccount, err = client.PChainApi().GetAccount(pchainAddress)
-		if err != nil {
-			return stacktrace.Propagate(err,"Failed to get account information.")
-		}
-		balance = pchainAccount.Balance
-		logrus.Debugf("Balance for account %s: %s", pchainAddress, balance)
-		time.Sleep(time.Second)
-	}
-	if balance == "0" {
-		return stacktrace.NewError("Timed out waiting for PChain address %s to receive funds.", pchainAddress)
-	} else {
-		return nil
-	}
-}
-
-func (runner RpcWorkflowRunner) getCurrentPayerNonce(pchainAddress string) (int, error) {
-	pchainAccountInfo, err := runner.client.PChainApi().GetAccount(pchainAddress)
-	if err != nil {
-		return 0, stacktrace.Propagate(err, "Failed to get pchain account info.")
-	}
-	currentPayerNonce, err := strconv.Atoi(pchainAccountInfo.Nonce)
-	if err != nil {
-		return 0, stacktrace.Propagate(err, "")
-	}
-	return currentPayerNonce, nil
 }
