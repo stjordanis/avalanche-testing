@@ -3,21 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"sort"
+	"strings"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
-	"os"
-	"sort"
-	"strings"
 )
 
-
 const (
-	testNameArgSeparator       = ","
-	geckoImageNameEnvVar       = "GECKO_IMAGE_NAME"
-	chitSpammerImageNameEnvVar = "CHIT_SPAMMER_IMAGE_NAME"
-	defaultParallelism         = 4
+	testNameArgSeparator     = ","
+	geckoImageNameEnvVar     = "GECKO_IMAGE_NAME"
+	byzantineImageNameEnvVar = "BYZANTINE_IMAGE_NAME"
+	defaultParallelism       = 4
 
 	// The number of bits to make each test network, which dictates the max number of services a test can spin up
 	// Here we choose 8 bits = 256 max services per test
@@ -27,8 +27,8 @@ const (
 func main() {
 	// NOTE: we'll need to change the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors:               true,
-		FullTimestamp:             true,
+		ForceColors:   true,
+		FullTimestamp: true,
 	})
 
 	doListArg := flag.Bool(
@@ -39,15 +39,15 @@ func main() {
 
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
-		"gecko-image-name", 
+		"gecko-image-name",
 		"",
 		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
 	)
 
-	chitSpammerImageNameArg := flag.String(
-		"chit-spammer-image-name",
+	byzantineImageNameArg := flag.String(
+		"byzantine-image-name",
 		"",
-		"The name of a pre-built Byzantine Gecko image, spamming unrequested chit messages, on the local Docker engine",
+		"The name of a pre-built Byzantine Gecko image, on the local Docker engine",
 	)
 
 	testControllerImageNameArg := flag.String(
@@ -84,8 +84,8 @@ func main() {
 
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
 	testSuite := ava_testsuite.AvaTestSuite{
-		ChitSpammerImageName: *chitSpammerImageNameArg,
-		NormalImageName:      *geckoImageNameArg,
+		ByzantineImageName: *byzantineImageNameArg,
+		NormalImageName:    *geckoImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}
@@ -99,7 +99,6 @@ func main() {
 		}
 		os.Exit(0)
 	}
-
 
 	initializerLevelPtr := logging.LevelFromString(*initializerLogLevelArg)
 	if initializerLevelPtr == nil {
@@ -133,8 +132,8 @@ func main() {
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
 		map[string]string{
-			geckoImageNameEnvVar: *geckoImageNameArg,
-			chitSpammerImageNameEnvVar: *chitSpammerImageNameArg,
+			geckoImageNameEnvVar:     *geckoImageNameArg,
+			byzantineImageNameEnvVar: *byzantineImageNameArg,
 		},
 		networkWidthBits)
 

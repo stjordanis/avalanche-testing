@@ -3,22 +3,22 @@ package ava_services
 import (
 	"bytes"
 	"fmt"
+	"net"
+	"testing"
+
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/stretchr/testify/assert"
-	"net"
-	"testing"
 )
 
-
 var testPublicIp = net.ParseIP("172.17.0.2")
-
 
 func TestNoDepsStartCommand(t *testing.T) {
 	initializerCore := NewGeckoServiceInitializerCore(
 		1,
 		1,
 		false,
+		make(map[string]string),
 		[]string{},
 		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		LOG_LEVEL_INFO)
@@ -28,7 +28,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",
-		"--http-host=" + testPublicIp.String(),
+		"--http-host=",
 		"--staking-port=9651",
 		"--log-level=info",
 		"--snow-sample-size=1",
@@ -51,6 +51,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		1,
 		1,
 		false,
+		make(map[string]string),
 		bootstrapperNodeIds,
 		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		LOG_LEVEL_INFO)
@@ -60,7 +61,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",
-		"--http-host=" + testPublicIp.String(),
+		"--http-host=",
 		"--staking-port=9651",
 		"--log-level=info",
 		"--snow-sample-size=1",
@@ -70,7 +71,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 	}
 
 	testDependency := GeckoService{
-		ipAddr: "1.2.3.4",
+		ipAddr:      "1.2.3.4",
 		jsonRpcPort: "9650/tcp",
 		stakingPort: "9651/tcp",
 	}
