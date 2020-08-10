@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/docker/go-connections/nat"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"

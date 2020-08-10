@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
-	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
 
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
@@ -143,9 +143,9 @@ func NewTestGeckoNetworkLoader(
 	for configId, configParams := range serviceConfigs {
 		if strings.HasPrefix(string(configId), bootNodeConfigIdPrefix) {
 			return nil, stacktrace.NewError("Config ID %v cannot be used because prefix %v is reserved for boot node configurations. Choose a configuration id that does not begin with %v.",
-											configId,
-											bootNodeConfigIdPrefix,
-											bootNodeConfigIdPrefix)
+				configId,
+				bootNodeConfigIdPrefix,
+				bootNodeConfigIdPrefix)
 		}
 		serviceConfigsCopy[configId] = configParams
 	}
@@ -155,9 +155,9 @@ func NewTestGeckoNetworkLoader(
 	for serviceId, configId := range desiredServiceConfigs {
 		if strings.HasPrefix(string(serviceId), bootNodeServiceIdPrefix) {
 			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot node services. Choose a service id that does not begin with %v.",
-											serviceId,
-											bootNodeServiceIdPrefix,
-											bootNodeServiceIdPrefix)
+				serviceId,
+				bootNodeServiceIdPrefix,
+				bootNodeServiceIdPrefix)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}

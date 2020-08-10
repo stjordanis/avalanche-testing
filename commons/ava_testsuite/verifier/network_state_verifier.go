@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
