@@ -19,11 +19,11 @@ const (
 	seedAmount     = int64(50000000000000)
 	stakeAmount    = int64(30000000000000)
 
-	normalNodeConfigId networks.ConfigurationID = 0
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
 
-	networkAcceptanceTimeoutRatio = 0.3
-	nonBootValidatorServiceId networks.ServiceID = "validator-service"
-	nonBootNonValidatorServiceId networks.ServiceID = "non-validator-service"
+	networkAcceptanceTimeoutRatio                    = 0.3
+	nonBootValidatorServiceId     networks.ServiceID = "validator-service"
+	nonBootNonValidatorServiceId  networks.ServiceID = "non-validator-service"
 )
 
 type StakingNetworkFullyConnectedTest struct {
@@ -34,7 +34,6 @@ type StakingNetworkFullyConnectedTest struct {
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
-
 
 	stakerIds := castedNetwork.GetAllBootServiceIds()
 	allServiceIds := make(map[networks.ServiceID]bool)

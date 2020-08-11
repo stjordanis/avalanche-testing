@@ -15,17 +15,18 @@ import (
 )
 
 const (
-	normalNodeConfigId            = 1
-	byzantineConfigId             = 2
-	byzantineUsername             = "byzantine_gecko"
-	byzantinePassword             = "byzant1n3!"
-	byzantineConflictingTxsVertex = "conflicting-txs-vertex"
-	stakerUsername                = "staker_gecko"
-	stakerPassword                = "test34test!23"
-	byzantineNodeServiceId networks.ServiceID = "byzantine-node"
-	normalNodeServiceId networks.ServiceID = "normal-node"
-	seedAmount                    = int64(50000000000000)
-	stakeAmount                   = int64(30000000000000)
+	normalNodeConfigId          networks.ConfigurationID = "normal-config"
+	byzantineConfigId           networks.ConfigurationID = "byzantine-config"
+	byzantineUsername                                    = "byzantine_gecko"
+	byzantinePassword                                    = "byzant1n3!"
+	byzantineBehavior                                    = "byzantine-behavior"
+	conflictingTxVertexBehavior                          = "conflicting-txs-vertex"
+	stakerUsername                                       = "staker_gecko"
+	stakerPassword                                       = "test34test!23"
+	byzantineNodeServiceId                               = "byzantine-node"
+	normalNodeServiceId                                  = "virtuous-node"
+	seedAmount                                           = int64(50000000000000)
+	stakeAmount                                          = int64(30000000000000)
 )
 
 // ================ Byzantine Test - Conflicting Transactions in a Vertex Test ===================================
@@ -44,7 +45,6 @@ type StakingNetworkConflictingTxsVertexTest struct {
 // in processing.
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	logrus.Info("Changes are being reflected")
 
 	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceId)
 	if err != nil {
@@ -58,7 +58,7 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 	// Transaction3: Sends the UTXO to address2
 	// Transactions 2 and 3 conflict, so this will trigger the byzantine node
 	// to issue all three transactions in a single vertex
-	// TODO move these strings into an external test vector and import them
+	// TODO move transaction strings into external test vector
 	createAssetTx := "111fqb8P5et4GYQHi6s3dyryAcmCqqPj998kfqvXtHvgnEmnoDwXBdHaYvjWp6WU1vhxGz3JTwBWXNWYBvJZkMb2jVoeTouJ6vjeQhQQx3MVYn2k5jYJGScd5bzrcE24AKLDG2YdCYRrfpJwgxPvHZH9XZuhzMy8Q8zZ1HzVEZggmRDysYUBBC"
 	conflictingTx1 := "111111yw4McR2ppKsF4t8AD8SmnkLVS4b9Zur5CikoDcC4dXr7rTYXfjc9bA45SiffbutqatRegMBRecAtCp55WXuGFGR1ymbJo5iCEFLbwLsbjaKVcYCyB5nyi6uwbHXdyz1cHVvnP9jDjVGT6dp3xzt57uXaXFGwxZky7ZSCL2Hh3vCuyjjZo7siGFMBzHmJc93SVTGptD6sJQoSiqqhdhnwLCTN6pKLYFfFYec2JMWSKo9jswtuY7JPWjEn8CNYzHxiBN3RN1MfbbLAwgFzAK321qpXUBaQjHq5vXj5GBqqkaW4UMhw2D5KPnSMzb4KPwussuT7YKJ4Rtmk7ysbD3sG4WbbL9kgQ2tzZFaLWa4vbEb51iUKDaZUuKZmdzcJxuk1nTwnbr3otKiEg"
 	conflictingTx2 := "111111yw4McR2ppKsF4t8AD8SmnkLVS4b9Zur5CikoDcC4dXr7rTYXfjc9bA45SiffbutqatRegMBRecAtCp55WXuGFGR1ymbJo5iCEFLbwLsbjaKVcYCyB5nyi6uwbHXdyz1cHVvnPGxtmVkdbkpw4wfLPpETgnvAWTJRUyrtWDTWtpHD19jArZqWfyZ6ipGiUpNVfU6yfaXah4CnmknXPR7hmm3jiWpoArUMJJd1e39vFCfZMDgov8MViCpUfwj6NpvaEyS7iWP5Ao6Lii6wq7VX5YJrRxhy9zFtgLCgLPya7ZdvwQfRSsQgRePoDXUmntJKfdPZoN4juG7t1ZdJ4KpPqvFbf2GhaUf2jzkJ7S6pTGAN9hthN71BV9CK9naHzQSJ9sZGQyZqPYdpt"
@@ -79,12 +79,14 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 	logrus.Infof("Issued three transactions to Byzantine Node with IDs: %s, %s, %s", nonConflictId, conflictId1, conflictId2)
 
 	// Confirm the byzantine node Accepted the transactions
-	// Note: The byzantine behavior is to batch pending transactions into a vertex
-	// accept them, and PushQuery the other nodes to gossip the vertex
+	// Note: The byzantine behavior is to batch the pending transactions into a vertex as soon as it detects a conflict.
+	// It should try to accept each transaction before PushQuery-ing the vertex to other nodes to signal to this test
+	// controller that the vertex was successfully issued
 	status, err := byzantineXChainAPI.GetTxStatus(nonConflictId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, fmt.Sprintf("Failed to get status of Transaction: %s", nonConflictId)))
-	} else if status != choices.Accepted.String() {
+	}
+	if status != choices.Accepted.String() {
 		context.Fatal(stacktrace.Propagate(err, fmt.Sprintf("Transaction: %s was not accepted, status: %s", nonConflictId, status)))
 	}
 
@@ -112,9 +114,7 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 
 	// The issued vertex should be dropped completely, so the virtuous nodes should drop the vertex
 	// and never issue the transactions into consensus.
-	// Note: since the transactions should still be parsed, we expect the status to be "Processing"
-	logrus.Info("Sleeping 10 seconds to see if virtuous nodes will accept the transactions")
-
+	// Note: since the transactions will be parsed in the process, we expect the status to be "Processing" not "Rejected" or "Unknown"
 	virtuousClient, err := castedNetwork.GetGeckoClient(normalNodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get virtuous client."))
@@ -122,8 +122,9 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 
 	// We issue a vertex from the virtuous node to see if it builds on invalid vertex
 	// This is meant to remove the need to wait an arbitrary amount of time to see if the vertex gets accepted
-	// and instead track a valid transaction's time to acceptance within the test to see if the illegal
-	// transaction is successfully dropped.
+	// and instead confirm the valid transaction as a measure of the time to finality before checking if
+	// the transactions that should have been dropped were in fact dropped successfully.
+	// TODO move to test vector
 	virtuousXChainAPI := virtuousClient.XChainApi()
 	virtuousCreateAssetTx := "1113xRTdaTYCMRbbnkQsteDyYuSr7GYbJzvuDkSwHKPhxafnh927eDuAB5vAeasK4F63kyYmA5t9NbZJEGdknQBXssfuDZD6FbM3Cksoghni8wGdUuq116DQNALBLufKKZTyZZHNbMwgnQkxLW1PVhsSv5DHK3M2W1UXeZv86bXkxszeqd5NUmUN"
 	virtuousSpendTx := "111111yw4McR2ppKsF4t8AD8SmnkLVS4b9Zur5CikoDcC4dXr7rTYXfjcAZVpdDcaZArPRWWUaAxUjGXXmt2JJNJ1Hux4sqDASGkFHBpQbHRs5cQUGTnifXobnKwJJsyWGrygzC7QLfchXwmZdssNHavKJ9urTobGj2EK7mvn6RL14Nkc5kPnBMpejcnH8WkS8gxcSb4eRibZiVHBCZf4x2yyMWBVQccdN7c7GLp1zdA343cAjk9ytgWfAxvUwErutBZQZkEDnKZ4AnzczWqxNBjbTpQuUAPdbbCwtcp5RTuKdnkhL9EjtK8YydueYUZrdMfgw5EkFNdNR7mkkMThTrHgZ7reJoaLVNwrf1zNRvQFGLeGkDcRrC5HozRgCYUYYpqYz7MwLxEYv2wctu"
@@ -159,8 +160,8 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 		context.Fatal(stacktrace.Propagate(err, "Failed to get transaction status for non-conflicting transaction."))
 	}
 	logrus.Infof("Status of CreateAssetTx: %s is %s", nonConflictId, status)
-	// If the transaction ends up getting Accepted, the vertex containing conflicting transactions was not dropped
-	// and the test should fail
+	// If the transaction was Accepted, the test should fail because virtuous nodes should not issue the vertex and
+	// the underlying transactions into consensus
 	if status == choices.Accepted.String() {
 		context.Fatal(stacktrace.Propagate(err, fmt.Sprintf("Expected status of non-conflicting transaction issued in bad vertex to be Processing, but found %s", status)))
 	}
@@ -176,12 +177,11 @@ func (test StakingNetworkConflictingTxsVertexTest) GetNetworkLoader() (networks.
 }
 
 func (test StakingNetworkConflictingTxsVertexTest) GetExecutionTimeout() time.Duration {
-	return 3 * time.Minute
+	return 2 * time.Minute
 }
 
 func (test StakingNetworkConflictingTxsVertexTest) GetSetupBuffer() time.Duration {
-	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
-	return 6 * time.Minute
+	return 2 * time.Minute
 }
 
 // =============== Helper functions =============================
@@ -206,7 +206,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 			byzantineImageName,
 			2,
 			2,
-			map[string]string{"byzantine-behavior": byzantineConflictingTxsVertex},
+			map[string]string{byzantineBehavior: conflictingTxVertexBehavior},
 		),
 	}
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
@@ -222,4 +222,3 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 		desiredServices,
 	)
 }
-

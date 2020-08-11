@@ -27,8 +27,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	client := gecko_client.NewGeckoClient(jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort())
 	healthInfo, err := client.HealthApi().GetLiveness()
 	if err != nil {
-		// TODO increase log level when InitialDelay is set to a conservative value
-		logrus.Info(stacktrace.Propagate(err, "Error occurred in getting liveness info"))
+		logrus.Trace(stacktrace.Propagate(err, "Error occurred getting liveness info"))
 		return false
 	}
 	logrus.Infof("Service reported healthy: %v", healthInfo.Healthy)
@@ -38,6 +37,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	if healthInfo.Healthy {
 		time.Sleep(15 * time.Second)
 	}
+
 	return healthInfo.Healthy
 }
 

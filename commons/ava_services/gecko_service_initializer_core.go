@@ -2,15 +2,15 @@ package ava_services
 
 import (
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
+
 	"net"
+	"os"
+	"strings"
 )
 
 const (
@@ -25,6 +25,7 @@ const (
 
 // ========= Loglevel Enum ========================
 type GeckoLogLevel string
+
 const (
 	LOG_LEVEL_VERBOSE GeckoLogLevel = "verbo"
 	LOG_LEVEL_DEBUG   GeckoLogLevel = "debug"
@@ -48,7 +49,7 @@ type GeckoServiceInitializerCore struct {
 	// TODO Switch these to be named properties of this struct, so that we're being explicit about what arguments
 	//  are consumed
 	// A set of CLI args that will be passed as-is to the Gecko service
-	cliArgs             map[string]string
+	additionalCLIArgs   map[string]string
 
 	// The Ava node IDs of the bootstrappers that the Gecko service should bootstrap from
 	bootstrapperNodeIds []string
@@ -81,7 +82,7 @@ func NewGeckoServiceInitializerCore(
 		snowSampleSize int,
 		snowQuorumSize int,
 		stakingTlsEnabled bool,
-		cliArgs map[string]string,
+		additionalCLIArgs map[string]string,
 		bootstrapperNodeIds []string,
 		certProvider cert_providers.GeckoCertProvider,
 		logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
@@ -95,7 +96,7 @@ func NewGeckoServiceInitializerCore(
 		snowSampleSize:      snowSampleSize,
 		snowQuorumSize:      snowQuorumSize,
 		stakingTlsEnabled:   stakingTlsEnabled,
-		cliArgs:             cliArgs,
+		additionalCLIArgs:   additionalCLIArgs,
 		bootstrapperNodeIds: bootstrapperIdsCopy,
 		certProvider:        certProvider,
 		logLevel:            logLevel,
@@ -161,7 +162,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		publicIpFlag,
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort.Int()),
-		fmt.Sprintf("--http-host=%s", publicIpAddr),
+		"--http-host=", // Leave empty to make API openly accessible
 		fmt.Sprintf("--staking-port=%d", stakingPort.Int()),
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
@@ -205,7 +206,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 
 	// Append additional CLI arguments
 	// These are added as is with no additional checking
-	for param, argument := range core.cliArgs {
+	for param, argument := range core.additionalCLIArgs {
 		commandList = append(commandList, fmt.Sprintf("--%s=%s", param, argument))
 	}
 

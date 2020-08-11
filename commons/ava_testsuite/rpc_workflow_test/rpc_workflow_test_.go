@@ -26,7 +26,7 @@ const (
 	delegatorNodeServiceId networks.ServiceID = "delegator-node"
 
 	networkAcceptanceTimeoutRatio = 0.3
-	normalNodeConfigId networks.ConfigurationID = 0
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
 )
 
 type StakingNetworkRpcWorkflowTest struct {
@@ -64,7 +64,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		delegatorUsername,
 		delegatorPassword,
 		networkAcceptanceTimeout)
-  
+
 	// ====================================== ADD VALIDATOR ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
@@ -127,7 +127,7 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, nil),
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{

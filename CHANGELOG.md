@@ -1,4 +1,14 @@
 # TBD
+* Add conflicting transactions vertex test
+* Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
+* Add docs to every public function and struct
+
+# 0.8.0
+* Switch configuration IDs to strings instead of ints
+* Bump kurtosis version to get cleanup on ctrl-c
+* Pull in Kurtosis version that will print test outputs they finish, rather than waiting for all tests to finish
+
+# 0.7.0
 * Split `staking_network_tests` into separate files per test
 * Upgrade to Kurtosis version with simplified service config definition
 * Implement network consensus timeouts in high level gecko client as fractions of total test timeout
@@ -15,9 +25,6 @@
 * Changing service IDs to strings rather than integers
 * Update function interface for GetStartCommand according to net.IP change in kurtosis
 * Added a script to clean Docker environment
-* Add conflicting transactions vertex test
-* Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
-* Add docs to every public function and struct
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width

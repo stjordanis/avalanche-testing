@@ -2,23 +2,25 @@ package ava_networks
 
 import (
 	"bytes"
-	"github.com/kurtosis-tech/kurtosis/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"github.com/palantir/stacktrace"
 	"time"
+
+	"strconv"
+	"strings"
 
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
-	"strconv"
-	"strings"
+
+	"github.com/kurtosis-tech/kurtosis/commons/networks"
+	"github.com/kurtosis-tech/kurtosis/commons/services"
+	"github.com/palantir/stacktrace"
 )
 
 const (
-	// The config ID that the first boot node will have, with successive boot nodes being incrementally higher
-	bootNodeConfigIdStart int = 987654
+	// The prefix for boot node configuration IDs, with an integer appended to specify each one
+	bootNodeConfigIdPrefix string = "boot-node-config-"
 
-	// The service ID that the first boot node will have, with successive boot nodes being incrementally higher
+	// The prefix for boot node service IDs, with an integer appended to specify each one
 	bootNodeServiceIdPrefix string = "boot-node-"
 )
 
@@ -125,7 +127,7 @@ type TestGeckoNetworkServiceConfig struct {
 
 	// TODO Make these named parameters, so we don't have an arbitrary bag of extra CLI args!
 	// A list of extra CLI args that should be passed to the Gecko services started with this configuration
-	cliArgs        map[string]string
+	additionalCLIArgs        map[string]string
 }
 
 /*
@@ -147,14 +149,14 @@ func NewTestGeckoNetworkServiceConfig(
 		imageName string,
 		snowQuorumSize int,
 		snowSampleSize int,
-		cliArgs map[string]string) *TestGeckoNetworkServiceConfig {
+		additionalCLIArgs map[string]string) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
 		varyCerts:       varyCerts,
 		serviceLogLevel: serviceLogLevel,
 		imageName:       imageName,
 		snowQuorumSize:  snowQuorumSize,
 		snowSampleSize:  snowSampleSize,
-		cliArgs:         cliArgs,
+		additionalCLIArgs: additionalCLIArgs,
 	}
 }
 
@@ -205,13 +207,13 @@ Args:
 	desiredServiceConfigs: A map of service_id -> config_id, one per node, that this network will initialize with
 */
 func NewTestGeckoNetworkLoader(
-			isStaking bool,
-			bootNodeImage string,
-			bootNodeLogLevel ava_services.GeckoLogLevel,
-			bootstrapperSnowQuorumSize int,
-			bootstrapperSnowSampleSize int,
-			serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig,
-			desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestGeckoNetworkLoader, error) {
+	isStaking bool,
+	bootNodeImage string,
+	bootNodeLogLevel ava_services.GeckoLogLevel,
+	bootstrapperSnowQuorumSize int,
+	bootstrapperSnowSampleSize int,
+	serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig,
+	desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestGeckoNetworkLoader, error) {
 	if len(desiredServiceConfigs) == 0 {
 		return nil, stacktrace.NewError("Must specify at least one node!")
 	}
@@ -219,8 +221,11 @@ func NewTestGeckoNetworkLoader(
 	// Defensive copy
 	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configId, configParams := range serviceConfigs {
-		if int(configId) >= bootNodeConfigIdStart && int(configId) < (bootNodeConfigIdStart + len(DefaultLocalNetGenesisConfig.Stakers)) {
-			return nil, stacktrace.NewError("Config ID %v cannot be used as it's being used as a boot node config ID", configId)
+		if strings.HasPrefix(string(configId), bootNodeConfigIdPrefix) {
+			return nil, stacktrace.NewError("Config ID %v cannot be used because prefix %v is reserved for boot node configurations. Choose a configuration id that does not begin with %v.",
+											configId,
+											bootNodeConfigIdPrefix,
+											bootNodeConfigIdPrefix)
 		}
 		serviceConfigsCopy[configId] = configParams
 	}
@@ -229,7 +234,10 @@ func NewTestGeckoNetworkLoader(
 	desiredServiceConfigsCopy := make(map[networks.ServiceID]networks.ConfigurationID)
 	for serviceId, configId := range desiredServiceConfigs {
 		if strings.HasPrefix(string(serviceId), bootNodeServiceIdPrefix) {
-			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot nodes.", serviceId, bootNodeServiceIdPrefix)
+			return nil, stacktrace.NewError("Service ID %v cannot be used because prefix %v is reserved for boot node services. Choose a service id that does not begin with %v.",
+											serviceId,
+											bootNodeServiceIdPrefix,
+											bootNodeServiceIdPrefix)
 		}
 		desiredServiceConfigsCopy[serviceId] = configId
 	}
@@ -257,7 +265,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 
 	// Add boot node configs
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
+		configId := networks.ConfigurationID(bootNodeConfigIdPrefix + strconv.Itoa(i))
 
 		certString := localNetGenesisStakers[i].TlsCert
 		keyString := localNetGenesisStakers[i].PrivateKey
@@ -290,7 +298,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			configParams.snowSampleSize,
 			configParams.snowQuorumSize,
 			loader.isStaking,
-			configParams.cliArgs,
+			configParams.additionalCLIArgs,
 			bootNodeIds,
 			certProvider,
 			configParams.serviceLogLevel,
@@ -316,7 +324,7 @@ func (loader TestGeckoNetworkLoader) InitializeNetwork(network *networks.Service
 	// Add the bootstrapper nodes
 	bootstrapperServiceIds := make(map[networks.ServiceID]bool)
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
-		configId := networks.ConfigurationID(bootNodeConfigIdStart + i)
+		configId := networks.ConfigurationID(bootNodeConfigIdPrefix + strconv.Itoa(i))
 		serviceId := networks.ServiceID(bootNodeServiceIdPrefix + strconv.Itoa(i))
 		checker, err := network.AddService(configId, serviceId, bootstrapperServiceIds)
 		if err != nil {

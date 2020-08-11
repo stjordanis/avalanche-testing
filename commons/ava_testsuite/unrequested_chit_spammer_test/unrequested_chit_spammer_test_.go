@@ -1,6 +1,7 @@
 package unrequested_chit_spammer_test
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
@@ -10,23 +11,24 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-	"strconv"
 )
 
 const (
-	normalNodeConfigId networks.ConfigurationID = 1
-	byzantineConfigId networks.ConfigurationID = 2
-	byzantineUsername = "byzantine_gecko"
-	byzantinePassword = "byzant1n3!"
-	stakerUsername = "staker_gecko"
-	stakerPassword = "test34test!23"
-	normalNodeServiceId networks.ServiceID = "normal-node"
-	byzantineNodePrefix string = "byzantine-node-"
-	numberOfByzantineNodes = 4
-	seedAmount               = int64(50000000000000)
-	stakeAmount              = int64(30000000000000)
+	normalNodeConfigId     networks.ConfigurationID = "normal-config"
+	byzantineConfigId      networks.ConfigurationID = "byzantine-config"
+	byzantineUsername                               = "byzantine_gecko"
+	byzantinePassword                               = "byzant1n3!"
+	stakerUsername                                  = "staker_gecko"
+	stakerPassword                                  = "test34test!23"
+	normalNodeServiceId    networks.ServiceID       = "normal-node"
+	byzantineNodePrefix    string                   = "byzantine-node-"
+	numberOfByzantineNodes                          = 4
+	seedAmount                                      = int64(50000000000000)
+	stakeAmount                                     = int64(30000000000000)
 
 	networkAcceptanceTimeoutRatio = 0.3
+	byzantineBehavior             = "byzantine-behavior"
+	chitSpammerBehavior           = "chit-spammer"
 )
 
 // ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
@@ -112,14 +114,16 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 			test.ByzantineImageName,
 			2,
 			2,
-			map[string]string{"byzantine-behavior": "chit-spammer"},
+			map[string]string{
+				"byzantine-behavior": "chit-spammer",
+			},
 		),
 	}
 
 	// Define the map from service->configuration for the network
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
 	for i := 0; i < numberOfByzantineNodes; i++ {
-		serviceIdConfigMap[networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i))] = byzantineConfigId
+		serviceIdConfigMap[networks.ServiceID(byzantineNodePrefix+strconv.Itoa(i))] = byzantineConfigId
 	}
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)

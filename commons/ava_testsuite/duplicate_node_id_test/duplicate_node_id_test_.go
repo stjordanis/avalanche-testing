@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	normalNodeConfigId networks.ConfigurationID = 0
-	sameCertConfigId networks.ConfigurationID = 1
+	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	sameCertConfigId networks.ConfigurationID = "same-cert-config"
 
 	vanillaNodeServiceId networks.ServiceID = "vanilla-node"
 	badServiceId1 networks.ServiceID = "bad-service-1"
@@ -204,10 +204,10 @@ func (test DuplicateNodeIdTest) GetSetupBuffer() time.Duration {
 This helper function will grab node IDs and Gecko clients
 */
 func getNodeIdsAndClients(
-		testContext testsuite.TestContext,
-		network ava_networks.TestGeckoNetwork,
-		allServiceIds map[networks.ServiceID]bool,
-		) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
+	testContext testsuite.TestContext,
+	network ava_networks.TestGeckoNetwork,
+	allServiceIds map[networks.ServiceID]bool,
+) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient) {
 	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
 	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {
