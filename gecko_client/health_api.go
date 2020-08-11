@@ -17,7 +17,7 @@ type HealthApi struct {
 }
 
 func (api HealthApi) GetLiveness() (health.GetLivenessReply, error) {
-	var response health.GetLivenessReply
+	var response GetLivenessResponse
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(healthApiEndpoint, "health.getLiveness", make(map[string]interface{}))
 	if err != nil {
 		return health.GetLivenessReply{}, stacktrace.Propagate(err, "Error getting liveness")
@@ -26,5 +26,5 @@ func (api HealthApi) GetLiveness() (health.GetLivenessReply, error) {
 	if err := json.Unmarshal(responseBodyBytes, &response); err != nil {
 		return health.GetLivenessReply{}, stacktrace.Propagate(err, "Error unmarshalling JSON response")
 	}
-	return response, nil
+	return response.Result, nil
 }

@@ -2,15 +2,15 @@ package ava_services
 
 import (
 	"fmt"
+	"net"
+	"os"
+	"strings"
+
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services/cert_providers"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
-
-	"net"
-	"os"
-	"strings"
 )
 
 const (
@@ -122,9 +122,8 @@ func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 			stakingTlsCertFileId: true,
 			stakingTlsKeyFileId:  true,
 		}
-	} else {
-		return make(map[string]bool)
 	}
+	return make(map[string]bool)
 }
 
 /*

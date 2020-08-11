@@ -30,7 +30,6 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 		logrus.Trace(stacktrace.Propagate(err, "Error occurred getting liveness info"))
 		return false
 	}
-	logrus.Infof("Service reported healthy: %v", healthInfo.Healthy)
 
 	// HACK HACK HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
 	// TODO TODO TODO once isReadiness endpoint is available, use that instead of just waiting
