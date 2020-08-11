@@ -3,11 +3,11 @@ package fully_connected_test
 import (
 	"time"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_networks"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_services"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
-	"github.com/kurtosis-tech/ava-e2e-tests/gecko_client"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"

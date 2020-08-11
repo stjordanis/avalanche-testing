@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 )

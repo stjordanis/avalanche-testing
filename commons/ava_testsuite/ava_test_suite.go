@@ -1,12 +1,12 @@
 package ava_testsuite
 
 import (
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/conflicting_txs_vertex_test"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/duplicate_node_id_test"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/fully_connected_test"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/rpc_workflow_test"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/unrequested_chit_spammer_test"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite/verifier"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/conflicting_txs_vertex_test"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/duplicate_node_id_test"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/fully_connected_test"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_test"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/unrequested_chit_spammer_test"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 

@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/ava_testsuite"
-	"github.com/kurtosis-tech/ava-e2e-tests/commons/logging"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 )

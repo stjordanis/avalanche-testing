@@ -1,4 +1,4 @@
-module github.com/kurtosis-tech/ava-e2e-tests
+module github.com/ava-labs/avalanche-e2e-tests
 
 go 1.13
 

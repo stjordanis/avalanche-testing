@@ -2,10 +2,8 @@
 
 set -euo pipefail
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
-
-# TODO this should be avalabs!
-DOCKER_ORG="kurtosistech"
-REPO_BASE="ava-e2e-tests"
+DOCKER_ORG="avaplatform"
+REPO_BASE="avalanche-e2e-tests"
 CONTROLLER_REPO="${REPO_BASE}_controller"
 LATEST_TAG="latest"
 
