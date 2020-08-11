@@ -107,10 +107,10 @@ func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
 This helper function will grab node IDs and Gecko clients
 */
 func getNodeIdsAndClients(
-	testContext testsuite.TestContext,
-	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[networks.ServiceID]bool,
-) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient) {
+		testContext testsuite.TestContext,
+		network ava_networks.TestGeckoNetwork,
+		allServiceIds map[networks.ServiceID]bool,
+		) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*gecko_client.GeckoClient){
 	allGeckoClients = make(map[networks.ServiceID]*gecko_client.GeckoClient)
 	allNodeIds = make(map[networks.ServiceID]string)
 	for serviceId, _ := range allServiceIds {

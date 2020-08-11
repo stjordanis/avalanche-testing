@@ -24,6 +24,9 @@ const (
 	networkWidthBits = 8
 )
 
+/*
+A CLI intended to be the main entrypoint into running the Ava E2E test suite.
+ */
 func main() {
 	// NOTE: we'll need to change the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{

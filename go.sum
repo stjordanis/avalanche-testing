@@ -314,9 +314,11 @@ github.com/kurtosis-tech/kurtosis v0.0.0-20200801201454-7ee7f859e303 h1:zNiCYGKp
 github.com/kurtosis-tech/kurtosis v0.0.0-20200801201454-7ee7f859e303/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200801222046-d64cf18cb9c7 h1:pjU954QvCP24ALdCE1TR7D406A4c8ohqRDVyLPsj/MM=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200801222046-d64cf18cb9c7/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200801230014-1acd2091d186 h1:uc13oYHP+v3S+P08fkhJRIMRw6E27FQ0aWZP05wvJNo=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200801230014-1acd2091d186/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200801231609-1aac12c61866 h1:dn25AN9SuAD/LIkj26IvOWcWUfF9CInyoPtlKUhWlvo=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200801231609-1aac12c61866/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
-github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200802181734-6b2270e2f80d/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200808091050-cb7ad34defb5 h1:vEovchPMQ1sqX1PI7Ee2b4CBMstP/YbnUeCg4mHfk1E=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200808091050-cb7ad34defb5/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200809213617-1103bdc4b774 h1:UKP8KNBJ2BbGbhRNFe6McJ/pzijRlSEbw/xIxao1msA=
@@ -329,6 +331,9 @@ github.com/kurtosis-tech/kurtosis v0.0.0-20200809224304-e8485a15ba64 h1:m48Ud4ob
 github.com/kurtosis-tech/kurtosis v0.0.0-20200809224304-e8485a15ba64/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200809230055-b2feeb1735bb h1:ARxc1gfE50q47XexhaVLBKGJo/pn+iGixb6C3i3USFE=
 github.com/kurtosis-tech/kurtosis v0.0.0-20200809230055-b2feeb1735bb/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200810120239-94d43a13679e h1:pXGT45XBJnshVg1BrPDY747AOyAtGrU9m4cy4ZXgs4k=
+github.com/kurtosis-tech/kurtosis v0.0.0-20200810120239-94d43a13679e/go.mod h1:Xz8KntSuaBBmGaWF633J1Q00WvIsIvJ3G+GWGNRQe2g=
+github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a h1:DGFy/362j92vQRE3ThU1yqg9TuJS8YJOSbQuB7BP9cA=
 github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a/go.mod h1:jVntzcUU+2BtVohZBQmSHWUmh8B55LCNfPhcNCIvvIg=
 github.com/mattn/go-colorable v0.1.6/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
@@ -544,6 +549,7 @@ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
 gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
+gotest.tools/v3 v3.0.2 h1:kG1BFyqVHuQoVQiR1bWGnfz/fmHvvuiSPIV7rvl360E=
 gotest.tools/v3 v3.0.2/go.mod h1:3SzNCllyD9/Y+b5r9JIKQ474KzkZyqLqEfYqMsX94Bk=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=

@@ -4,6 +4,9 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+/*
+An implementation of AvaService representing the interactions available with a Gecko client of the Ava network
+ */
 type GeckoService struct {
 	ipAddr string
 	stakingPort nat.Port

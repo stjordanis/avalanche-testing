@@ -2,6 +2,7 @@ package gecko_client
 
 import (
 	"encoding/json"
+
 	"github.com/palantir/stacktrace"
 )
 
@@ -15,8 +16,8 @@ type XChainApi struct {
 
 func (api XChainApi) ImportKey(username string, password string, privateKey string) (string, error) {
 	params := map[string]interface{}{
-		"username": username,
-		"password": password,
+		"username":   username,
+		"password":   password,
 		"privateKey": privateKey,
 	}
 	responseBodyBytes, err := api.rpcRequester.makeRpcRequest(xchainEndpoint, "avm.importKey", params)
@@ -33,8 +34,8 @@ func (api XChainApi) ImportKey(username string, password string, privateKey stri
 
 func (api XChainApi) ExportAVA(to string, amount int64, username string, password string) (string, error) {
 	params := map[string]interface{}{
-		"to": to,
-		"amount": amount,
+		"to":       to,
+		"amount":   amount,
 		"username": username,
 		"password": password,
 	}
@@ -52,7 +53,7 @@ func (api XChainApi) ExportAVA(to string, amount int64, username string, passwor
 
 func (api XChainApi) ImportAVA(to string, username string, password string) (string, error) {
 	params := map[string]interface{}{
-		"to": to,
+		"to":       to,
 		"username": username,
 		"password": password,
 	}
@@ -103,9 +104,9 @@ func (api XChainApi) GetBalance(address string, assetId string) (*AccountWithUtx
 
 func (api XChainApi) Send(amount int64, assetId string, to string, username string, password string) (string, error) {
 	params := map[string]interface{}{
-		"amount": amount,
-		"assetID": assetId,
-		"to": to,
+		"amount":   amount,
+		"assetID":  assetId,
+		"to":       to,
 		"username": username,
 		"password": password,
 	}

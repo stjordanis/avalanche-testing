@@ -100,7 +100,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true,
+		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			test.ByzantineImageName,
 			2,
@@ -109,7 +110,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true,
+		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			test.NormalImageName,
 			6,
@@ -117,6 +119,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 			make(map[string]string),
 		),
 	}
+
 	// Define the map from service->configuration for the network
 	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
 	for i := 0; i < numberOfByzantineNodes; i++ {

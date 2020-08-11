@@ -1,3 +1,8 @@
+# TBD
+* Add conflicting transactions vertex test
+* Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
+* Add docs to every public function and struct
+
 # 0.8.0
 * Switch configuration IDs to strings instead of ints
 * Bump kurtosis version to get cleanup on ctrl-c
@@ -21,8 +26,6 @@
 * Changing service IDs to strings rather than integers
 * Update function interface for GetStartCommand according to net.IP change in kurtosis
 * Added a script to clean Docker environment
-* Add conflicting transactions vertex test
-* Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
 
 # 0.6.0
 * Use Kurtosis version that allows the user to configure network width

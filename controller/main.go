@@ -11,6 +11,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+/*
+A CLI entrypoint that will be packaged inside a Docker image to form the test controller used for orchestrating test execution
+	for tests in the Ava E2E test suite.
+ */
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
