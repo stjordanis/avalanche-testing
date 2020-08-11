@@ -24,18 +24,18 @@ BYZANTINE_IMAGE_ARG="--byzantine-image-name=${BYZANTINE_IMAGE}"
 GECKO_IMAGE_ARG="--gecko-image-name=${GECKO_IMAGE}"
 return_code=0
 if ! bash "${E2E_TEST_COMMAND}" "${BYZANTINE_IMAGE_ARG}" "${GECKO_IMAGE_ARG}"; then
-    echo "Ava E2E tests failed"
+    echo "Avalanche E2E tests failed"
     return_code=1
 else
-    echo "Ava E2E tests succeeded"
+    echo "Avalanche E2E tests succeeded"
     return_code=0
 fi
 
 # Clear containers.
-echo "Clearing Ava Docker containers..."
+echo "Clearing Avalanche Docker containers..."
 docker rm $(docker stop $(docker ps -a -q --filter ancestor="${GECKO_IMAGE}" --format="{{.ID}}")) >/dev/null
 docker rm $(docker stop $(docker ps -a -q --filter ancestor="${BYZANTINE_IMAGE}" --format="{{.ID}}")) >/dev/null
 docker rm $(docker stop $(docker ps -a -q --filter ancestor="${DEFAULT_CONTROLLER_TAG}" --format="{{.ID}}")) >/dev/null
-echo "Ava Docker containers cleared successfully"
+echo "Avalanche Docker containers cleared successfully"
 
 exit "${return_code}"
