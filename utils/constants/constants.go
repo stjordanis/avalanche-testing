@@ -3,5 +3,5 @@ package constants
 import "time"
 
 const (
-	DefaultRequestTimeout = 5 * time.Second
+	DefaultRequestTimeout = 10 * time.Second
 )
