@@ -1,7 +1,5 @@
 package ava_networks
 
-
-
 /*
 When using Gecko with the 'local' testnet option, the P-chain comes preloaded with five bootstrapper nodes whose node
 	IDs are hardcoded in Gecko source. Node IDs are determined based off the TLS keys of the nodes, so to ensure that
@@ -16,11 +14,11 @@ var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 	FundedAddresses: FundedAddress{
 		"6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV",
 		/*
-		 	It's okay to have privateKey here because its a hardcoded value available in the Gecko codebase.
-			It is necessary to have this privateKey in order to transfer funds to test accounts in the test net.
-			This privateKey only applies to local test nets, it has nothing to do with the public test net or main net.
+			 	It's okay to have privateKey here because its a hardcoded value available in the Gecko codebase.
+				It is necessary to have this privateKey in order to transfer funds to test accounts in the test net.
+				This privateKey only applies to local test nets, it has nothing to do with the public test net or main net.
 		*/
-		"ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN",
+		"PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN",
 	},
 }
 
@@ -31,7 +29,7 @@ hardcodes 5 staker IDs already registered on the PChain:
 https://github.com/ava-labs/gecko/blob/master/genesis/config.go#L407
 
 These IDs are those stakers, and all local testnets
- */
+*/
 var defaultStakers = []StakerIdentity{
 	staker1,
 	staker2,

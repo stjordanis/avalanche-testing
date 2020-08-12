@@ -17,7 +17,7 @@ import (
 const (
 	GENESIS_USERNAME         = "genesis"
 	GENESIS_PASSWORD         = "genesis34!23"
-	AVA_ASSET_ID             = "AVA"
+	AVA_ASSET_ID             = "AVAX"
 	DefaultStakingDelay      = 20 * time.Second
 	DefaultStakingPeriod     = 72 * time.Hour
 	DefaultDelegationDelay   = 20 * time.Second // Time until delegation period should begin
