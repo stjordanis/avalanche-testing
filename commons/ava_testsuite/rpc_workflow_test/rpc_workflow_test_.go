@@ -99,10 +99,10 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 
 	// ========================= ADD DELEGATOR AND TRANSFER FUNDS TO XCHAIN ======================
-	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
-	}
+	// err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
+	// }
 	/*
 		Currently no way to verify rewards for stakers and delegators because rewards are
 		only paid out at the end of the staking period, and the staking period must last at least
