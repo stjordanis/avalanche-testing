@@ -260,9 +260,9 @@ func (c *Client) MintNFT(user api.UserPass, assetID string, payload []byte, to s
 	return res.TxID, nil
 }
 
-func (c *Client) ImportAVA(user api.UserPass, to string) (ids.ID, error) {
+func (c *Client) ImportAVAX(user api.UserPass, to string) (ids.ID, error) {
 	res := &api.JsonTxID{}
-	err := c.requester.SendRequest("importAVA", &avm.ImportAVAArgs{
+	err := c.requester.SendRequest("importAVAX", &avm.ImportAVAXArgs{
 		UserPass: user,
 		To:       to,
 	}, res)
@@ -272,9 +272,9 @@ func (c *Client) ImportAVA(user api.UserPass, to string) (ids.ID, error) {
 	return res.TxID, nil
 }
 
-func (c *Client) ExportAVA(user api.UserPass, amount uint64, to string) (ids.ID, error) {
+func (c *Client) ExportAVAX(user api.UserPass, amount uint64, to string) (ids.ID, error) {
 	res := &api.JsonTxID{}
-	err := c.requester.SendRequest("exportAVA", &avm.ExportAVAArgs{
+	err := c.requester.SendRequest("exportAVAX", &avm.ExportAVAXArgs{
 		UserPass: user,
 		Amount:   cjson.Uint64(amount),
 		To:       to,

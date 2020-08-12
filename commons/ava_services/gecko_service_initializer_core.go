@@ -6,21 +6,22 @@ import (
 	"os"
 	"strings"
 
-	"github.com/docker/go-connections/nat"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	httpPort             nat.Port = "9650/tcp"
-	stakingPort          nat.Port = "9651/tcp"
+	httpPort    nat.Port = "9650/tcp"
+	stakingPort nat.Port = "9651/tcp"
 
-	stakingTlsCertFileId          = "staking-tls-cert"
-	stakingTlsKeyFileId           = "staking-tls-key"
+	stakingTlsCertFileId = "staking-tls-cert"
+	stakingTlsKeyFileId  = "staking-tls-key"
 
 	testVolumeMountpoint = "/shared"
+	avalancheBinary      = "/gecko/build/avalanche"
 )
 
 // ========= Loglevel Enum ========================
@@ -35,30 +36,30 @@ const (
 // ========= Initializer Core ========================
 /*
 An implementation of Kurtosis' services.ServiceInitializerCore used for initializing a Gecko service
- */
+*/
 type GeckoServiceInitializerCore struct {
 	// Snow protocol sample size that the Gecko node will be run with
-	snowSampleSize      int
+	snowSampleSize int
 
 	// Snow protocol quorum size that the Gecko node will be run with
-	snowQuorumSize      int
+	snowQuorumSize int
 
 	// Whether the Gecko node will start with TLS staking enabled or not
-	stakingTlsEnabled   bool
+	stakingTlsEnabled bool
 
 	// TODO Switch these to be named properties of this struct, so that we're being explicit about what arguments
 	//  are consumed
 	// A set of CLI args that will be passed as-is to the Gecko service
-	additionalCLIArgs   map[string]string
+	additionalCLIArgs map[string]string
 
 	// The Ava node IDs of the bootstrappers that the Gecko service should bootstrap from
 	bootstrapperNodeIds []string
 
 	// Cert provider that should be used when initializing the Gecko service
-	certProvider        cert_providers.GeckoCertProvider
+	certProvider cert_providers.GeckoCertProvider
 
 	// Log level that the Gecko service should start with
-	logLevel            GeckoLogLevel
+	logLevel GeckoLogLevel
 }
 
 /*
@@ -79,13 +80,13 @@ Returns:
 	An intializer core for creating Gecko nodes with the specified parameers.
 */
 func NewGeckoServiceInitializerCore(
-		snowSampleSize int,
-		snowQuorumSize int,
-		stakingTlsEnabled bool,
-		additionalCLIArgs map[string]string,
-		bootstrapperNodeIds []string,
-		certProvider cert_providers.GeckoCertProvider,
-		logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
+	snowSampleSize int,
+	snowQuorumSize int,
+	stakingTlsEnabled bool,
+	additionalCLIArgs map[string]string,
+	bootstrapperNodeIds []string,
+	certProvider cert_providers.GeckoCertProvider,
+	logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIdsCopy := make([]string, 0, len(bootstrapperNodeIds))
 	for _, nodeId := range bootstrapperNodeIds {
@@ -105,7 +106,7 @@ func NewGeckoServiceInitializerCore(
 
 /*
 Implementation of services.ServiceInitializerCore function to declare Gecko's used ports
- */
+*/
 func (core GeckoServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
 	return map[nat.Port]bool{
 		httpPort:    true,
@@ -157,7 +158,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 
 	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr.String())
 	commandList := []string{
-		"/gecko/build/ava",
+		avalancheBinary,
 		publicIpFlag,
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort.Int()),

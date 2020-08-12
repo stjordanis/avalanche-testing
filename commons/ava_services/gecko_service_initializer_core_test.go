@@ -24,7 +24,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		LOG_LEVEL_INFO)
 
 	expected := []string{
-		"/gecko/build/ava",
+		avalancheBinary,
 		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",
@@ -57,7 +57,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		LOG_LEVEL_INFO)
 
 	expected := []string{
-		"/gecko/build/ava",
+		avalancheBinary,
 		"--public-ip=" + testPublicIp.String(),
 		"--network-id=local",
 		"--http-port=9650",

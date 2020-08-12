@@ -212,7 +212,7 @@ func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
 		return "", stacktrace.Propagate(err, "Failed to create new address on PChain")
 	}
 
-	txnId, err := client.XChainAPI().ExportAVA(runner.geckoUser, amount, pchainAddress)
+	txnId, err := client.XChainAPI().ExportAVAX(runner.geckoUser, amount, pchainAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
@@ -221,7 +221,7 @@ func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
 		return "", stacktrace.Propagate(err, "")
 	}
 
-	importTxID, err := client.PChainAPI().ImportAVA(runner.geckoUser, pchainAddress)
+	importTxID, err := client.PChainAPI().ImportAVAX(runner.geckoUser, pchainAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
@@ -245,7 +245,7 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XChainAddressPrefix)
 
 	// PChain API only accepts the XChain address without the xchain prefix.
-	exportTxID, err := client.PChainAPI().ExportAVA(runner.geckoUser, xchainAddressWithoutPrefix, amount)
+	exportTxID, err := client.PChainAPI().ExportAVAX(runner.geckoUser, xchainAddressWithoutPrefix, amount)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to xchainAddress %s", xchainAddress)
 	}
@@ -254,7 +254,7 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 	}
 
 	// XChain API only accepts the XChain address with the xchain prefix.
-	txnId, err := client.XChainAPI().ImportAVA(runner.geckoUser, xchainAddress)
+	txnId, err := client.XChainAPI().ImportAVAX(runner.geckoUser, xchainAddress)
 	err = runner.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
