@@ -12,14 +12,14 @@ WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-e2e-tests
 RUN go mod download
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o test-controller controller/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o /build/test-controller controller/main.go
 
 # ============= Execution Stage ================
 FROM docker:stable AS execution
 WORKDIR /run
 
 # Copy the binary into the execution container
-COPY --from=builder $GOPATH/src/github.com/ava-labs/avalanche-e2e-tests/test-controller .
+COPY --from=builder /build/test-controller .
 
 # Note that this CANNOT be an execution list else the variables won't be expanded
 # See: https://stackoverflow.com/questions/40454470/how-can-i-use-a-variable-inside-a-dockerfile-cmd
