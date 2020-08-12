@@ -7,15 +7,16 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"github.com/palantir/stacktrace"
 	"math/big"
 	mathrand "math/rand"
 	"time"
+
+	"github.com/palantir/stacktrace"
 )
 
 const (
-	certificatePreamble  = "CERTIFICATE"
-	privateKeyPreamble   = "RSA PRIVATE KEY"
+	certificatePreamble = "CERTIFICATE"
+	privateKeyPreamble  = "RSA PRIVATE KEY"
 )
 
 var rootCert = x509.Certificate{
@@ -38,10 +39,10 @@ var rootCert = x509.Certificate{
 
 /*
 An implementation of GeckoCertProvider that provides certs signed by the same root CA
- */
+*/
 type RandomGeckoCertProvider struct {
 	nextSerialNumber int64
-	varyCerts bool
+	varyCerts        bool
 }
 
 /*
@@ -50,11 +51,11 @@ Creates a new cert provider that can optionally return either the same cert ever
 Args:
 	varyCerts: True to produce a different cert on each call to GetCertAndKey, or false to yield the same
 		randomly-generated cert each time
- */
+*/
 func NewRandomGeckoCertProvider(varyCerts bool) *RandomGeckoCertProvider {
 	return &RandomGeckoCertProvider{
 		nextSerialNumber: mathrand.Int63(),
-		varyCerts: varyCerts,
+		varyCerts:        varyCerts,
 	}
 }
 
@@ -65,10 +66,10 @@ Implementation of GeckoCertProvider function that yields a new cert and private 
 Returns:
 	certPemBytes: The bytes of the generated cert
 	keyPemBytes: The bytes of the private key that was generated alongside the cert
- */
+*/
 func (r *RandomGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
-	if (r.varyCerts) {
+	if r.varyCerts {
 		r.nextSerialNumber = mathrand.Int63()
 	}
 	serviceCert := getServiceCert(serialNum)
@@ -82,16 +83,20 @@ func (r *RandomGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, ke
 		return bytes.Buffer{}, bytes.Buffer{}, stacktrace.Propagate(err, "Failed to sign service cert with cert authority.")
 	}
 	certPEM := new(bytes.Buffer)
-	pem.Encode(certPEM, &pem.Block{
+	if err := pem.Encode(certPEM, &pem.Block{
 		Type:  certificatePreamble,
 		Bytes: certBytes,
-	})
+	}); err != nil {
+		return bytes.Buffer{}, bytes.Buffer{}, err
+	}
 
 	certPrivKeyPEM := new(bytes.Buffer)
-	pem.Encode(certPrivKeyPEM, &pem.Block{
+	if err := pem.Encode(certPrivKeyPEM, &pem.Block{
 		Type:  privateKeyPreamble,
 		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
-	})
+	}); err != nil {
+		return bytes.Buffer{}, bytes.Buffer{}, err
+	}
 	return *certPEM, *certPrivKeyPEM, nil
 }
 

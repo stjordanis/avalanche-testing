@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/tests"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
@@ -14,7 +14,7 @@ import (
 /*
 A CLI entrypoint that will be packaged inside a Docker image to form the test controller used for orchestrating test execution
 	for tests in the Ava E2E test suite.
- */
+*/
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -101,7 +101,7 @@ func main() {
 		*geckoImageNameArg)
 
 	logrus.Debugf("Byzantine image name: %s", *byzantineImageNameArg)
-	testSuite := ava_testsuite.AvaTestSuite{
+	testSuite := tests.AvaTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
 	}

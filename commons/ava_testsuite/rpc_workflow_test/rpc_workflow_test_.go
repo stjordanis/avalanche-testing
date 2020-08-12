@@ -5,12 +5,9 @@ import (
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
-	"github.com/ava-labs/gecko/utils/constants"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -42,86 +39,16 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
 
-	// delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
-	// if err != nil {
-	// 	context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
-	// }
-
-	stakerNodeId, err := stakerClient.InfoAPI().GetNodeID()
+	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
-	}
-	// delegatorNodeId, err := delegatorClient.InfoAPI().GetNodeID()
-	// if err != nil {
-	// 	context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
-	// }
-	highLevelStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
-		stakerClient,
-		stakerUsername,
-		stakerPassword,
-		networkAcceptanceTimeout)
-	// highLevelDelegatorClient := rpc_workflow_runner.NewRpcWorkflowRunner(
-	// 	delegatorClient,
-	// 	delegatorUsername,
-	// 	delegatorPassword,
-	// 	networkAcceptanceTimeout)
-
-	// ====================================== ADD VALIDATOR ===============================
-	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
-	}
-	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(seedAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
-	}
-	// _, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
-	// if err != nil {
-	// 	context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
-	// }
-	// delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(seedAmount)
-	// if err != nil {
-	// 	context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
-	// }
-	// Adding stakers
-	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId))
+		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
 
-	// ====================================== VERIFY NETWORK STATE ===============================
-	currentStakers, err := stakerClient.PChainAPI().GetCurrentValidators(constants.DefaultSubnetID)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
-	}
-	logrus.Debugf("Number of current validators: %d", len(currentStakers))
-	actualNumStakers := len(currentStakers)
-	expectedNumStakers := 6
-	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
+	executor := NewRPCWorkflowTestExecutor(stakerClient, delegatorClient, networkAcceptanceTimeout)
 
-	// ========================= ADD DELEGATOR AND TRANSFER FUNDS TO XCHAIN ======================
-	// err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
-	// if err != nil {
-	// 	context.Fatal(stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId))
-	// }
-	/*
-		Currently no way to verify rewards for stakers and delegators because rewards are
-		only paid out at the end of the staking period, and the staking period must last at least
-		24 hours. This is far too long to be able to test in a CI scenario.
-	*/
-	remainingStakerAva := seedAmount - stakeAmount
-	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain."))
+	if err := executor.ExecuteTest(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "RPCWorkflow Test failed."))
 	}
-
-	// ================================ VERIFY NETWORK STATE =====================================
-	balanceInfo, err := stakerClient.XChainAPI().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress))
-	}
-	actualRemainingAva := uint64(balanceInfo.Balance)
-	context.AssertTrue(actualRemainingAva == remainingStakerAva, stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, remainingStakerAva))
 }
 
 func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {

@@ -1,7 +1,6 @@
-package ava_testsuite
+package tests
 
 import (
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/conflicting_txs_vertex_test"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/duplicate_node_id_test"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/fully_connected_test"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_test"
@@ -12,7 +11,7 @@ import (
 
 /*
 An implementation of testsuite.TestSuite for Ava
- */
+*/
 type AvaTestSuite struct {
 	ByzantineImageName string
 	NormalImageName    string
@@ -20,7 +19,7 @@ type AvaTestSuite struct {
 
 /*
 An implementation of testsuite.TestSuite that returns the tests registered with this test suite
- */
+*/
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
@@ -29,10 +28,11 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 			ByzantineImageName: a.ByzantineImageName,
 			NormalImageName:    a.NormalImageName,
 		}
-		result["conflictingTxsVertexTest"] = conflicting_txs_vertex_test.StakingNetworkConflictingTxsVertexTest{
-			ByzantineImageName: a.ByzantineImageName,
-			NormalImageName:    a.NormalImageName,
-		}
+		// This is better tested at unit test level
+		// result["conflictingTxsVertexTest"] = conflicting_txs_vertex_test.StakingNetworkConflictingTxsVertexTest{
+		// 	ByzantineImageName: a.ByzantineImageName,
+		// 	NormalImageName:    a.NormalImageName,
+		// }
 	}
 	result["stakingNetworkFullyConnectedTest"] = fully_connected_test.StakingNetworkFullyConnectedTest{
 		ImageName: a.NormalImageName,

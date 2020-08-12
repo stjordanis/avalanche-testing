@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	GENESIS_USERNAME            = "genesis"
-	GENESIS_PASSWORD            = "genesis34!23"
 	AVA_ASSET_ID                = "AVAX"
 	DefaultStakingDelay         = 20 * time.Second
 	DefaultStakingPeriod        = 72 * time.Hour
@@ -165,11 +163,7 @@ func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
 	keystore := client.KeystoreAPI()
 	_, err := keystore.CreateUser(runner.geckoUser)
 	if err != nil {
-		stacktrace.Propagate(err, "Could not create user.")
-	}
-	_, err = keystore.CreateUser(runner.geckoUser)
-	if err != nil {
-		stacktrace.Propagate(err, "Could not create genesis user.")
+		return "", stacktrace.Propagate(err, "Could not create user.")
 	}
 	nodeId, err := client.InfoAPI().GetNodeID()
 	if err != nil {
@@ -299,7 +293,7 @@ func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 		}
 		logrus.Debugf("Status for transaction: %s: %s", txID, status)
 		if status == platformvm.Dropped {
-			return stacktrace.NewError("Transaction %s was was dropped", txID)
+			return stacktrace.NewError("Transaction %s was dropped", txID)
 		}
 	}
 	if status != platformvm.Committed {

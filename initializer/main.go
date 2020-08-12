@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/tests"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ const (
 
 /*
 A CLI intended to be the main entrypoint into running the Ava E2E test suite.
- */
+*/
 func main() {
 	// NOTE: we'll need to change the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -86,7 +86,7 @@ func main() {
 	flag.Parse()
 
 	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
-	testSuite := ava_testsuite.AvaTestSuite{
+	testSuite := tests.AvaTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
 	}

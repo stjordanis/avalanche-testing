@@ -130,15 +130,19 @@ func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 /*
 Implementation of services.ServiceInitializerCore function to initialize the files Gecko needs
 */
-func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) (err error) {
+func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) error {
 	certFilePointer := osFiles[stakingTlsCertFileId]
 	keyFilePointer := osFiles[stakingTlsKeyFileId]
 	certPEM, keyPEM, err := core.certProvider.GetCertAndKey()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get cert & key when initializing service")
 	}
-	certFilePointer.Write(certPEM.Bytes())
-	keyFilePointer.Write(keyPEM.Bytes())
+	if _, err := certFilePointer.Write(certPEM.Bytes()); err != nil {
+		return err
+	}
+	if _, err := keyFilePointer.Write(keyPEM.Bytes()); err != nil {
+		return err
+	}
 	return nil
 }
 
