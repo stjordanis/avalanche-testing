@@ -30,16 +30,22 @@ E2E_CLONE="$WORKPREFIX/avalanche-e2e-tests"
 if [[ ! -d "$WORKPREFIX" ]]; then
     mkdir -p "$WORKPREFIX"
 fi
-rm -rf "$WORKPREFIX"
-mkdir -p "$WORKPREFIX"
 
+# Configure git credential helper
 git config --global credential.helper cache
-git clone "$GECKO_REMOTE" "$GECKO_CLONE"
+
+if [[ ! -d "$GECKO_CLONE" ]]; then
+    git clone "$GECKO_REMOTE" "$GECKO_CLONE"
+fi
+
 git -C "$GECKO_CLONE" checkout "$GECKO_BRANCH"
 
 GECKO_COMMIT="$(git -C "$GECKO_CLONE" rev-parse --short HEAD)"
 
-git clone "$E2E_REMOTE" "$E2E_CLONE"
+if [[ ! -d "$E2E_CLONE" ]]; then
+    git clone "$E2E_REMOTE" "$E2E_CLONE"
+fi
+
 git -C "$E2E_CLONE" checkout "$E2E_COMMIT"
 
 
