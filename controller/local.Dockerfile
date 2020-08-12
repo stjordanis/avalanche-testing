@@ -7,9 +7,9 @@ RUN mkdir -p /go/src/github.com/ava-labs
 WORKDIR $GOPATH/src/github.com/ava-labs
 COPY gecko gecko
 COPY avalanche-e2e-tests avalanche-e2e-tests
-RUN go mod download
 
 WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-e2e-tests
+RUN go mod download
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o test-controller controller/main.go
