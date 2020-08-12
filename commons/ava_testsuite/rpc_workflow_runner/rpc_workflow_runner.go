@@ -15,15 +15,16 @@ import (
 )
 
 const (
-	GENESIS_USERNAME         = "genesis"
-	GENESIS_PASSWORD         = "genesis34!23"
-	AVA_ASSET_ID             = "AVAX"
-	DefaultStakingDelay      = 20 * time.Second
-	DefaultStakingPeriod     = 72 * time.Hour
-	DefaultDelegationDelay   = 20 * time.Second // Time until delegation period should begin
-	DefaultDelegationPeriod  = 72 * time.Hour
-	DefaultDelegationFeeRate = 500000
-	XChainAddressPrefix      = "X-"
+	GENESIS_USERNAME            = "genesis"
+	GENESIS_PASSWORD            = "genesis34!23"
+	AVA_ASSET_ID                = "AVAX"
+	DefaultStakingDelay         = 20 * time.Second
+	DefaultStakingPeriod        = 72 * time.Hour
+	DefaultDelegationDelay      = 20 * time.Second // Time until delegation period should begin
+	stakingPeriodSynchronyDelay = 3 * time.Second
+	DefaultDelegationPeriod     = 72 * time.Hour
+	DefaultDelegationFeeRate    = 500000
+	XChainAddressPrefix         = "X-"
 )
 
 /*
@@ -120,7 +121,7 @@ func (runner RpcWorkflowRunner) AddDelegatorOnSubnet(
 	}
 
 	// Sleep until delegator starts validating
-	time.Sleep(time.Until(delegatorStartTime))
+	time.Sleep(time.Until(delegatorStartTime) + stakingPeriodSynchronyDelay)
 	return nil
 }
 
@@ -149,6 +150,8 @@ func (runner RpcWorkflowRunner) AddValidatorOnSubnet(
 	if err := runner.waitForPChainTransactionAcceptance(addStakerTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to confirm AddDefaultSubnetValidator Tx: %s", addStakerTxID)
 	}
+
+	time.Sleep(time.Until(stakingStartTime) + stakingPeriodSynchronyDelay)
 
 	return nil
 }
