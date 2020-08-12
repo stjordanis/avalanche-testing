@@ -36,6 +36,8 @@ git config --global credential.helper cache
 
 if [[ ! -d "$GECKO_CLONE" ]]; then
     git clone "$GECKO_REMOTE" "$GECKO_CLONE"
+else
+    git -C "$GECKO_CLONE" fetch origin
 fi
 
 git -C "$GECKO_CLONE" checkout "$GECKO_BRANCH"
@@ -44,6 +46,8 @@ GECKO_COMMIT="$(git -C "$GECKO_CLONE" rev-parse --short HEAD)"
 
 if [[ ! -d "$E2E_CLONE" ]]; then
     git clone "$E2E_REMOTE" "$E2E_CLONE"
+else
+    git -C "$E2E_CLONE" fetch origin
 fi
 
 git -C "$E2E_CLONE" checkout "$E2E_COMMIT"

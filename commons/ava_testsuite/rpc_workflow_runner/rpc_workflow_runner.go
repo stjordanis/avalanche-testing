@@ -292,7 +292,7 @@ func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 	}
 
 	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != platformvm.Committed {
-		time.Sleep(time.Second)
+		time.Sleep(2 * time.Second)
 		status, err = client.GetTxStatus(txID)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status")
@@ -304,7 +304,7 @@ func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 	}
 	if status != platformvm.Committed {
 		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
-	} else {
-		return nil
 	}
+
+	return nil
 }

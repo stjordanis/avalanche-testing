@@ -56,7 +56,7 @@ func (requester jsonRPCRequester) SendJSONRPCRequest(endpoint string, method str
 	logrus.Infof("Sending request to %s:\n%s\n", url, requestBodyBytes)
 	resp, err := requester.client.Post(url, "application/json", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
-		return fmt.Errorf("problem while making JSON RPC POST request to %s", url)
+		return fmt.Errorf("problem while making JSON RPC POST request to %s: %s", url, err)
 	}
 	defer resp.Body.Close()
 	statusCode := resp.StatusCode
