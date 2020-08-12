@@ -36,34 +36,35 @@ type StakingNetworkRpcWorkflowTest struct {
 func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	// =============================== SETUP GECKO CLIENTS ======================================
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
-	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
-
+	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
-	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
-	}
+
+	// delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
+	// }
+
 	stakerNodeId, err := stakerClient.InfoAPI().GetNodeID()
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker node ID."))
 	}
-	delegatorNodeId, err := delegatorClient.InfoAPI().GetNodeID()
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
-	}
+	// delegatorNodeId, err := delegatorClient.InfoAPI().GetNodeID()
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Could not get delegator node ID."))
+	// }
 	highLevelStakerClient := rpc_workflow_runner.NewRpcWorkflowRunner(
 		stakerClient,
 		stakerUsername,
 		stakerPassword,
 		networkAcceptanceTimeout)
-	highLevelDelegatorClient := rpc_workflow_runner.NewRpcWorkflowRunner(
-		delegatorClient,
-		delegatorUsername,
-		delegatorPassword,
-		networkAcceptanceTimeout)
+	// highLevelDelegatorClient := rpc_workflow_runner.NewRpcWorkflowRunner(
+	// 	delegatorClient,
+	// 	delegatorUsername,
+	// 	delegatorPassword,
+	// 	networkAcceptanceTimeout)
 
 	// ====================================== ADD VALIDATOR ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
@@ -74,14 +75,14 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
 	}
-	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
-	}
-	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(seedAmount)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
-	}
+	// _, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Could not seed XChain account from Genesis."))
+	// }
+	// delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(seedAmount)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information"))
+	// }
 	// Adding stakers
 	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
 	if err != nil {
