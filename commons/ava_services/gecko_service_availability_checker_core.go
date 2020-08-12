@@ -13,13 +13,13 @@ import (
 
 /*
 An implementation of services.ServiceAvailabilityCheckerCore that defines the criteria for a Gecko service being available
- */
+*/
 type GeckoServiceAvailabilityCheckerCore struct{}
 
 /*
 An implementation of services.ServiceAvailabilityCheckerCore#IsServiceUp that returns true when the Gecko healthcheck
 	reports that the node is available
- */
+*/
 func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
 	// NOTE: we don't check the dependencies intentionally, because we don't need to - a Gecko service won't report itself
 	//  as up until its bootstrappers are up
@@ -37,7 +37,7 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	// HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
 	// TODO once isReadiness endpoint is available, use that instead of just waiting
 	if healthInfo.Healthy {
-		time.Sleep(3 * time.Second)
+		time.Sleep(15 * time.Second)
 	}
 
 	return healthInfo.Healthy

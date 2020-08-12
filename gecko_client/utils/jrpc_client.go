@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	rpc "github.com/gorilla/rpc/v2/json2"
 )
 
@@ -51,6 +53,7 @@ func (requester jsonRPCRequester) SendJSONRPCRequest(endpoint string, method str
 	}
 
 	url := fmt.Sprintf("%v/%v", requester.uri, endpoint)
+	logrus.Infof("Sending request to %s:\n%s\n", url, requestBodyBytes)
 	resp, err := requester.client.Post(url, "application/json", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		return fmt.Errorf("problem while making JSON RPC POST request to %s", url)
@@ -60,7 +63,7 @@ func (requester jsonRPCRequester) SendJSONRPCRequest(endpoint string, method str
 
 	// Return an error for any non successful status code
 	if statusCode < 200 || statusCode > 299 {
-		return fmt.Errorf("received non-200 status code '%v'", statusCode)
+		return fmt.Errorf("received status code '%v'", statusCode)
 	}
 
 	return rpc.DecodeClientResponse(resp.Body, reply)

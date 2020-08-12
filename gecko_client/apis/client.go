@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	XChain = "x"
+	XChain = "X"
 )
 
 type Client struct {
