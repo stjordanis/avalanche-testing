@@ -1,7 +1,6 @@
 package rpc_workflow_runner
 
 import (
-	"strings"
 	"time"
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
@@ -22,9 +21,8 @@ const (
 	DefaultStakingPeriod        = 72 * time.Hour
 	DefaultDelegationDelay      = 20 * time.Second // Time until delegation period should begin
 	stakingPeriodSynchronyDelay = 3 * time.Second
-	DefaultDelegationPeriod     = 72 * time.Hour
+	DefaultDelegationPeriod     = 36 * time.Hour
 	DefaultDelegationFeeRate    = 500000
-	XChainAddressPrefix         = "X-"
 )
 
 /*
@@ -231,7 +229,7 @@ func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
 	if err := runner.waitForPChainTransactionAcceptance(importTxID); err != nil {
 		return "", stacktrace.Propagate(err, "Failed to Accept ImportTx: %s", importTxID)
 	}
-	// runner.waitForPchainNonZeroBalance(pchainAddress)
+
 	return pchainAddress, nil
 }
 
@@ -245,10 +243,8 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 	xchainAddress string,
 	amount uint64) (string, error) {
 	client := runner.client
-	xchainAddressWithoutPrefix := strings.TrimPrefix(xchainAddress, XChainAddressPrefix)
 
-	// PChain API only accepts the XChain address without the xchain prefix.
-	exportTxID, err := client.PChainAPI().ExportAVAX(runner.geckoUser, xchainAddressWithoutPrefix, amount)
+	exportTxID, err := client.PChainAPI().ExportAVAX(runner.geckoUser, xchainAddress, amount)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to xchainAddress %s", xchainAddress)
 	}
@@ -256,7 +252,6 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 		return "", stacktrace.Propagate(err, "Failed to accept ExportTx: %s", exportTxID)
 	}
 
-	// XChain API only accepts the XChain address with the xchain prefix.
 	txnId, err := client.XChainAPI().ImportAVAX(runner.geckoUser, xchainAddress)
 	err = runner.waitForXchainTransactionAcceptance(txnId)
 	if err != nil {
@@ -303,6 +298,9 @@ func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 			return stacktrace.Propagate(err, "Failed to get status")
 		}
 		logrus.Debugf("Status for transaction: %s: %s", txID, status)
+		if status == platformvm.Dropped {
+			return stacktrace.NewError("Transaction %s was was dropped", txID)
+		}
 	}
 	if status != platformvm.Committed {
 		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
