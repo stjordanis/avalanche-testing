@@ -63,34 +63,17 @@ func (c *Client) GetTx(txID ids.ID) ([]byte, error) {
 }
 
 // GetUTXOs returns the byte representation of the UTXOs controlled by [addrs]
-func (c *Client) GetUTXOs(addrs []string) ([][]byte, error) {
-	res := &avm.FormattedUTXOs{}
-	err := c.requester.SendRequest("getUTXOs", &api.JsonAddresses{
+func (c *Client) GetUTXOs(addrs []string, limit uint32, startAddress, startUTXOID string) (*avm.GetUTXOsReply, error) {
+	res := &avm.GetUTXOsReply{}
+	err := c.requester.SendRequest("getUTXOs", &avm.GetUTXOsArgs{
 		Addresses: addrs,
+		Limit:     cjson.Uint32(limit),
+		StartIndex: avm.Index{
+			Address: startAddress,
+			Utxo:    startUTXOID,
+		},
 	}, res)
-	if err != nil {
-		return nil, err
-	}
-	utxos := make([][]byte, len(res.UTXOs))
-	for i, utxo := range res.UTXOs {
-		utxos[i] = utxo.Bytes
-	}
-	return utxos, nil
-}
-
-func (c *Client) GetAtomicUTXOs(addrs []string) ([][]byte, error) {
-	res := &avm.FormattedUTXOs{}
-	err := c.requester.SendRequest("getAtomicUTXOs", &api.JsonAddresses{
-		Addresses: addrs,
-	}, res)
-	if err != nil {
-		return nil, err
-	}
-	utxos := make([][]byte, len(res.UTXOs))
-	for i, utxo := range res.UTXOs {
-		utxos[i] = utxo.Bytes
-	}
-	return utxos, nil
+	return res, err
 }
 
 func (c *Client) GetAssetDescription(assetID string) (*avm.GetAssetDescriptionReply, error) {
@@ -260,11 +243,12 @@ func (c *Client) MintNFT(user api.UserPass, assetID string, payload []byte, to s
 	return res.TxID, nil
 }
 
-func (c *Client) ImportAVAX(user api.UserPass, to string) (ids.ID, error) {
+func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("importAVAX", &avm.ImportAVAXArgs{
-		UserPass: user,
-		To:       to,
+		UserPass:    user,
+		To:          to,
+		SourceChain: sourceChain,
 	}, res)
 	if err != nil {
 		return ids.Empty, err

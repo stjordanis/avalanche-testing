@@ -19,27 +19,29 @@ const (
 	stakeAmount       = uint64(30000000000000)
 	delegatorAmount   = uint64(30000000000000)
 
-	regularNodeServiceId   networks.ServiceID = "validator-node"
-	delegatorNodeServiceId networks.ServiceID = "delegator-node"
+	regularNodeServiceID   networks.ServiceID = "validator-node"
+	delegatorNodeServiceID networks.ServiceID = "delegator-node"
 
 	networkAcceptanceTimeoutRatio                          = 0.3
-	normalNodeConfigId            networks.ConfigurationID = "normal-config"
+	normalNodeConfigID            networks.ConfigurationID = "normal-config"
 )
 
-type StakingNetworkRpcWorkflowTest struct {
+// StakingNetworkRPCWorkflowTest ...
+type StakingNetworkRPCWorkflowTest struct {
 	ImageName string
 }
 
-func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
+// Run implements the Kurtosis Test interface
+func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	// =============================== SETUP GECKO CLIENTS ======================================
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
-	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceId)
+	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
 
-	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceId)
+	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}
@@ -51,15 +53,16 @@ func (test StakingNetworkRpcWorkflowTest) Run(network networks.Network, context 
 	}
 }
 
-func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+// GetNetworkLoader implements the Kurtosis Test interface
+func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
+		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
-		regularNodeServiceId:   normalNodeConfigId,
-		delegatorNodeServiceId: normalNodeConfigId,
+		regularNodeServiceID:   normalNodeConfigID,
+		delegatorNodeServiceID: normalNodeConfigID,
 	}
 	// Return a Gecko test net with this service:configuration mapping.
 	return ava_networks.NewTestGeckoNetworkLoader(
@@ -72,11 +75,13 @@ func (test StakingNetworkRpcWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		desiredServices)
 }
 
-func (test StakingNetworkRpcWorkflowTest) GetExecutionTimeout() time.Duration {
+// GetExecutionTimeout implements the Kurtosis Test interface
+func (test StakingNetworkRPCWorkflowTest) GetExecutionTimeout() time.Duration {
 	return 5 * time.Minute
 }
 
-func (test StakingNetworkRpcWorkflowTest) GetSetupBuffer() time.Duration {
+// GetSetupBuffer implements the Kurtosis Test interface
+func (test StakingNetworkRPCWorkflowTest) GetSetupBuffer() time.Duration {
 	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
 	return 6 * time.Minute
 }

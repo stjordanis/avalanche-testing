@@ -5,6 +5,7 @@ import (
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils/constants"
 	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/snow/choices"
@@ -20,7 +21,7 @@ const (
 	DefaultDelegationDelay      = 20 * time.Second // Time until delegation period should begin
 	stakingPeriodSynchronyDelay = 3 * time.Second
 	DefaultDelegationPeriod     = 36 * time.Hour
-	DefaultDelegationFeeRate    = 500000
+	DefaultDelegationFeeRate    = 0.1
 )
 
 /*
@@ -68,7 +69,7 @@ func (runner RpcWorkflowRunner) GetFundsAndStartValidating(
 	seedAmount uint64,
 	stakeAmount uint64) error {
 	client := runner.client
-	stakerNodeId, err := client.InfoAPI().GetNodeID()
+	stakerNodeID, err := client.InfoAPI().GetNodeID()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get staker node ID.")
 	}
@@ -85,9 +86,9 @@ func (runner RpcWorkflowRunner) GetFundsAndStartValidating(
 		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
 	}
 	// Adding staker
-	err = runner.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
+	err = runner.AddValidatorOnSubnet(stakerNodeID, stakerPchainAddress, stakeAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId)
+		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
 	}
 	return nil
 }
@@ -165,7 +166,7 @@ func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Could not create user.")
 	}
-	nodeId, err := client.InfoAPI().GetNodeID()
+	nodeID, err := client.InfoAPI().GetNodeID()
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Could not get node id")
 	}
@@ -175,7 +176,7 @@ func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
-	logrus.Debugf("Adding Node %s as a validator.", nodeId)
+	logrus.Debugf("Adding Node %s as a validator.", nodeID)
 	logrus.Debugf("Genesis Address: %s.", genesisAccountAddress)
 	testAccountAddress, err := client.XChainAPI().CreateAddress(runner.geckoUser)
 	if err != nil {
@@ -183,11 +184,11 @@ func (runner RpcWorkflowRunner) CreateAndSeedXChainAccountFromGenesis(
 	}
 	logrus.Debugf("Test account address: %s", testAccountAddress)
 
-	txnId, err := client.XChainAPI().Send(runner.geckoUser, amount, AVA_ASSET_ID, testAccountAddress)
+	txID, err := client.XChainAPI().Send(runner.geckoUser, amount, AVA_ASSET_ID, testAccountAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to send AVA to test account address %s", testAccountAddress)
 	}
-	err = runner.waitForXchainTransactionAcceptance(txnId)
+	err = runner.waitForXchainTransactionAcceptance(txID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for transaction acceptance.")
 	}
@@ -207,16 +208,16 @@ func (runner RpcWorkflowRunner) TransferAvaXChainToPChain(
 		return "", stacktrace.Propagate(err, "Failed to create new address on PChain")
 	}
 
-	txnId, err := client.XChainAPI().ExportAVAX(runner.geckoUser, amount, pchainAddress)
+	txID, err := client.XChainAPI().ExportAVAX(runner.geckoUser, amount, pchainAddress)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pchainAddress)
 	}
-	err = runner.waitForXchainTransactionAcceptance(txnId)
+	err = runner.waitForXchainTransactionAcceptance(txID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 
-	importTxID, err := client.PChainAPI().ImportAVAX(runner.geckoUser, pchainAddress)
+	importTxID, err := client.PChainAPI().ImportAVAX(runner.geckoUser, pchainAddress, constants.XChainID.String())
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pchainAddress)
 	}
@@ -246,58 +247,83 @@ func (runner RpcWorkflowRunner) TransferAvaPChainToXChain(
 		return "", stacktrace.Propagate(err, "Failed to accept ExportTx: %s", exportTxID)
 	}
 
-	txnId, err := client.XChainAPI().ImportAVAX(runner.geckoUser, xchainAddress)
-	err = runner.waitForXchainTransactionAcceptance(txnId)
+	txID, err := client.XChainAPI().ImportAVAX(runner.geckoUser, xchainAddress, constants.PlatformChainID.String())
+	err = runner.waitForXchainTransactionAcceptance(txID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
 	}
 	return xchainAddress, nil
 }
 
-func (runner RpcWorkflowRunner) waitForXchainTransactionAcceptance(txnId ids.ID) error {
-	client := runner.client
-	status, err := client.XChainAPI().GetTxStatus(txnId)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get status.")
-	}
+func (runner RpcWorkflowRunner) waitForXchainTransactionAcceptance(txID ids.ID) error {
+	client := runner.client.XChainAPI()
+
 	pollStartTime := time.Now()
-	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != choices.Accepted {
-		status, err = client.XChainAPI().GetTxStatus(txnId)
+	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout {
+		status, err := client.GetTxStatus(txID)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status.")
 		}
-		logrus.Debugf("Status for transaction %s: %s", txnId, status)
+		if status == choices.Accepted {
+			return nil
+		}
+		if status == choices.Rejected {
+			return stacktrace.NewError("Transaciton %s was rejected", txID)
+		}
+		logrus.Debugf("Status for transaction %s: %s", txID, status)
 		time.Sleep(time.Second)
 	}
-	if status != choices.Accepted {
-		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txnId)
-	} else {
-		return nil
-	}
+
+	return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the XChain.", txID)
 }
 
 func (runner RpcWorkflowRunner) waitForPChainTransactionAcceptance(txID ids.ID) error {
 	client := runner.client.PChainAPI()
 	pollStartTime := time.Now()
 
-	status, err := client.GetTxStatus(txID)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get tx status")
-	}
-
-	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout && status != platformvm.Committed {
-		time.Sleep(2 * time.Second)
-		status, err = client.GetTxStatus(txID)
+	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout {
+		status, err := client.GetTxStatus(txID)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status")
 		}
-		logrus.Debugf("Status for transaction: %s: %s", txID, status)
-		if status == platformvm.Dropped {
-			return stacktrace.NewError("Transaction %s was dropped", txID)
+		if status == platformvm.Committed {
+			return nil
 		}
+
+		// TODO reset to debug log level
+		logrus.Infof("Status for transaction: %s: %s", txID, status)
+		if status == platformvm.Dropped || status == platformvm.Aborted {
+			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s", txID, status)
+		}
+		time.Sleep(time.Second)
 	}
-	if status != platformvm.Committed {
-		return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
+
+	return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
+}
+
+func (runner RpcWorkflowRunner) VerifyPChainBalance(address string, expectedBalance uint64) error {
+	client := runner.client.PChainAPI()
+	balance, err := client.GetBalance(address)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to retrieve P Chain balance.")
+	}
+	actualBalance := uint64(balance.Balance)
+	if actualBalance != expectedBalance {
+		return stacktrace.NewError("Found unexpected P Chain Balance for address: %s. Expected: %v, found: %v", address, expectedBalance, actualBalance)
+	}
+
+	return nil
+}
+
+func (runner RpcWorkflowRunner) VerifyXChainAVABalance(address string, expectedBalance uint64) error {
+	client := runner.client.XChainAPI()
+	balance, err := client.GetBalance(address, AVA_ASSET_ID)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to retrieve X Chain balance.")
+	}
+	actualBalance := uint64(balance.Balance)
+	if actualBalance != expectedBalance {
+		return stacktrace.NewError("Found unexpected X Chain Balance for address: %s. Expected: %v, found: %v", address, expectedBalance, actualBalance)
 	}
 
 	return nil

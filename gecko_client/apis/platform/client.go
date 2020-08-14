@@ -131,14 +131,14 @@ func (c *Client) SampleValidators(subnetID ids.ID, sampleSize uint16) (*platform
 }
 
 // AddDefaultSubnetValidator issues a transaction to add a default subnet validator and returns the txID
-func (c *Client) AddDefaultSubnetValidator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate uint32) (ids.ID, error) {
+func (c *Client) AddDefaultSubnetValidator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate float32) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDefaultSubnetValidator", &platformvm.AddDefaultSubnetValidatorArgs{
 		UserPass: user,
 		FormattedAPIDefaultSubnetValidator: platformvm.FormattedAPIDefaultSubnetValidator{
-			Destination:       destination,
-			DelegationFeeRate: cjson.Uint32(delegationFeeRate),
+			RewardAddress:     rewardAddress,
+			DelegationFeeRate: cjson.Float32(delegationFeeRate),
 			FormattedAPIValidator: platformvm.FormattedAPIValidator{
 				ID:          nodeID,
 				StakeAmount: &jsonStakeAmount,
@@ -151,7 +151,7 @@ func (c *Client) AddDefaultSubnetValidator(user api.UserPass, destination, nodeI
 }
 
 // AddDefaultSubnetDelegator issues a transaction to add a default subnet delegator and returns the txID
-func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
+func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDefaultSubnetDelegator", &platformvm.AddDefaultSubnetDelegatorArgs{
@@ -162,7 +162,7 @@ func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, destination, nodeI
 			StartTime:   cjson.Uint64(startTime),
 			EndTime:     cjson.Uint64(endTime),
 		},
-		Destination: destination,
+		RewardAddress: rewardAddress,
 	}, res)
 	return res.TxID, err
 }
@@ -206,11 +206,12 @@ func (c *Client) ExportAVAX(user api.UserPass, to string, amount uint64) (ids.ID
 }
 
 // ImportAVAX issues an ImportAVAX transaction and returns the txID
-func (c *Client) ImportAVAX(user api.UserPass, to string) (ids.ID, error) {
+func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("importAVAX", &platformvm.ImportAVAXArgs{
-		UserPass: user,
-		To:       to,
+		UserPass:    user,
+		To:          to,
+		SourceChain: sourceChain,
 	}, res)
 	return res.TxID, err
 }

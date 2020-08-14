@@ -9,17 +9,13 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 
-/*
-An implementation of testsuite.TestSuite for Ava
-*/
+// AvaTestSuite implements the Kurtosis TestSuite interface
 type AvaTestSuite struct {
 	ByzantineImageName string
 	NormalImageName    string
 }
 
-/*
-An implementation of testsuite.TestSuite that returns the tests registered with this test suite
-*/
+// GetTests implements the Kurtosis TestSuite interface
 func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
@@ -42,7 +38,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["stakingNetworkRpcWorkflowTest"] = rpc_workflow_test.StakingNetworkRpcWorkflowTest{
+	result["StakingNetworkRPCWorkflowTest"] = rpc_workflow_test.StakingNetworkRPCWorkflowTest{
 		ImageName: a.NormalImageName,
 	}
 

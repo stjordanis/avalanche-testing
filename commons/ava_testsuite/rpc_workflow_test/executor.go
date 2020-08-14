@@ -16,6 +16,7 @@ type executor struct {
 	acceptanceTimeout             time.Duration
 }
 
+// NewRPCWorkflowTestExecutor ...
 func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *apis.Client, acceptanceTimeout time.Duration) ava_testsuite.AvalancheTester {
 	return &executor{
 		stakerClient:      stakerClient,
@@ -24,12 +25,13 @@ func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *apis.Client, acce
 	}
 }
 
+// ExecuteTest ...
 func (e *executor) ExecuteTest() error {
-	stakerNodeId, err := e.stakerClient.InfoAPI().GetNodeID()
+	stakerNodeID, err := e.stakerClient.InfoAPI().GetNodeID()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get staker node ID.")
 	}
-	delegatorNodeId, err := e.delegatorClient.InfoAPI().GetNodeID()
+	delegatorNodeID, err := e.delegatorClient.InfoAPI().GetNodeID()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get delegator node ID.")
 	}
@@ -46,30 +48,48 @@ func (e *executor) ExecuteTest() error {
 		e.acceptanceTimeout,
 	)
 
-	// ====================================== ADD VALIDATOR ===============================
+	// ====================================== SEED ACCOUNTS ===============================
 	stakerXchainAddress, err := highLevelStakerClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+	}
+	if err := highLevelStakerClient.VerifyXChainAVABalance(stakerXchainAddress, seedAmount); err != nil {
+		return stacktrace.Propagate(err, "Unexpected X Chain balance for staker.")
 	}
 	stakerPchainAddress, err := highLevelStakerClient.TransferAvaXChainToPChain(seedAmount)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
 	}
+	if err := highLevelStakerClient.VerifyPChainBalance(stakerPchainAddress, seedAmount); err != nil {
+		return stacktrace.Propagate(err, "Unexpected P Chain balance after X -> P Transfer.")
+	}
+	if err := highLevelStakerClient.VerifyXChainAVABalance(stakerXchainAddress, 0); err != nil {
+		return stacktrace.Propagate(err, "X Chain Balance not updated correctly after X -> P Transfer for validator")
+	}
 
 	time.Sleep(5 * time.Second)
-	_, err = highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
+	delegatorXChainAddress, err := highLevelDelegatorClient.CreateAndSeedXChainAccountFromGenesis(seedAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
+		return stacktrace.Propagate(err, "Could not seed X Chain account from Genesis.")
 	}
-
+	if err := highLevelDelegatorClient.VerifyXChainAVABalance(delegatorXChainAddress, seedAmount); err != nil {
+		return stacktrace.Propagate(err, "Unexpected X Chain Balance after seeding account.")
+	}
 	delegatorPchainAddress, err := highLevelDelegatorClient.TransferAvaXChainToPChain(seedAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
+		return stacktrace.Propagate(err, "Could not transfer AVA from X Chain to P Chain account.")
 	}
-	// Adding stakers
-	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeId, stakerPchainAddress, stakeAmount)
+	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPchainAddress, seedAmount); err != nil {
+		return stacktrace.Propagate(err, "Unexpected P Chain balance after X -> P Transfer for Delegator.")
+	}
+	if err := highLevelDelegatorClient.VerifyXChainAVABalance(delegatorXChainAddress, 0); err != nil {
+		return stacktrace.Propagate(err, "Unexpected X Chain Balance after X -> P Transfer for Delegator")
+	}
+
+	// Adds new staker to the network and block until its staking period begins
+	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeID, stakerPchainAddress, stakeAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeId)
+		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
 	}
 
 	// ====================================== VERIFY NETWORK STATE ===============================
@@ -83,31 +103,31 @@ func (e *executor) ExecuteTest() error {
 	if actualNumStakers != expectedNumStakers {
 		return stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers)
 	}
-
-	// ========================= ADD DELEGATOR AND TRANSFER FUNDS TO XCHAIN ======================
-	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeId, delegatorPchainAddress, delegatorAmount)
-	if err != nil {
-		return stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeId)
+	expectedStakerBalance := seedAmount - stakeAmount
+	if err := highLevelStakerClient.VerifyPChainBalance(stakerPchainAddress, expectedStakerBalance); err != nil {
+		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding default subnet validator to the network")
 	}
-	/*
-		Currently no way to verify rewards for stakers and delegators because rewards are
-		only paid out at the end of the staking period, and the staking period must last at least
-		24 hours. This is far too long to be able to test in a CI scenario.
-	*/
-	remainingStakerAva := seedAmount - stakeAmount
-	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, remainingStakerAva)
+
+	// ====================================== ADD DELEGATOR ======================================
+	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeID, delegatorPchainAddress, delegatorAmount)
+	if err != nil {
+		return stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeID)
+	}
+	expectedDelegatorBalance := seedAmount - delegatorAmount
+	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPchainAddress, expectedDelegatorBalance); err != nil {
+		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding a new delegator to the network.")
+	}
+
+	// Transfer funds back to the X Chain
+	_, err = highLevelStakerClient.TransferAvaPChainToXChain(stakerPchainAddress, stakerXchainAddress, expectedStakerBalance)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to transfer Ava from PChain to XChain.")
 	}
-
-	// ================================ VERIFY NETWORK STATE =====================================
-	balanceInfo, err := e.stakerClient.XChainAPI().GetBalance(stakerXchainAddress, rpc_workflow_runner.AVA_ASSET_ID)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get account info for account %v.", stakerXchainAddress)
+	if err := highLevelStakerClient.VerifyPChainBalance(stakerPchainAddress, 0); err != nil {
+		return stacktrace.Propagate(err, "Unexpected P Chain Balance after P -> X Transfer.")
 	}
-	actualRemainingAva := uint64(balanceInfo.Balance)
-	if actualRemainingAva != remainingStakerAva {
-		return stacktrace.NewError("Actual remaining Ava, %v, != expected remaining Ava, %v", actualRemainingAva, remainingStakerAva)
+	if err := highLevelStakerClient.VerifyXChainAVABalance(stakerXchainAddress, expectedStakerBalance); err != nil {
+		return stacktrace.Propagate(err, "Unexpected X Chain Balance after P -> X Transfer.")
 	}
 
 	return nil
