@@ -44,7 +44,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 	testNodeId := "node1"
 	testDependencyIp := "1.2.3.4"
 
-	bootstrapperNodeIds := []string{
+	bootstrapperNodeIDs := []string{
 		testNodeId,
 	}
 	initializerCore := NewGeckoServiceInitializerCore(
@@ -52,7 +52,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		1,
 		false,
 		make(map[string]string),
-		bootstrapperNodeIds,
+		bootstrapperNodeIDs,
 		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		LOG_LEVEL_INFO)
 

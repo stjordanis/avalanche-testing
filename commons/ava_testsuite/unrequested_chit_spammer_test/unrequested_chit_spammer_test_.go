@@ -48,12 +48,12 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
-		highLevelByzClient := rpc_workflow_runner.NewRpcWorkflowRunner(
+		highLevelByzClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 			byzClient,
 			byzantineUsername,
 			byzantinePassword,
 			networkAcceptanceTimeout)
-		err = highLevelByzClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
+		_, err = highLevelByzClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
 		}
@@ -76,12 +76,12 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get staker client."))
 	}
-	highLevelNormalClient := rpc_workflow_runner.NewRpcWorkflowRunner(
+	highLevelNormalClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		normalClient,
 		stakerUsername,
 		stakerPassword,
 		networkAcceptanceTimeout)
-	err = highLevelNormalClient.GetFundsAndStartValidating(seedAmount, stakeAmount)
+	_, err = highLevelNormalClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
 	}

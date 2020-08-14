@@ -11,14 +11,6 @@ import (
 )
 
 const (
-	stakerUsername    = "staker"
-	stakerPassword    = "test34test!23"
-	delegatorUsername = "delegator"
-	delegatorPassword = "test34test!23"
-	seedAmount        = uint64(50000000000000)
-	stakeAmount       = uint64(30000000000000)
-	delegatorAmount   = uint64(30000000000000)
-
 	regularNodeServiceID   networks.ServiceID = "validator-node"
 	delegatorNodeServiceID networks.ServiceID = "delegator-node"
 

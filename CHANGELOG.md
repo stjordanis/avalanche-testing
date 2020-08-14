@@ -19,7 +19,7 @@
 * Make controller Docker image `tee` to the logfile, rather than redirecting all output
 * Implement a 10-second HTTP request timeout in the Gecko client
 * Upgraded to Kurtosis that allows the setup buffer to be configured at a per-test level, and gave a generous setup buffer for as long as the Gecko availability checker core has a `time.Sleep` in it
-* Rename HighLevelGeckoClient to RpcWorkflowRunner and move to ava_testsuite package
+* Rename HighLevelGeckoClient to RPCWorkFlowRunner and move to ava_testsuite package
 * Bugfix on Travis CI checks for CHANGELOG entries
 * Add comments and documentation in RPC workflow and chit spammer tests
 * Using network ID in controller image rather than network name

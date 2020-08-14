@@ -216,11 +216,11 @@ func getNodeIdsAndClients(
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
 		}
 		allGeckoClients[serviceId] = client
-		nodeId, err := client.InfoAPI().GetNodeID()
+		nodeID, err := client.InfoAPI().GetNodeID()
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
 		}
-		allNodeIds[serviceId] = nodeId
+		allNodeIds[serviceId] = nodeID
 	}
 	return
 }
