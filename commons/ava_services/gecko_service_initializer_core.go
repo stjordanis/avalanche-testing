@@ -45,7 +45,7 @@ type GeckoServiceInitializerCore struct {
 	snowQuorumSize int
 
 	// Whether the Gecko node will start with TLS staking enabled or not
-	stakingTlsEnabled bool
+	stakingEnabled bool
 
 	// TODO Switch these to be named properties of this struct, so that we're being explicit about what arguments
 	//  are consumed
@@ -68,7 +68,7 @@ Creates a new Gecko service initializer core with the following parameters:
 Args:
 	snowSampleSize: Sample size for Snow consensus protocol
 	snowQuroumSize: Quorum size for Snow consensus protocol
-	stakingTlsEnabled: Whether this node will use staking & TLS
+	stakingEnabled: Whether this node will use staking
 	cliArgs: A mapping of cli_arg -> cli_arg_value that will be passed as-is to the Gecko node
 	bootstrapperNodeIDs: The node IDs of the bootstrapper nodes that this node will connect to. While this *seems* unintuitive
 		why this would be required, it's because Gecko doesn't actually use certs. So, to prevent against man-in-the-middle attacks,
@@ -82,7 +82,7 @@ Returns:
 func NewGeckoServiceInitializerCore(
 	snowSampleSize int,
 	snowQuorumSize int,
-	stakingTlsEnabled bool,
+	stakingEnabled bool,
 	additionalCLIArgs map[string]string,
 	bootstrapperNodeIDs []string,
 	certProvider cert_providers.GeckoCertProvider,
@@ -96,7 +96,7 @@ func NewGeckoServiceInitializerCore(
 	return &GeckoServiceInitializerCore{
 		snowSampleSize:      snowSampleSize,
 		snowQuorumSize:      snowQuorumSize,
-		stakingTlsEnabled:   stakingTlsEnabled,
+		stakingEnabled:      stakingEnabled,
 		additionalCLIArgs:   additionalCLIArgs,
 		bootstrapperNodeIDs: bootstrapperIDsCopy,
 		certProvider:        certProvider,
@@ -118,7 +118,7 @@ func (core GeckoServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
 Implementation of services.ServiceInitializerCore function to declare the files Gecko needs
 */
 func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
-	if core.stakingTlsEnabled {
+	if core.stakingEnabled {
 		return map[string]bool{
 			stakingTlsCertFileId: true,
 			stakingTlsKeyFileId:  true,
@@ -171,10 +171,10 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
-		fmt.Sprintf("--staking-tls-enabled=%v", core.stakingTlsEnabled),
+		fmt.Sprintf("--staking-enabled=%v", core.stakingEnabled),
 	}
 
-	if core.stakingTlsEnabled {
+	if core.stakingEnabled {
 		certFilepath, found := mountedFileFilepaths[stakingTlsCertFileId]
 		if !found {
 			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsCertFileId)

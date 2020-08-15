@@ -15,7 +15,7 @@ DOCKER="${DOCKER:-docker}"
 
 # TODO set this to use the public repo and master branch, leave for now to avoid passing args while using
 GECKO_REMOTE="https://github.com/ava-labs/gecko-internal.git"
-GECKO_BRANCH="lock-everest"
+GECKO_BRANCH="fix-calc-validators-infinite-loop"
 
 # Clones the remote and checks out the current local commit
 # Note: commit and push changes before running this script, or some local changes
