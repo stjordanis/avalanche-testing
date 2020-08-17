@@ -34,7 +34,7 @@ const (
 )
 
 /*
-A struct type wrapping Kurtosis' ServiceNetwork that is meant to be the interface tests use for interacting with Ava
+A struct type wrapping Kurtosis' ServiceNetwork that is meant to be the interface tests use for interacting with Avalanche
 	networks of Gecko nodes
 */
 type TestGeckoNetwork struct {
@@ -138,7 +138,7 @@ Creates a new Gecko network service config with the given parameters
 
 Args:
 	varyCerts: True if the Gecko services created with this configuration will have differing certs (and therefore
-		differing node IDs), or the same cert (used for a test to see how the Ava network behaves with duplicate node
+		differing node IDs), or the same cert (used for a test to see how the Avalanche network behaves with duplicate node
 		IDs)
 	serviceLogLevel: The log level that Gecko services started with this configuration will use
 	imageName: The name of the Docker image that Gecko services started with this configuration will use

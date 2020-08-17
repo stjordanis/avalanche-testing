@@ -31,16 +31,9 @@ const (
 type RPCWorkFlowRunner struct {
 	client    *apis.Client
 	geckoUser api.UserPass
-	/*
-		This timeout represents the time the RPCWorkFlowRunner will wait for some state
-		change in the network to be understood as accepted and implemented by the underlying
-		Gecko client (XChain transaction acceptance, Ava transfer to PChain, etc). There is
-		only one timeout for each kind of state change in order to reduce the complexity of
-		configuring timeouts throughout the test suite.
-		Also, each state change is roughly the same - we're waiting not only for
-		a transaction to be considered accepted by the network and also for the nodes
-		internal state to reflect that acceptance.
-	*/
+
+	// This timeout represents the time the RPCWorkFlowRunner will wait for some state change to be accepted
+	// and implemented by the underlying client.
 	networkAcceptanceTimeout time.Duration
 }
 

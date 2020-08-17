@@ -5,10 +5,10 @@ import (
 )
 
 /*
-An implementation of AvaService representing the interactions available with a Gecko client of the Ava network
- */
+An implementation of AvaService representing the interactions available with a Gecko client of the Avalanche network
+*/
 type GeckoService struct {
-	ipAddr string
+	ipAddr      string
 	stakingPort nat.Port
 	jsonRpcPort nat.Port
 }

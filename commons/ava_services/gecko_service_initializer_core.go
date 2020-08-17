@@ -33,10 +33,7 @@ const (
 	LOG_LEVEL_INFO    GeckoLogLevel = "info"
 )
 
-// ========= Initializer Core ========================
-/*
-An implementation of Kurtosis' services.ServiceInitializerCore used for initializing a Gecko service
-*/
+// GeckoServiceInitializerCore implements Kurtosis' services.ServiceInitializerCore used to initialize a Gecko service
 type GeckoServiceInitializerCore struct {
 	// Snow protocol sample size that the Gecko node will be run with
 	snowSampleSize int
@@ -52,7 +49,7 @@ type GeckoServiceInitializerCore struct {
 	// A set of CLI args that will be passed as-is to the Gecko service
 	additionalCLIArgs map[string]string
 
-	// The Ava node IDs of the bootstrappers that the Gecko service should bootstrap from
+	// The node IDs of the nodes this node should bootstrap from
 	bootstrapperNodeIDs []string
 
 	// Cert provider that should be used when initializing the Gecko service

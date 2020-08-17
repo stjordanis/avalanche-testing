@@ -25,7 +25,7 @@ const (
 )
 
 /*
-A CLI intended to be the main entrypoint into running the Ava E2E test suite.
+A CLI intended to be the main entrypoint into running the Avalanche E2E test suite.
 */
 func main() {
 	// NOTE: we'll need to change the ForceColors to false if we ever want structured logging
@@ -85,7 +85,7 @@ func main() {
 
 	flag.Parse()
 
-	logrus.Info("Welcome to the Ava E2E test suite, powered by the Kurtosis framework")
+	logrus.Info("Welcome to the Avalanche E2E test suite, powered by the Kurtosis framework")
 	testSuite := tests.AvaTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
