@@ -34,7 +34,7 @@ func (a AvaTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["stakingNetworkDuplicateNodeIdTest"] = duplicate_node_id_test.DuplicateNodeIdTest{
+	result["stakingNetworkDuplicateNodeIDTest"] = duplicate_node_id_test.DuplicateNodeIDTest{
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}

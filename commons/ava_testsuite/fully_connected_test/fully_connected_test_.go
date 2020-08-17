@@ -19,11 +19,11 @@ const (
 	seedAmount     = uint64(50000000000000)
 	stakeAmount    = uint64(30000000000000)
 
-	normalNodeConfigId networks.ConfigurationID = "normal-config"
+	normalNodeConfigID networks.ConfigurationID = "normal-config"
 
 	networkAcceptanceTimeoutRatio                    = 0.3
-	nonBootValidatorServiceId     networks.ServiceID = "validator-service"
-	nonBootNonValidatorServiceId  networks.ServiceID = "non-validator-service"
+	nonBootValidatorServiceID     networks.ServiceID = "validator-service"
+	nonBootNonValidatorServiceID  networks.ServiceID = "non-validator-service"
 )
 
 type StakingNetworkFullyConnectedTest struct {
@@ -35,21 +35,21 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
-	stakerIds := castedNetwork.GetAllBootServiceIds()
-	allServiceIds := make(map[networks.ServiceID]bool)
-	for stakerId, _ := range stakerIds {
-		allServiceIds[stakerId] = true
+	stakerIDs := castedNetwork.GetAllBootServiceIDs()
+	allServiceIDs := make(map[networks.ServiceID]bool)
+	for stakerID, _ := range stakerIDs {
+		allServiceIDs[stakerID] = true
 	}
 	// Add our custom nodes
-	allServiceIds[nonBootValidatorServiceId] = true
-	allServiceIds[nonBootNonValidatorServiceId] = true
+	allServiceIDs[nonBootValidatorServiceID] = true
+	allServiceIDs[nonBootNonValidatorServiceID] = true
 
-	allNodeIds, allGeckoClients := getNodeIdsAndClients(context, castedNetwork, allServiceIds)
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
+	allNodeIDs, allGeckoClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
-	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceId]
+	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceID]
 	highLevelExtraStakerClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		nonBootValidatorClient,
 		stakerUsername,
@@ -62,7 +62,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	// Give time for the new validator to propagate via gossip
 	time.Sleep(70 * time.Second)
 
-	stakerIds[nonBootValidatorServiceId] = true
+	stakerIDs[nonBootValidatorServiceID] = true
 
 	/*
 		After gossip, we expect the peers list to look like:
@@ -70,18 +70,18 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 		2) The validators will have ALL other nodes in the network (propagated via gossip)
 		3) The non-validators will have all the validators in the network (propagated via gossip)
 	*/
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIds, stakerIds, allNodeIds, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
 }
 
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
+		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
-		nonBootValidatorServiceId:    normalNodeConfigId,
-		nonBootNonValidatorServiceId: normalNodeConfigId,
+		nonBootValidatorServiceID:    normalNodeConfigID,
+		nonBootNonValidatorServiceID: normalNodeConfigID,
 	}
 	return ava_networks.NewTestGeckoNetworkLoader(
 		true,
@@ -106,24 +106,24 @@ func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
 /*
 This helper function will grab node IDs and Gecko clients
 */
-func getNodeIdsAndClients(
+func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
 	network ava_networks.TestGeckoNetwork,
-	allServiceIds map[networks.ServiceID]bool,
-) (allNodeIds map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
+	allServiceIDs map[networks.ServiceID]bool,
+) (allNodeIDs map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
 	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
-	allNodeIds = make(map[networks.ServiceID]string)
-	for serviceId, _ := range allServiceIds {
-		client, err := network.GetGeckoClient(serviceId)
+	allNodeIDs = make(map[networks.ServiceID]string)
+	for serviceID, _ := range allServiceIDs {
+		client, err := network.GetGeckoClient(serviceID)
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceId))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))
 		}
-		allGeckoClients[serviceId] = client
+		allGeckoClients[serviceID] = client
 		nodeID, err := client.InfoAPI().GetNodeID()
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceId))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceID))
 		}
-		allNodeIds[serviceId] = nodeID
+		allNodeIDs[serviceID] = nodeID
 	}
 	return
 }
