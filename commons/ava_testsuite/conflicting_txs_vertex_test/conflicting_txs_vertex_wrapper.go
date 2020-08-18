@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	normalNodeConfigId          networks.ConfigurationID = "normal-config"
-	byzantineConfigId           networks.ConfigurationID = "byzantine-config"
+	normalNodeConfigID          networks.ConfigurationID = "normal-config"
+	byzantineConfigID           networks.ConfigurationID = "byzantine-config"
 	byzantineUsername                                    = "byzantine_gecko"
 	byzantinePassword                                    = "byzant1n3!"
 	byzantineBehavior                                    = "byzantine-behavior"
 	conflictingTxVertexBehavior                          = "conflicting-txs-vertex"
 	stakerUsername                                       = "staker_gecko"
 	stakerPassword                                       = "test34test!23"
-	byzantineNodeServiceId                               = "byzantine-node"
-	normalNodeServiceId                                  = "virtuous-node"
+	byzantineNodeServiceID                               = "byzantine-node"
+	normalNodeServiceID                                  = "virtuous-node"
 	seedAmount                                           = int64(50000000000000)
 	stakeAmount                                          = int64(30000000000000)
 )
@@ -43,11 +43,11 @@ type StakingNetworkConflictingTxsVertexTest struct {
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 
-	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceId)
+	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 	}
-	virtuousClient, err := castedNetwork.GetGeckoClient(normalNodeServiceId)
+	virtuousClient, err := castedNetwork.GetGeckoClient(normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get virtuous client."))
 	}
@@ -57,19 +57,22 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 	}
 }
 
+// GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkConflictingTxsVertexTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Provision a byzantine and normal node
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{}
-	desiredServices[byzantineNodeServiceId] = byzantineConfigId
-	desiredServices[normalNodeServiceId] = normalNodeConfigId
+	desiredServices[byzantineNodeServiceID] = byzantineConfigID
+	desiredServices[normalNodeServiceID] = normalNodeConfigID
 
 	return getByzantineNetworkLoader(desiredServices, test.ByzantineImageName, test.NormalImageName)
 }
 
+// GetExecutionTimeout implements the Kurtosis Test interface
 func (test StakingNetworkConflictingTxsVertexTest) GetExecutionTimeout() time.Duration {
 	return 2 * time.Minute
 }
 
+// GetSetupBuffer implements the Kurtosis Test interface
 func (test StakingNetworkConflictingTxsVertexTest) GetSetupBuffer() time.Duration {
 	return 2 * time.Minute
 }
@@ -82,7 +85,7 @@ Args:
 */
 func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.ConfigurationID, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			normalImageName,
@@ -90,7 +93,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 			2,
 			make(map[string]string),
 		),
-		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		byzantineConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			byzantineImageName,
