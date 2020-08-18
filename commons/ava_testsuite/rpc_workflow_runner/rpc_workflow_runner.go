@@ -40,15 +40,11 @@ type RPCWorkFlowRunner struct {
 // NewRPCWorkFlowRunner ...
 func NewRPCWorkFlowRunner(
 	client *apis.Client,
-	username string,
-	password string,
+	user api.UserPass,
 	networkAcceptanceTimeout time.Duration) *RPCWorkFlowRunner {
 	return &RPCWorkFlowRunner{
-		client: client,
-		geckoUser: api.UserPass{
-			Username: username,
-			Password: password,
-		},
+		client:                   client,
+		geckoUser:                user,
 		networkAcceptanceTimeout: networkAcceptanceTimeout,
 	}
 }

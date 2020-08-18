@@ -6,6 +6,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/utils/constants"
 	"github.com/ava-labs/gecko/utils/units"
 	"github.com/palantir/stacktrace"
@@ -42,8 +43,7 @@ func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *apis.Client, acce
 func (e *executor) ExecuteTest() error {
 	genesisClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		e.stakerClient,
-		genesisUsername,
-		genesisPassword,
+		api.UserPass{Username: genesisUsername, Password: genesisPassword},
 		e.acceptanceTimeout,
 	)
 
@@ -61,14 +61,12 @@ func (e *executor) ExecuteTest() error {
 	}
 	highLevelStakerClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		e.stakerClient,
-		stakerUsername,
-		stakerPassword,
+		api.UserPass{Username: stakerUsername, Password: stakerPassword},
 		e.acceptanceTimeout,
 	)
 	highLevelDelegatorClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		e.delegatorClient,
-		delegatorUsername,
-		delegatorPassword,
+		api.UserPass{Username: delegatorUsername, Password: delegatorPassword},
 		e.acceptanceTimeout,
 	)
 

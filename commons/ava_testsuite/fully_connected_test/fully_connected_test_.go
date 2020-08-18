@@ -8,6 +8,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/gecko/api"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -52,8 +53,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceID]
 	highLevelExtraStakerClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		nonBootValidatorClient,
-		stakerUsername,
-		stakerPassword,
+		api.UserPass{Username: stakerUsername, Password: stakerPassword},
 		networkAcceptanceTimeout)
 	if _, err := highLevelExtraStakerClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))

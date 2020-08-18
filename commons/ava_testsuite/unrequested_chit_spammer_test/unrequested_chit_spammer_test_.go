@@ -7,6 +7,7 @@ import (
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
+	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
@@ -50,8 +51,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		}
 		highLevelByzClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 			byzClient,
-			byzantineUsername,
-			byzantinePassword,
+			api.UserPass{Username: byzantineUsername, Password: byzantinePassword},
 			networkAcceptanceTimeout)
 		_, err = highLevelByzClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 		if err != nil {
@@ -78,8 +78,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	}
 	highLevelNormalClient := rpc_workflow_runner.NewRPCWorkFlowRunner(
 		normalClient,
-		stakerUsername,
-		stakerPassword,
+		api.UserPass{Username: stakerUsername, Password: stakerPassword},
 		networkAcceptanceTimeout)
 	_, err = highLevelNormalClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
