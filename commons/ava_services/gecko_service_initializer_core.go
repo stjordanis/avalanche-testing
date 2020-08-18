@@ -169,7 +169,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
 		fmt.Sprintf("--staking-enabled=%v", core.stakingEnabled),
-		fmt.Sprintf("--avax-tx-fee=%d", 0),
+		fmt.Sprintf("--tx-fee=%d", 0),
 	}
 
 	if core.stakingEnabled {
