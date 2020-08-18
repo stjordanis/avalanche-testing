@@ -34,6 +34,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		"--snow-sample-size=1",
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
+		"--avax-tx-fee=0", // TODO make this into a variable
 	}
 	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIp, make([]services.Service, 0))
 	assert.NoError(t, err, "An error occurred getting the start command")
@@ -67,6 +68,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		"--snow-sample-size=1",
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
+		"--avax-tx-fee=0",
 		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIp),
 	}
 

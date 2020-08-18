@@ -146,7 +146,7 @@ func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[strin
 /*
 Implementation of services.ServiceInitializerCore function to build the command line that will be used to launch a Gecko service
 */
-func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIpAddr net.IP, dependencies []services.Service) ([]string, error) {
+func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIPAddr net.IP, dependencies []services.Service) ([]string, error) {
 	numBootNodeIds := len(core.bootstrapperNodeIDs)
 	numDependencies := len(dependencies)
 	if numDependencies > numBootNodeIds {
@@ -157,10 +157,10 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		)
 	}
 
-	publicIpFlag := fmt.Sprintf("--public-ip=%s", publicIpAddr.String())
+	publicIPFlag := fmt.Sprintf("--public-ip=%s", publicIPAddr.String())
 	commandList := []string{
 		avalancheBinary,
-		publicIpFlag,
+		publicIPFlag,
 		"--network-id=local",
 		fmt.Sprintf("--http-port=%d", httpPort.Int()),
 		"--http-host=", // Leave empty to make API openly accessible
@@ -169,6 +169,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
 		fmt.Sprintf("--staking-enabled=%v", core.stakingEnabled),
+		fmt.Sprintf("--avax-tx-fee=%d", 0),
 	}
 
 	if core.stakingEnabled {
