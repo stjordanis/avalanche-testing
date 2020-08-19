@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/certs"
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
@@ -53,7 +53,7 @@ type GeckoServiceInitializerCore struct {
 	bootstrapperNodeIDs []string
 
 	// Cert provider that should be used when initializing the Gecko service
-	certProvider cert_providers.GeckoCertProvider
+	certProvider certs.GeckoCertProvider
 
 	// Log level that the Gecko service should start with
 	logLevel GeckoLogLevel
@@ -82,7 +82,7 @@ func NewGeckoServiceInitializerCore(
 	stakingEnabled bool,
 	additionalCLIArgs map[string]string,
 	bootstrapperNodeIDs []string,
-	certProvider cert_providers.GeckoCertProvider,
+	certProvider certs.GeckoCertProvider,
 	logLevel GeckoLogLevel) *GeckoServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIDsCopy := make([]string, 0, len(bootstrapperNodeIDs))

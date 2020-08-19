@@ -3,7 +3,7 @@ package rpc_workflow_runner
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils/constants"
 	"github.com/ava-labs/gecko/api"
@@ -59,7 +59,7 @@ func (runner RPCWorkFlowRunner) ImportGenesisFunds() (string, error) {
 
 	genesisAccountAddress, err := client.XChainAPI().ImportKey(
 		runner.geckoUser,
-		ava_networks.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
+		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}

@@ -3,8 +3,8 @@ package conflicting_txs_vertex_test
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -26,22 +26,17 @@ const (
 	stakeAmount                                          = int64(30000000000000)
 )
 
-// ================ Byzantine Test - Conflicting Transactions in a Vertex Test ===================================
-// StakingNetworkConflictingTxsVertexTest implements the Test interface
+// StakingNetworkConflictingTxsVertexTest creates a byzantine node to issue conflicting transactions into a single
+// vertex. It then checks to ensure that the byzantine node has accepted these transactions, while the virtuous nodes
+// drop the vertex.
 type StakingNetworkConflictingTxsVertexTest struct {
 	ByzantineImageName string
 	NormalImageName    string
 }
 
-// Issue conflicting transactions to the byzantine node to be issued into a vertex
-// The byzantine node should mark them as accepted when it issues them into a vertex.
-// Once the transactions are issued, verify the byzantine node has marked them as accepted
-// Virtuous nodes should drop the vertex without issuing it the vertex or its transactions
-// into consensus.
-// As a result both the virtuous and rogue transactions within the vertex should stay stuck
-// in processing.
+// Run implements the Kurtosis Test interface
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 
 	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceID)
 	if err != nil {
@@ -84,18 +79,18 @@ Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
 func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.ConfigurationID, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			true,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			normalImageName,
 			2,
 			2,
 			make(map[string]string),
 		),
-		byzantineConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			true,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			byzantineImageName,
 			2,
 			2,
@@ -105,10 +100,10 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", normalImageName)
 
-	return ava_networks.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestGeckoNetworkLoader(
 		true,
 		normalImageName,
-		ava_services.LOG_LEVEL_DEBUG,
+		avalancheService.LOG_LEVEL_DEBUG,
 		2,
 		2,
 		serviceConfigs,

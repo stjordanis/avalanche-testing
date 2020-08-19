@@ -3,8 +3,8 @@ package duplicate_node_id_test
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
@@ -22,18 +22,21 @@ const (
 	badServiceID2        networks.ServiceID = "bad-service-2"
 )
 
+// DuplicateNodeIDTest adds a node with a duplicate nodeID and ensures that the network handles the duplicate
+// appropriately and settles on the remaining node when the duplicate is removed.
 type DuplicateNodeIDTest struct {
 	ImageName string
 	Verifier  verifier.NetworkStateVerifier
 }
 
+// Run implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
 
 	allServiceIDs := make(map[networks.ServiceID]bool)
-	for bootServiceID, _ := range bootServiceIDs {
+	for bootServiceID := range bootServiceIDs {
 		allServiceIDs[bootServiceID] = true
 	}
 	allServiceIDs[vanillaNodeServiceID] = true
@@ -45,7 +48,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 	// We'll need these later
 	originalServiceIDs := make(map[networks.ServiceID]bool)
-	for serviceID, _ := range allServiceIDs {
+	for serviceID := range allServiceIDs {
 		originalServiceIDs[serviceID] = true
 	}
 
@@ -111,11 +114,11 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	// At this point, it's undefined what happens with the two nodes with duplicate IDs; verify that the original nodes
 	//  in the network operate normally amongst themselves
 	logrus.Info("Connection behaviour to nodes with duplicate IDs is undefined, so verifying that the original nodes connect as expected...")
-	for serviceID, _ := range originalServiceIDs {
+	for serviceID := range originalServiceIDs {
 		acceptableNodeIDs := make(map[string]bool)
 
 		// All original nodes should have the boot nodes (though a boot node won't have itself)
-		for bootServiceID, _ := range bootServiceIDs {
+		for bootServiceID := range bootServiceIDs {
 			if serviceID != bootServiceID {
 				bootNodeID := allNodeIDs[bootServiceID]
 				acceptableNodeIDs[bootNodeID] = true
@@ -158,19 +161,20 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
 }
 
+// GetNetworkLoader implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			true,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			test.ImageName,
 			2,
 			2,
 			make(map[string]string),
 		),
-		sameCertConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		sameCertConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			false,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			test.ImageName,
 			2,
 			2,
@@ -180,20 +184,22 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		vanillaNodeServiceID: normalNodeConfigID,
 	}
-	return ava_networks.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestGeckoNetworkLoader(
 		true,
 		test.ImageName,
-		ava_services.LOG_LEVEL_DEBUG,
+		avalancheService.LOG_LEVEL_DEBUG,
 		2,
 		2,
 		serviceConfigs,
 		desiredServices)
 }
 
+// GetExecutionTimeout implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) GetExecutionTimeout() time.Duration {
 	return 5 * time.Minute
 }
 
+// GetSetupBuffer implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) GetSetupBuffer() time.Duration {
 	// TODO drop this when the availabilityChecker doesn't have a sleep (because we spin up a bunch of nodes before execution)
 	return 6 * time.Minute
@@ -205,12 +211,12 @@ This helper function will grab node IDs and Gecko clients
 */
 func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
-	network ava_networks.TestGeckoNetwork,
+	network avalancheNetwork.TestGeckoNetwork,
 	allServiceIDs map[networks.ServiceID]bool,
 ) (allNodeIDs map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
 	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
-	for serviceID, _ := range allServiceIDs {
+	for serviceID := range allServiceIDs {
 		client, err := network.GetGeckoClient(serviceID)
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))

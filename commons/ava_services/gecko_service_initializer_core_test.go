@@ -6,7 +6,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/certs"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +20,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		false,
 		make(map[string]string),
 		[]string{},
-		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		LOG_LEVEL_INFO)
 
 	expected := []string{
@@ -54,7 +54,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		false,
 		make(map[string]string),
 		bootstrapperNodeIDs,
-		cert_providers.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		LOG_LEVEL_INFO)
 
 	expected := []string{

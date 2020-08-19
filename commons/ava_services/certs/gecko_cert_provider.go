@@ -1,4 +1,4 @@
-package cert_providers
+package certs
 
 import "bytes"
 

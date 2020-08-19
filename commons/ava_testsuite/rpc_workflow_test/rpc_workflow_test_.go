@@ -3,8 +3,8 @@ package rpc_workflow_test
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -26,7 +26,7 @@ type StakingNetworkRPCWorkflowTest struct {
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
 	// =============================== SETUP GECKO CLIENTS ======================================
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceID)
 	if err != nil {
@@ -48,8 +48,8 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(true, avalancheService.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
@@ -57,10 +57,10 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		delegatorNodeServiceID: normalNodeConfigID,
 	}
 	// Return a Gecko test net with this service:configuration mapping.
-	return ava_networks.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestGeckoNetworkLoader(
 		true,
 		test.ImageName,
-		ava_services.LOG_LEVEL_DEBUG,
+		avalancheService.LOG_LEVEL_DEBUG,
 		2,
 		2,
 		serviceConfigs,

@@ -3,8 +3,8 @@ package fully_connected_test
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
@@ -27,18 +27,20 @@ const (
 	nonBootNonValidatorServiceID  networks.ServiceID = "non-validator-service"
 )
 
+// StakingNetworkFullyConnectedTest adds nodes to the network and verifies that the network stays fully connected
 type StakingNetworkFullyConnectedTest struct {
 	ImageName string
 	Verifier  verifier.NetworkStateVerifier
 }
 
+// Run implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	stakerIDs := castedNetwork.GetAllBootServiceIDs()
 	allServiceIDs := make(map[networks.ServiceID]bool)
-	for stakerID, _ := range stakerIDs {
+	for stakerID := range stakerIDs {
 		allServiceIDs[stakerID] = true
 	}
 	// Add our custom nodes
@@ -75,28 +77,31 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	}
 }
 
+// GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(true, ava_services.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(true, avalancheService.LOG_LEVEL_DEBUG, test.ImageName, 2, 2, make(map[string]string)),
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		nonBootValidatorServiceID:    normalNodeConfigID,
 		nonBootNonValidatorServiceID: normalNodeConfigID,
 	}
-	return ava_networks.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestGeckoNetworkLoader(
 		true,
 		test.ImageName,
-		ava_services.LOG_LEVEL_DEBUG,
+		avalancheService.LOG_LEVEL_DEBUG,
 		2,
 		2,
 		serviceConfigs,
 		desiredServices)
 }
 
+// GetExecutionTimeout implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) GetExecutionTimeout() time.Duration {
 	return 5 * time.Minute
 }
 
+// GetSetupBuffer implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
 	// TODO drop this when the availabilityChecker doesn't have a sleep (because we spin up a bunch of nodes before running the test)
 	return 6 * time.Minute
@@ -108,12 +113,12 @@ This helper function will grab node IDs and Gecko clients
 */
 func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
-	network ava_networks.TestGeckoNetwork,
+	network avalancheNetwork.TestGeckoNetwork,
 	allServiceIDs map[networks.ServiceID]bool,
 ) (allNodeIDs map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
 	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
-	for serviceID, _ := range allServiceIDs {
+	for serviceID := range allServiceIDs {
 		client, err := network.GetGeckoClient(serviceID)
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))

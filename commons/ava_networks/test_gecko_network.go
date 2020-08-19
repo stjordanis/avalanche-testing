@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/cert_providers"
+	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services/certs"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/ava-labs/avalanche-e2e-tests/utils/constants"
 
@@ -281,7 +281,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			loader.isStaking,
 			make(map[string]string), // No additional CLI args for the default network
 			bootNodeIDs[0:i],        // Only the node IDs of the already-started nodes
-			cert_providers.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
+			certs.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
 			loader.bootNodeLogLevel,
 		)
 		availabilityCheckerCore := ava_services.GeckoServiceAvailabilityCheckerCore{}
@@ -293,7 +293,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 
 	// Add user-custom configs
 	for configID, configParams := range loader.serviceConfigs {
-		certProvider := cert_providers.NewRandomGeckoCertProvider(configParams.varyCerts)
+		certProvider := certs.NewRandomGeckoCertProvider(configParams.varyCerts)
 		imageName := configParams.imageName
 
 		initializerCore := ava_services.NewGeckoServiceInitializerCore(

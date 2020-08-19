@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/ids"
@@ -42,7 +42,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(ava_networks.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
@@ -106,10 +106,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
-	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		byzantineConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
+		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			true,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			test.ByzantineImageName,
 			2,
 			2,
@@ -117,9 +117,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
-		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
 			true,
-			ava_services.LOG_LEVEL_DEBUG,
+			avalancheService.LOG_LEVEL_DEBUG,
 			test.NormalImageName,
 			6,
 			8,
@@ -135,10 +135,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
 
-	return ava_networks.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestGeckoNetworkLoader(
 		true,
 		test.NormalImageName,
-		ava_services.LOG_LEVEL_DEBUG,
+		avalancheService.LOG_LEVEL_DEBUG,
 		2,
 		2,
 		serviceConfigs,
