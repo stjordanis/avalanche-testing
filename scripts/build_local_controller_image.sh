@@ -6,21 +6,18 @@ set -euo pipefail
 # location and using that version's Dockerfile to build the image.
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
+GECKO_PATH="$GOPATH/src/github.com/ava-labs/gecko"
 E2E_COMMIT="$(git --git-dir="$ROOT_DIRPATH/.git" rev-parse --short HEAD)"
+GECKO_COMMIT="$(git --git-dir="$GECKO_PATH/.git" rev-parse --short HEAD)"
 
 export GOPATH="$SCRIPT_DIRPATH/.build_image_gopath"
 WORKPREFIX="$GOPATH/src/github.com/ava-labs"
 DOCKER="${DOCKER:-docker}"
 
 
-# TODO set this to use the public repo and master branch, leave for now to avoid passing args while using
 GECKO_REMOTE="https://github.com/ava-labs/gecko-internal.git"
-GECKO_BRANCH="fix-calc-validators-infinite-loop"
-
-# Clones the remote and checks out the current local commit
-# Note: commit and push changes before running this script, or some local changes
-# will be left out
 E2E_REMOTE="https://github.com/ava-labs/avalanche-e2e-tests.git"
+
 
 # Clone the remotes and checkout the desired branch/commits
 GECKO_CLONE="$WORKPREFIX/gecko"
@@ -40,9 +37,7 @@ else
     git -C "$GECKO_CLONE" fetch origin
 fi
 
-git -C "$GECKO_CLONE" checkout "$GECKO_BRANCH"
-
-GECKO_COMMIT="$(git -C "$GECKO_CLONE" rev-parse --short HEAD)"
+git -C "$GECKO_CLONE" checkout "$GECKO_COMMIT"
 
 if [[ ! -d "$E2E_CLONE" ]]; then
     git clone "$E2E_REMOTE" "$E2E_CLONE"
