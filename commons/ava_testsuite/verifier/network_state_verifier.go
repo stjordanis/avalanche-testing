@@ -105,7 +105,6 @@ func (verifier NetworkStateVerifier) VerifyExpectedPeers(
 	// Verify that IDs of the peers we have are in our list of acceptable IDs
 	for _, peer := range peers {
 		_, found := acceptableNodeIds[peer.ID]
-		logrus.Infof("Found peer nodeID: %s and PublicIP: %s", peer.ID, peer.PublicIP)
 		if !found {
 			return stacktrace.NewError("Service ID %v has a peer with node ID %s that we don't recognize", serviceId, peer.ID)
 		}
