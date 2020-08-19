@@ -52,7 +52,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 			}
 		}
 
-		logrus.Debugf("Expecting serviceId %v to have the following peer node IDs, %v", serviceId, acceptableNodeIds)
+		logrus.Infof("Expecting serviceId %v to have the following peer node IDs, %v", serviceId, acceptableNodeIds)
 		if err := verifier.VerifyExpectedPeers(serviceId, allGeckoClients[serviceId], acceptableNodeIds, len(acceptableNodeIds), false); err != nil {
 			return stacktrace.Propagate(err, "An error occurred verifying the expected peers list")
 		}
@@ -105,8 +105,9 @@ func (verifier NetworkStateVerifier) VerifyExpectedPeers(
 	// Verify that IDs of the peers we have are in our list of acceptable IDs
 	for _, peer := range peers {
 		_, found := acceptableNodeIds[peer.ID]
+		logrus.Infof("Found peer nodeID: %s and PublicIP: %s", peer.ID, peer.PublicIP)
 		if !found {
-			return stacktrace.NewError("Service ID %v has a peer with node ID %v that we don't recognize", serviceId, peer.ID)
+			return stacktrace.NewError("Service ID %v has a peer with node ID %s that we don't recognize", serviceId, peer.ID)
 		}
 	}
 	return nil
