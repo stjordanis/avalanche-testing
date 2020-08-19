@@ -1,8 +1,6 @@
 package info
 
 import (
-	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils"
@@ -54,12 +52,6 @@ func (c *Client) GetBlockchainID() (string, error) {
 func (c *Client) Peers() ([]network.PeerID, error) {
 	res := &info.PeersReply{}
 	err := c.requester.SendRequest("peers", struct{}{}, res)
-	resVal, err := json.Marshal(res)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-	} else {
-		fmt.Printf("\n%s\n", resVal)
-	}
 	return res.Peers, err
 }
 
