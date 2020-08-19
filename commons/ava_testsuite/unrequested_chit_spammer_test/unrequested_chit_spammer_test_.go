@@ -82,9 +82,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		networkAcceptanceTimeout)
 	_, err = highLevelNormalClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
+		context.Fatal(stacktrace.Propagate(err, "Failed to add client as a validator."))
 	}
 
+	time.Sleep(10 * time.Second)
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
 	if err != nil {
