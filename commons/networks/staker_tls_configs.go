@@ -1,4 +1,4 @@
-package ava_networks
+package networks
 
 const (
 	STAKER_1_NODE_ID = "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg"

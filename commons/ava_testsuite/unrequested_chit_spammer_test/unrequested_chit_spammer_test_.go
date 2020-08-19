@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/gecko/api"
@@ -47,7 +47,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
 	for i := 0; i < numberOfByzantineNodes; i++ {
-		byzClient, err := castedNetwork.GetGeckoClient(networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i)))
+		byzClient, err := castedNetwork.GetAvalancheClient(networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i)))
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 		}
@@ -74,7 +74,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	if err = availabilityChecker.WaitForStartup(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of normal node."))
 	}
-	normalClient, err := castedNetwork.GetGeckoClient(normalNodeServiceID)
+	normalClient, err := castedNetwork.GetAvalancheClient(normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get staker client."))
 	}

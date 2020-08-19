@@ -3,7 +3,7 @@ package rpc_workflow_test
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
@@ -28,12 +28,12 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 	// =============================== SETUP GECKO CLIENTS ======================================
 	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
-	stakerClient, err := castedNetwork.GetGeckoClient(regularNodeServiceID)
+	stakerClient, err := castedNetwork.GetAvalancheClient(regularNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get staker client"))
 	}
 
-	delegatorClient, err := castedNetwork.GetGeckoClient(delegatorNodeServiceID)
+	delegatorClient, err := castedNetwork.GetAvalancheClient(delegatorNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get delegator client"))
 	}

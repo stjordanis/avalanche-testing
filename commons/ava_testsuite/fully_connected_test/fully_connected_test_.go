@@ -3,7 +3,7 @@ package fully_connected_test
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/rpc_workflow_runner"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
@@ -119,7 +119,7 @@ func getNodeIDsAndClients(
 	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
 	for serviceID := range allServiceIDs {
-		client, err := network.GetGeckoClient(serviceID)
+		client, err := network.GetAvalancheClient(serviceID)
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))
 		}

@@ -3,7 +3,7 @@ package conflicting_txs_vertex_test
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
@@ -38,11 +38,11 @@ type StakingNetworkConflictingTxsVertexTest struct {
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
 
-	byzantineClient, err := castedNetwork.GetGeckoClient(byzantineNodeServiceID)
+	byzantineClient, err := castedNetwork.GetAvalancheClient(byzantineNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
 	}
-	virtuousClient, err := castedNetwork.GetGeckoClient(normalNodeServiceID)
+	virtuousClient, err := castedNetwork.GetAvalancheClient(normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get virtuous client."))
 	}

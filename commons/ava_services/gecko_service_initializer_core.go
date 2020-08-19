@@ -17,8 +17,8 @@ const (
 	httpPort    nat.Port = "9650/tcp"
 	stakingPort nat.Port = "9651/tcp"
 
-	stakingTlsCertFileId = "staking-tls-cert"
-	stakingTlsKeyFileId  = "staking-tls-key"
+	stakingTLSCertFileID = "staking-tls-cert"
+	stakingTLSKeyFileID  = "staking-tls-key"
 
 	testVolumeMountpoint = "/shared"
 	avalancheBinary      = "/gecko/build/avalanche"
@@ -117,8 +117,8 @@ Implementation of services.ServiceInitializerCore function to declare the files 
 func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 	if core.stakingEnabled {
 		return map[string]bool{
-			stakingTlsCertFileId: true,
-			stakingTlsKeyFileId:  true,
+			stakingTLSCertFileID: true,
+			stakingTLSKeyFileID:  true,
 		}
 	}
 	return make(map[string]bool)
@@ -128,8 +128,8 @@ func (core GeckoServiceInitializerCore) GetFilesToMount() map[string]bool {
 Implementation of services.ServiceInitializerCore function to initialize the files Gecko needs
 */
 func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[string]*os.File, dependencies []services.Service) error {
-	certFilePointer := osFiles[stakingTlsCertFileId]
-	keyFilePointer := osFiles[stakingTlsKeyFileId]
+	certFilePointer := osFiles[stakingTLSCertFileID]
+	keyFilePointer := osFiles[stakingTLSKeyFileID]
 	certPEM, keyPEM, err := core.certProvider.GetCertAndKey()
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get cert & key when initializing service")
@@ -147,13 +147,13 @@ func (core GeckoServiceInitializerCore) InitializeMountedFiles(osFiles map[strin
 Implementation of services.ServiceInitializerCore function to build the command line that will be used to launch a Gecko service
 */
 func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIPAddr net.IP, dependencies []services.Service) ([]string, error) {
-	numBootNodeIds := len(core.bootstrapperNodeIDs)
+	numBootNodeIDs := len(core.bootstrapperNodeIDs)
 	numDependencies := len(dependencies)
-	if numDependencies > numBootNodeIds {
+	if numDependencies > numBootNodeIDs {
 		return nil, stacktrace.NewError(
 			"Gecko service is being started with %v dependencies but only %v boot node IDs have been configured",
 			numDependencies,
-			numBootNodeIds,
+			numBootNodeIDs,
 		)
 	}
 
@@ -173,13 +173,13 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 	}
 
 	if core.stakingEnabled {
-		certFilepath, found := mountedFileFilepaths[stakingTlsCertFileId]
+		certFilepath, found := mountedFileFilepaths[stakingTLSCertFileID]
 		if !found {
-			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsCertFileId)
+			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTLSCertFileID)
 		}
-		keyFilepath, found := mountedFileFilepaths[stakingTlsKeyFileId]
+		keyFilepath, found := mountedFileFilepaths[stakingTLSKeyFileID]
 		if !found {
-			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTlsKeyFileId)
+			return nil, stacktrace.NewError("Could not find file key '%v' in the mounted filepaths map; this is likely a code bug", stakingTLSKeyFileID)
 		}
 		commandList = append(commandList, fmt.Sprintf("--staking-tls-cert-file=%s", certFilepath))
 		commandList = append(commandList, fmt.Sprintf("--staking-tls-key-file=%s", keyFilepath))

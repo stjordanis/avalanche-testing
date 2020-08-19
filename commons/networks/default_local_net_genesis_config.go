@@ -1,13 +1,10 @@
-package ava_networks
+package networks
 
-/*
-When using Gecko with the 'local' testnet option, the P-chain comes preloaded with five bootstrapper nodes whose node
-	IDs are hardcoded in Gecko source. Node IDs are determined based off the TLS keys of the nodes, so to ensure that
-	we can launch nodes with the same node ID (to validate, else we wouldn't be able to validate at all), the Gecko
-	source code also provides the private keys for these nodes.
-
-This struct contains the private keys and node IDs that come from Gecko for the 5 bootstrapper nodes.
-*/
+// DefaultLocalNetGenesisConfig contains the private keys and node IDs that come from Gecko for the 5 bootstrapper nodes.
+// When using Gecko with the 'local' testnet option, the P-chain comes preloaded with five bootstrapper nodes whose node
+// IDs are hardcoded in Gecko source. Node IDs are determined based off the TLS keys of the nodes, so to ensure that
+// we can launch nodes with the same node ID (to validate, else we wouldn't be able to validate at all), the Gecko
+// source code also provides the private keys for these nodes.
 var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 	Stakers: defaultStakers,
 	// hardcoded in Gecko in "genesis/config.go". needed to distribute genesis funds in tests

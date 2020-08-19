@@ -3,7 +3,7 @@ package duplicate_node_id_test
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	avalancheService "github.com/ava-labs/avalanche-e2e-tests/commons/ava_services"
 	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/verifier"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
@@ -66,7 +66,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	}
 	allServiceIDs[badServiceID1] = true
 
-	badServiceClient1, err := castedNetwork.GetGeckoClient(badServiceID1)
+	badServiceClient1, err := castedNetwork.GetAvalancheClient(badServiceID1)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the first dupe node ID service with ID %v", badServiceID1))
 	}
@@ -98,7 +98,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	}
 	allServiceIDs[badServiceID2] = true
 
-	badServiceClient2, err := castedNetwork.GetGeckoClient(badServiceID2)
+	badServiceClient2, err := castedNetwork.GetAvalancheClient(badServiceID2)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the second dupe node ID service with ID %v", badServiceID2))
 	}
@@ -217,7 +217,7 @@ func getNodeIDsAndClients(
 	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
 	for serviceID := range allServiceIDs {
-		client, err := network.GetGeckoClient(serviceID)
+		client, err := network.GetAvalancheClient(serviceID)
 		if err != nil {
 			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))
 		}

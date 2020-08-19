@@ -3,7 +3,7 @@ package rpc_workflow_runner
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/ava_networks"
+	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/commons/networks"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
 	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils/constants"
 	"github.com/ava-labs/gecko/api"

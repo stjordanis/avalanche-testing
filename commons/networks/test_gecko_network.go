@@ -1,4 +1,4 @@
-package ava_networks
+package networks
 
 import (
 	"bytes"
@@ -46,14 +46,14 @@ type TestGeckoNetwork struct {
 /*
 Gets the API Client for the node with the given service ID
 */
-func (network TestGeckoNetwork) GetGeckoClient(serviceID networks.ServiceID) (*apis.Client, error) {
+func (network TestGeckoNetwork) GetAvalancheClient(serviceID networks.ServiceID) (*apis.Client, error) {
 	node, err := network.svcNetwork.GetService(serviceID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceID)
 	}
 	geckoService := node.Service.(ava_services.GeckoService)
-	jsonRpcSocket := geckoService.GetJsonRpcSocket()
-	uri := fmt.Sprintf("http://%s:%d", jsonRpcSocket.GetIpAddr(), jsonRpcSocket.GetPort().Int())
+	jsonRPCSocket := geckoService.GetJsonRpcSocket()
+	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
 	return apis.NewClient(uri, constants.DefaultRequestTimeout), nil
 }
 
@@ -269,7 +269,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 	for i := 0; i < len(DefaultLocalNetGenesisConfig.Stakers); i++ {
 		configID := networks.ConfigurationID(bootNodeConfigIDPrefix + strconv.Itoa(i))
 
-		certString := localNetGenesisStakers[i].TlsCert
+		certString := localNetGenesisStakers[i].TLSCert
 		keyString := localNetGenesisStakers[i].PrivateKey
 
 		certBytes := bytes.NewBufferString(certString)
