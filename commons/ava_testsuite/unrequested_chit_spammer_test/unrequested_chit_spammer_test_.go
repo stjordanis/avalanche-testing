@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	normalNodeConfigId     networks.ConfigurationID = "normal-config"
-	byzantineConfigId      networks.ConfigurationID = "byzantine-config"
+	normalNodeConfigID     networks.ConfigurationID = "normal-config"
+	byzantineConfigID      networks.ConfigurationID = "byzantine-config"
 	byzantineUsername                               = "byzantine_gecko"
 	byzantinePassword                               = "byzant1n3!"
 	stakerUsername                                  = "staker_gecko"
 	stakerPassword                                  = "test34test!23"
-	normalNodeServiceId    networks.ServiceID       = "normal-node"
+	normalNodeServiceID    networks.ServiceID       = "normal-node"
 	byzantineNodePrefix    string                   = "byzantine-node-"
 	numberOfByzantineNodes                          = 4
 	seedAmount                                      = uint64(50000000000000)
@@ -33,12 +33,14 @@ const (
 	chitSpammerBehavior           = "chit-spammer"
 )
 
-// ================ Byzantine Test - Spamming Unrequested Chit Messages ===================================
+// StakingNetworkUnrequestedChitSpammerTest tests that a node is able to continue to work normally
+// while the network is spammed with chit messages from byzantine peers
 type StakingNetworkUnrequestedChitSpammerTest struct {
 	ByzantineImageName string
 	NormalImageName    string
 }
 
+// Run implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(ava_networks.TestGeckoNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
@@ -65,14 +67,14 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
-	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigId, normalNodeServiceId)
+	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigID, normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add normal node with high quorum and sample to network."))
 	}
 	if err = availabilityChecker.WaitForStartup(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of normal node."))
 	}
-	normalClient, err := castedNetwork.GetGeckoClient(normalNodeServiceId)
+	normalClient, err := castedNetwork.GetGeckoClient(normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to get staker client."))
 	}
@@ -85,6 +87,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		context.Fatal(stacktrace.Propagate(err, "Failed to add client as a validator."))
 	}
 
+	// Sleep an additional 10 seconds to ensure that the Validator has time to be added from
+	// pending validators to the set of current validators
 	time.Sleep(10 * time.Second)
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
@@ -94,14 +98,16 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
-	context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
-
+	if actualNumStakers != expectedNumStakers {
+		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
+	}
 }
 
+// GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
 	serviceConfigs := map[networks.ConfigurationID]ava_networks.TestGeckoNetworkServiceConfig{
-		byzantineConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		byzantineConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			test.ByzantineImageName,
@@ -111,7 +117,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
-		normalNodeConfigId: *ava_networks.NewTestGeckoNetworkServiceConfig(
+		normalNodeConfigID: *ava_networks.NewTestGeckoNetworkServiceConfig(
 			true,
 			ava_services.LOG_LEVEL_DEBUG,
 			test.NormalImageName,
@@ -122,9 +128,9 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	}
 
 	// Define the map from service->configuration for the network
-	serviceIdConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
+	serviceIDConfigMap := map[networks.ServiceID]networks.ConfigurationID{}
 	for i := 0; i < numberOfByzantineNodes; i++ {
-		serviceIdConfigMap[networks.ServiceID(byzantineNodePrefix+strconv.Itoa(i))] = byzantineConfigId
+		serviceIDConfigMap[networks.ServiceID(byzantineNodePrefix+strconv.Itoa(i))] = byzantineConfigID
 	}
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
@@ -136,15 +142,17 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 		2,
 		2,
 		serviceConfigs,
-		serviceIdConfigMap)
+		serviceIDConfigMap)
 }
 
+// GetExecutionTimeout implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetExecutionTimeout() time.Duration {
 	// TODO drop this when the availabilityChecker doesn't have a sleep, because we spin up a *bunch* of byzantine
 	// nodes during test execution
 	return 10 * time.Minute
 }
 
+// GetSetupBuffer implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetSetupBuffer() time.Duration {
 	return 4 * time.Minute
 }
