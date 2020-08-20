@@ -297,13 +297,13 @@ func (runner RPCWorkFlowRunner) waitForXchainTransactionAcceptance(txID ids.ID) 
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status.")
 		}
+		logrus.Debugf("Status for transaction %s: %s", txID, status)
 		if status == choices.Accepted {
 			return nil
 		}
 		if status == choices.Rejected {
 			return stacktrace.NewError("Transaciton %s was rejected", txID)
 		}
-		logrus.Debugf("Status for transaction %s: %s", txID, status)
 		time.Sleep(time.Second)
 	}
 
@@ -343,12 +343,12 @@ func (runner RPCWorkFlowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status")
 		}
+		logrus.Infof("Status for transaction: %s: %s", txID, status)
+
 		if status == platformvm.Committed {
 			return nil
 		}
 
-		// TODO reset to debug log level
-		logrus.Infof("Status for transaction: %s: %s", txID, status)
 		if status == platformvm.Dropped || status == platformvm.Aborted {
 			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s", txID, status)
 		}

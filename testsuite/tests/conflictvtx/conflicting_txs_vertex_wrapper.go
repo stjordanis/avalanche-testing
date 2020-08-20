@@ -47,6 +47,7 @@ func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network,
 		context.Fatal(stacktrace.Propagate(err, "Failed to get virtuous client."))
 	}
 	executor := NewConflictingTxsVertexExecutor(virtuousClient, byzantineClient)
+	logrus.Infof("Executing conflicting transaction vertex test...")
 	if err := executor.ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Conflicting Transactions Vertex Test failed."))
 	}

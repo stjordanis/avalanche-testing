@@ -30,7 +30,6 @@ func (e *executor) ExecuteTest() error {
 	// TODO switch to test vectors or come up with method to reliably generate conflicting transactions
 	// how to create a conflicting transaction???
 	// test vector create asset tx and conflicting transactions
-
 	cb58 := formatting.CB58{}
 	if err := cb58.FromString("111115P99NeFpAqLusu4fw9f8yqU89bnDn4yKjvvBKZPdfzTUHkjdh56Bh5SJhM83LWcPp6nzuDtttQVG6qaStJQs5uG5tgt6WUWAopGjZ149Vgtz9KmuQHXxQvF7Gb5d9kJ3ebRJSU9yNeygeWTndyDbqoyEFkCzxthdZuLs1HpQZZfpDztDdhLDkop2F"); err != nil {
 		return stacktrace.Propagate(err, "Problem parsing create asset tx")
@@ -46,6 +45,7 @@ func (e *executor) ExecuteTest() error {
 	}
 	conflictingTx2 := cb58.Bytes
 
+	logrus.Infof("Issuing conflicting transactions to a byzantine node...")
 	nonConflictID, err := byzantineXChainAPI.IssueTx(createAssetTx)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to issue first transaction to byzantine node.")

@@ -46,6 +46,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
+	logrus.Infof("Adding byzantine chit spammer nodes as stakers...")
 	for i := 0; i < numberOfByzantineNodes; i++ {
 		byzClient, err := castedNetwork.GetAvalancheClient(networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i)))
 		if err != nil {
@@ -67,6 +68,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
+	logrus.Infof("Adding normal node as a staker...")
 	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigID, normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add normal node with high quorum and sample to network."))
@@ -87,17 +89,18 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		context.Fatal(stacktrace.Propagate(err, "Failed to add client as a validator."))
 	}
 
-	// Sleep an additional 10 seconds to ensure that the Validator has time to be added from
-	// pending validators to the set of current validators
+	logrus.Infof("Added normal node as a staker. Sleeping an additional 10 seconds to ensure it joins current validators...")
 	time.Sleep(10 * time.Second)
+
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
+	logrus.Infof("Validating network state...")
 	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
-	logrus.Debugf("Number of current stakers: %d", len(currentStakers))
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
+	logrus.Debugf("Number of current stakers: %d, expected number of stakers: %d", len(currentStakers), expectedNumStakers)
 	if actualNumStakers != expectedNumStakers {
 		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
 	}

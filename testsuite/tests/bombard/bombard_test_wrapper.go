@@ -9,6 +9,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -44,10 +45,13 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 
 	// Execute the bombard test to issue [NumTxs] to each node
 	executor := NewBombardExecutor(clients, test.NumTxs, test.TxFee, test.AcceptanceTimeout)
+	logrus.Infof("Executing bombard test...")
 	if err := executor.ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Bombard Test Failed."))
 	}
 
+	logrus.Infof("Bombard test completed successfully.")
+	logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")
 	// Add two additional nodes to ensure that they can successfully bootstrap the additional data
 	availabilityChecker1, err := castedNetwork.AddService(normalNodeConfigID, additionalNode1ServiceID)
 	if err != nil {
@@ -62,9 +66,11 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 	if err = availabilityChecker1.WaitForStartup(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode1ServiceID))
 	}
+	logrus.Infof("Node1 finished bootstrapping.")
 	if err = availabilityChecker2.WaitForStartup(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode2ServiceID))
 	}
+	logrus.Infof("Node2 finished bootstrapping.")
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface

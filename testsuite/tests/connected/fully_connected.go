@@ -30,6 +30,7 @@ const (
 // StakingNetworkFullyConnectedTest adds nodes to the network and verifies that the network stays fully connected
 type StakingNetworkFullyConnectedTest struct {
 	ImageName string
+	FullyConnectedDelay time.Duration
 	Verifier  verifier.NetworkStateVerifier
 }
 
@@ -48,10 +49,13 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	allServiceIDs[nonBootNonValidatorServiceID] = true
 
 	allNodeIDs, allGeckoClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
+	logrus.Infof("Verifying that the network is fully connected...")
 	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
+	logrus.Infof("Network is fully connected.")
 
+	logrus.Infof("Adding additional staker to the network...")
 	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceID]
 	highLevelExtraStakerClient := helpers.NewRPCWorkFlowRunner(
 		nonBootValidatorClient,
@@ -61,11 +65,12 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 		context.Fatal(stacktrace.Propagate(err, "Failed to add extra staker."))
 	}
 
+	logrus.Infof("Sleeping %v seconds before verifying that the network has fully connected to the new staker...", test.FullyConnectedDelay.Seconds())
 	// Give time for the new validator to propagate via gossip
 	time.Sleep(70 * time.Second)
 
+	logrus.Infof("Verifying that the network is fully connected...")
 	stakerIDs[nonBootValidatorServiceID] = true
-
 	/*
 		After gossip, we expect the peers list to look like:
 		1) No node has itself in its peers list
@@ -75,6 +80,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
+	logrus.Infof("The network is fully connected.")
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface

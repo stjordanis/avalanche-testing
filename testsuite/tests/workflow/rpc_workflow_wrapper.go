@@ -8,6 +8,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -40,6 +41,7 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 
 	executor := NewRPCWorkflowTestExecutor(stakerClient, delegatorClient, networkAcceptanceTimeout)
 
+	logrus.Infof("Set up RPCWorkFlowTest. Executing...")
 	if err := executor.ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "RPCWorkflow Test failed."))
 	}

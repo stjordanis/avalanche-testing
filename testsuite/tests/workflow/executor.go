@@ -50,6 +50,7 @@ func (e *executor) ExecuteTest() error {
 	if _, err := genesisClient.ImportGenesisFunds(); err != nil {
 		return stacktrace.Propagate(err, "Failed to fund genesis client.")
 	}
+	logrus.Debugf("Funded genesis client...")
 
 	stakerNodeID, err := e.stakerClient.InfoAPI().GetNodeID()
 	if err != nil {
@@ -79,6 +80,7 @@ func (e *executor) ExecuteTest() error {
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not create default addresses for delegator client.")
 	}
+	logrus.Infof("Created addresses for staker and delegator clients.")
 
 	if err := genesisClient.FundXChainAddresses([]string{stakerXChainAddress, delegatorXChainAddress}, seedAmount); err != nil {
 		return stacktrace.Propagate(err, "Failed to fund X Chain Addresses from genesis client.")
@@ -90,6 +92,7 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelDelegatorClient.VerifyXChainAVABalance(delegatorXChainAddress, seedAmount); err != nil {
 		return stacktrace.Propagate(err, "Unexpected X Chain Balance for delegator client.")
 	}
+	logrus.Infof("Funded X Chain Addresses for staker and delegator clients.")
 
 	//  ====================================== ADD VALIDATOR ===============================
 	err = highLevelStakerClient.TransferAvaXChainToPChain(stakerPChainAddress, seedAmount)
@@ -106,14 +109,15 @@ func (e *executor) ExecuteTest() error {
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
 	}
+	logrus.Infof("Transferred funds from X Chain to P Chain and added a new staker.")
 
 	// ====================================== VERIFY NETWORK STATE ===============================
 	currentStakers, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.DefaultSubnetID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current stakers.")
 	}
-	logrus.Debugf("Number of current validators: %d", len(currentStakers))
 	actualNumStakers := len(currentStakers)
+	logrus.Debugf("Number of current validators: %d", actualNumStakers)
 	expectedNumStakers := 6
 	if actualNumStakers != expectedNumStakers {
 		return stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers)
@@ -122,6 +126,7 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, expectedStakerBalance); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding default subnet validator to the network")
 	}
+	logrus.Infof("Verified the staker was added to current validators and has the expected P Chain balance.")
 
 	// ====================================== ADD DELEGATOR ======================================
 	err = highLevelDelegatorClient.TransferAvaXChainToPChain(delegatorPChainAddress, seedAmount)
@@ -143,6 +148,7 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPChainAddress, expectedDelegatorBalance); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding a new delegator to the network.")
 	}
+	logrus.Infof("Added delegator to subnet and verified the expected P Chain balance.")
 
 	// ====================================== TRANSFER TO X CHAIN ================================
 	err = highLevelStakerClient.TransferAvaPChainToXChain(stakerXChainAddress, expectedStakerBalance)
@@ -155,6 +161,7 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelStakerClient.VerifyXChainAVABalance(stakerXChainAddress, expectedStakerBalance); err != nil {
 		return stacktrace.Propagate(err, "Unexpected X Chain Balance after P -> X Transfer.")
 	}
+	logrus.Infof("Transferred leftover staker funds back to X Chain and verified X and P balances.")
 
 	err = highLevelDelegatorClient.TransferAvaPChainToXChain(delegatorXChainAddress, expectedStakerBalance)
 	if err != nil {
@@ -166,6 +173,7 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelDelegatorClient.VerifyXChainAVABalance(delegatorXChainAddress, expectedDelegatorBalance); err != nil {
 		return stacktrace.Propagate(err, "Unexpected X Chain Balance after P -> X Transfer.")
 	}
+	logrus.Infof("Transferred leftover delegator funds back to X Chain and verified X and P balances.")
 
 	return nil
 }
