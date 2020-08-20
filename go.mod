@@ -3,7 +3,7 @@ module github.com/ava-labs/avalanche-e2e-tests
 go 1.13
 
 require (
-	github.com/ava-labs/gecko v0.5.7
+	github.com/ava-labs/gecko v0.6.1-rc.1
 	github.com/docker/go-connections v0.4.0
 	github.com/gorilla/rpc v1.2.0
 	github.com/hashicorp/consul/api v1.6.0

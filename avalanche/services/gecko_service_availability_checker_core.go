@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/info"
 	"github.com/ava-labs/avalanche-e2e-tests/utils/constants"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
-	"github.com/palantir/stacktrace"
-	"github.com/sirupsen/logrus"
 )
 
 // NewAvalancheServiceAvailabilityChecker returns a new services.ServiceAvailabilityCheckerCore to
@@ -34,20 +32,20 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	castedService := toCheck.(GeckoService)
 	jsonRPCSocket := castedService.GetJSONRPCSocket()
 	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
-	client := apis.NewClient(uri, constants.DefaultRequestTimeout)
-	healthInfo, err := client.HealthAPI().GetLiveness()
-	if err != nil {
-		logrus.Trace(stacktrace.Propagate(err, "Error occurred getting liveness info"))
+	client := info.NewClient(uri, constants.DefaultRequestTimeout)
+
+	if bootstrapped, err := client.IsBootstrapped("P"); err != nil || !bootstrapped {
+		return false
+	}
+	if bootstrapped, err := client.IsBootstrapped("C"); err != nil || !bootstrapped {
+		return false
+	}
+	if bootstrapped, err := client.IsBootstrapped("X"); err != nil || !bootstrapped {
 		return false
 	}
 
-	// HACK we need to wait for bootstrapping to finish, and there is not API for this yet (in development)
-	// TODO once isReadiness endpoint is available, use that instead of just waiting
-	if healthInfo.Healthy {
-		time.Sleep(15 * time.Second)
-	}
-
-	return healthInfo.Healthy
+	time.Sleep(5 * time.Second)
+	return true
 }
 
 // GetTimeout implements services.AvailabilityCheckerCore
