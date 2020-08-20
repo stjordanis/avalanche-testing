@@ -196,10 +196,6 @@ func NewTestGeckoNetworkLoader(
 	txFee uint64,
 	serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig,
 	desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestGeckoNetworkLoader, error) {
-	if len(desiredServiceConfigs) == 0 {
-		return nil, stacktrace.NewError("Must specify at least one node!")
-	}
-
 	// Defensive copy
 	serviceConfigsCopy := make(map[networks.ConfigurationID]TestGeckoNetworkServiceConfig)
 	for configID, configParams := range serviceConfigs {
