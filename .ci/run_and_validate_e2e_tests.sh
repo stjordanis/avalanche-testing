@@ -10,12 +10,12 @@ echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdi
 DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-e2e-tests_controller"
 
 # Use stable version of Everest for CI
-GECKO_IMAGE="$DOCKER_REPO/gecko:everest-df19a710"
+GECKO_IMAGE="$DOCKER_REPO/gecko:everest-latest"
 # Use stable version of gecko-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/gecko-byzantine:c2504a6-df19a710-13ebd8b"
+BYZANTINE_IMAGE="$DOCKER_REPO/gecko-byzantine:everest-latest"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
-#  so we have to do the pull here
+# so we have to do the pull here
 docker pull "${BYZANTINE_IMAGE}"
 docker pull "${GECKO_IMAGE}"
 
