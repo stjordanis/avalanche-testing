@@ -4,7 +4,7 @@
 * Add docs to every public function and struct
 * Update Gecko Client to use the same structs used by Gecko services
 * Fix bug in RPCWorkFlowTest where multiple clients shared the genesis key leading to undefined behavior
-* Clean up naming conventions
+* Refactor code organization and comments
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints

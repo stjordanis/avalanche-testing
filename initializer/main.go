@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/tests"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
+	"github.com/ava-labs/avalanche-e2e-tests/avalanche/logging"
+	testsuite "github.com/ava-labs/avalanche-e2e-tests/testsuite/kurtosis"
 	"github.com/kurtosis-tech/kurtosis/initializer"
 	"github.com/sirupsen/logrus"
 )
@@ -86,13 +86,13 @@ func main() {
 	flag.Parse()
 
 	logrus.Info("Welcome to the Avalanche E2E test suite, powered by the Kurtosis framework")
-	testSuite := tests.AvaTestSuite{
+	testSuite := testsuite.AvalancheTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}
-		for name, _ := range testSuite.GetTests() {
+		for name := range testSuite.GetTests() {
 			testNames = append(testNames, name)
 		}
 		sort.Strings(testNames)

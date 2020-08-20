@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite/tests"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
+	"github.com/ava-labs/avalanche-e2e-tests/avalanche/logging"
+	testsuite "github.com/ava-labs/avalanche-e2e-tests/testsuite/kurtosis"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 )
@@ -64,13 +64,13 @@ func main() {
 		"Subnet mask of the Docker network that the test controller is running in",
 	)
 
-	testControllerIpArg := flag.String(
+	testControllerIPArg := flag.String(
 		"test-controller-ip",
 		"",
 		"IP address of the Docker container running this test controller",
 	)
 
-	gatewayIpArg := flag.String(
+	gatewayIPArg := flag.String(
 		"gateway-ip",
 		"",
 		"IP address of the gateway address on the Docker network that the test controller is running in",
@@ -96,12 +96,12 @@ func main() {
 		"Controller CLI arguments: dockerNetwork: %v, subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
 		*dockerNetworkArg,
 		*subnetMaskArg,
-		*gatewayIpArg,
-		*testControllerIpArg,
+		*gatewayIPArg,
+		*testControllerIPArg,
 		*geckoImageNameArg)
 
 	logrus.Debugf("Byzantine image name: %s", *byzantineImageNameArg)
-	testSuite := tests.AvaTestSuite{
+	testSuite := testsuite.AvalancheTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
 	}
@@ -110,8 +110,8 @@ func main() {
 		*testVolumeMountpointArg,
 		*dockerNetworkArg,
 		*subnetMaskArg,
-		*gatewayIpArg,
-		*testControllerIpArg,
+		*gatewayIPArg,
+		*testControllerIPArg,
 		testSuite,
 		*testNameArg)
 
