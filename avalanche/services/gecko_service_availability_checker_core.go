@@ -20,7 +20,8 @@ func NewAvalancheServiceAvailabilityChecker(timeout time.Duration) services.Serv
 // GeckoServiceAvailabilityCheckerCore implements services.ServiceAvailabilityCheckerCore
 // that defines the criteria for a Gecko service being available
 type GeckoServiceAvailabilityCheckerCore struct {
-	timeout time.Duration
+	timeout                                                    time.Duration
+	bootstrappedPChain, bootstrappedCChain, bootstrappedXChain bool
 }
 
 // IsServiceUp implements services.ServiceAvailabilityCheckerCore#IsServiceUp
@@ -34,14 +35,25 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
 	client := info.NewClient(uri, constants.DefaultRequestTimeout)
 
-	if bootstrapped, err := client.IsBootstrapped("P"); err != nil || !bootstrapped {
-		return false
+	if !g.bootstrappedPChain {
+		if bootstrapped, err := client.IsBootstrapped("P"); err != nil || !bootstrapped {
+			return false
+		}
+		g.bootstrappedPChain = true
 	}
-	if bootstrapped, err := client.IsBootstrapped("C"); err != nil || !bootstrapped {
-		return false
+
+	if !g.bootstrappedCChain {
+		if bootstrapped, err := client.IsBootstrapped("C"); err != nil || !bootstrapped {
+			return false
+		}
+		g.bootstrappedCChain = true
 	}
-	if bootstrapped, err := client.IsBootstrapped("X"); err != nil || !bootstrapped {
-		return false
+
+	if !g.bootstrappedXChain {
+		if bootstrapped, err := client.IsBootstrapped("X"); err != nil || !bootstrapped {
+			return false
+		}
+		g.bootstrappedXChain = true
 	}
 
 	time.Sleep(5 * time.Second)
