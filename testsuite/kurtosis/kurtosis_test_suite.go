@@ -1,6 +1,9 @@
 package kurtosis
 
 import (
+	"time"
+
+	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/bombard"
 	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/conflictvtx"
 	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/connected"
 	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/duplicate"
@@ -29,6 +32,12 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 			ByzantineImageName: a.ByzantineImageName,
 			NormalImageName:    a.NormalImageName,
 		}
+	}
+	result["stakingNetworkBombardXChainTest"] = bombard.StakingNetworkBombardTest{
+		ImageName:         a.NormalImageName,
+		NumTxs:            1000,
+		TxFee:             1000000,
+		AcceptanceTimeout: 10 * time.Second,
 	}
 	result["stakingNetworkFullyConnectedTest"] = connected.StakingNetworkFullyConnectedTest{
 		ImageName: a.NormalImageName,
