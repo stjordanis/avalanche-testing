@@ -12,6 +12,7 @@ import (
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -29,9 +30,9 @@ const (
 
 // StakingNetworkFullyConnectedTest adds nodes to the network and verifies that the network stays fully connected
 type StakingNetworkFullyConnectedTest struct {
-	ImageName string
+	ImageName           string
 	FullyConnectedDelay time.Duration
-	Verifier  verifier.NetworkStateVerifier
+	Verifier            verifier.NetworkStateVerifier
 }
 
 // Run implements the Kurtosis Test interface
