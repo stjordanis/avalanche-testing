@@ -107,7 +107,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 		avalancheService.DEBUG,
 		2,
 		2,
-		0,
+		1000000,
 		serviceConfigs,
 		desiredServices,
 	)
