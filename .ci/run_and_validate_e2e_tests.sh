@@ -2,20 +2,20 @@ set -euo pipefail
 SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 
-DOCKER_REPO="964377072876.dkr.ecr.us-east-1.amazonaws.com"
+DOCKER_REPO="avaplatform"
 
 # login to AWS for byzantine images
-aws ecr get-login-password --region "${AWS_DEFAULT_REGION}" | docker login --username AWS --password-stdin "${DOCKER_REPO}"
+echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
-DEFAULT_CONTROLLER_TAG="avaplatform/avalanche-e2e-tests_controller"
+DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-testing_controller"
 
-# Use stable version of Denali for CI
-GECKO_IMAGE="avaplatform/gecko:denali-9e341440"
-# Use stable version of gecko-byzantine based on denali for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/gecko-byzantine:denali-7db87b4-9e341440"
+# Use stable version of Everest for CI
+GECKO_IMAGE="$DOCKER_REPO/gecko:everest-latest"
+# Use stable version of gecko-byzantine based on everest for CI
+BYZANTINE_IMAGE="$DOCKER_REPO/gecko-byzantine:everest-latest"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
-#  so we have to do the pull here
+# so we have to do the pull here
 docker pull "${BYZANTINE_IMAGE}"
 docker pull "${GECKO_IMAGE}"
 

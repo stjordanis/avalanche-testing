@@ -1,7 +1,12 @@
-# TBD
+# 0.8.2-dev
 * Add conflicting transactions vertex test
 * Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
 * Add docs to every public function and struct
+* Update Gecko Client to use the same structs used by Gecko services
+* Fix bug in RPCWorkFlowTest where multiple clients shared the genesis key leading to undefined behavior
+* Refactor code organization and comments
+* Point CI to latest everest images for both gecko and gecko-byzantine
+* Add bombard test to bombard the X chain with transactions and then add two nodes to bootstrap the new data
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints
@@ -19,7 +24,7 @@
 * Make controller Docker image `tee` to the logfile, rather than redirecting all output
 * Implement a 10-second HTTP request timeout in the Gecko client
 * Upgraded to Kurtosis that allows the setup buffer to be configured at a per-test level, and gave a generous setup buffer for as long as the Gecko availability checker core has a `time.Sleep` in it
-* Rename HighLevelGeckoClient to RpcWorkflowRunner and move to ava_testsuite package
+* Rename HighLevelGeckoClient to RPCWorkFlowRunner and move to ava_testsuite package
 * Bugfix on Travis CI checks for CHANGELOG entries
 * Add comments and documentation in RPC workflow and chit spammer tests
 * Using network ID in controller image rather than network name

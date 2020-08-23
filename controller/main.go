@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanche-e2e-tests/commons/ava_testsuite"
-	"github.com/ava-labs/avalanche-e2e-tests/commons/logging"
+	"github.com/ava-labs/avalanche-testing/avalanche/logging"
+	testsuite "github.com/ava-labs/avalanche-testing/testsuite/kurtosis"
 	"github.com/kurtosis-tech/kurtosis/controller"
 	"github.com/sirupsen/logrus"
 )
 
 /*
 A CLI entrypoint that will be packaged inside a Docker image to form the test controller used for orchestrating test execution
-	for tests in the Ava E2E test suite.
- */
+	for tests in the Avalanche E2E test suite.
+*/
 func main() {
 	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
@@ -64,13 +64,13 @@ func main() {
 		"Subnet mask of the Docker network that the test controller is running in",
 	)
 
-	testControllerIpArg := flag.String(
+	testControllerIPArg := flag.String(
 		"test-controller-ip",
 		"",
 		"IP address of the Docker container running this test controller",
 	)
 
-	gatewayIpArg := flag.String(
+	gatewayIPArg := flag.String(
 		"gateway-ip",
 		"",
 		"IP address of the gateway address on the Docker network that the test controller is running in",
@@ -96,12 +96,12 @@ func main() {
 		"Controller CLI arguments: dockerNetwork: %v, subnetMask %v, gatewayIp %v, testControllerIp %v, testImageName %v",
 		*dockerNetworkArg,
 		*subnetMaskArg,
-		*gatewayIpArg,
-		*testControllerIpArg,
+		*gatewayIPArg,
+		*testControllerIPArg,
 		*geckoImageNameArg)
 
 	logrus.Debugf("Byzantine image name: %s", *byzantineImageNameArg)
-	testSuite := ava_testsuite.AvaTestSuite{
+	testSuite := testsuite.AvalancheTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
 		NormalImageName:    *geckoImageNameArg,
 	}
@@ -110,8 +110,8 @@ func main() {
 		*testVolumeMountpointArg,
 		*dockerNetworkArg,
 		*subnetMaskArg,
-		*gatewayIpArg,
-		*testControllerIpArg,
+		*gatewayIPArg,
+		*testControllerIPArg,
 		testSuite,
 		*testNameArg)
 

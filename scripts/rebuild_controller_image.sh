@@ -3,7 +3,7 @@
 set -euo pipefail
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 DOCKER_ORG="avaplatform"
-REPO_BASE="avalanche-e2e-tests"
+REPO_BASE="avalanche-testing"
 CONTROLLER_REPO="${REPO_BASE}_controller"
 LATEST_TAG="latest"
 
