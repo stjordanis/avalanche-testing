@@ -3,13 +3,13 @@ package apis
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/admin"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/avm"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/health"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/info"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/ipcs"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/keystore"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/platform"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/admin"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/avm"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/health"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/info"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/ipcs"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/keystore"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/platform"
 )
 
 const (

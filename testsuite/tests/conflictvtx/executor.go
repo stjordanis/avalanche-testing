@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tester"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/gecko/snow/choices"
 	"github.com/ava-labs/gecko/utils/formatting"
 	"github.com/palantir/stacktrace"

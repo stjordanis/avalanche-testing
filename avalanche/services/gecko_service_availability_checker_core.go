@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/info"
-	"github.com/ava-labs/avalanche-e2e-tests/utils/constants"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/info"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 )
 

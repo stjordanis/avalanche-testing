@@ -6,7 +6,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/ava-labs/avalanche-e2e-tests/avalanche/services/certs"
+	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/stretchr/testify/assert"
 )

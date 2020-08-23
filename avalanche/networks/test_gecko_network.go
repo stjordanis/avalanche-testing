@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	avalancheService "github.com/ava-labs/avalanche-e2e-tests/avalanche/services"
-	"github.com/ava-labs/avalanche-e2e-tests/avalanche/services/certs"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
-	"github.com/ava-labs/avalanche-e2e-tests/utils/constants"
+	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/services"

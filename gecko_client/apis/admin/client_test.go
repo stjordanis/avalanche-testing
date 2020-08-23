@@ -3,8 +3,8 @@ package admin
 import (
 	"testing"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis/test"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis/test"
+	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
 	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/api/admin"
 )

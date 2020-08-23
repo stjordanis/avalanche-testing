@@ -3,11 +3,11 @@ package connected
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-e2e-tests/avalanche/services"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/helpers"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/verifier"
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
+	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 	"github.com/ava-labs/gecko/api"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"

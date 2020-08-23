@@ -3,9 +3,9 @@ package bombard
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-e2e-tests/avalanche/services"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"

@@ -4,9 +4,9 @@ import (
 	"strconv"
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-e2e-tests/avalanche/services"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/helpers"
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"

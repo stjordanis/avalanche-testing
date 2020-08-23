@@ -3,13 +3,13 @@ package kurtosis
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/bombard"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/conflictvtx"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/connected"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/duplicate"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/spamchits"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/tests/workflow"
-	"github.com/ava-labs/avalanche-e2e-tests/testsuite/verifier"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/duplicate"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
+	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 )
 

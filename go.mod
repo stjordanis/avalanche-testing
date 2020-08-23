@@ -1,4 +1,4 @@
-module github.com/ava-labs/avalanche-e2e-tests
+module github.com/ava-labs/avalanche-testing
 
 go 1.13
 

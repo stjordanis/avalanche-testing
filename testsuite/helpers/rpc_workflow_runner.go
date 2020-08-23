@@ -3,9 +3,9 @@ package helpers
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/avalanche/networks"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils/constants"
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/gecko_client/utils/constants"
 	"github.com/ava-labs/gecko/api"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/snow/choices"

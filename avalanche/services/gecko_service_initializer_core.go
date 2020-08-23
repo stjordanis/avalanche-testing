@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ava-labs/avalanche-e2e-tests/avalanche/services/certs"
+	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/docker/go-connections/nat"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"

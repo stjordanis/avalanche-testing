@@ -3,8 +3,8 @@ package workflow
 import (
 	"time"
 
-	avalancheNetwork "github.com/ava-labs/avalanche-e2e-tests/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-e2e-tests/avalanche/services"
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"

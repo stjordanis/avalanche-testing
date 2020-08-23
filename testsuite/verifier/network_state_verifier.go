@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"

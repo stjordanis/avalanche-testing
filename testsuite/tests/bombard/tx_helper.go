@@ -3,7 +3,7 @@ package bombard
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-e2e-tests/gecko_client/utils/constants"
+	"github.com/ava-labs/avalanche-testing/gecko_client/utils/constants"
 	"github.com/ava-labs/gecko/ids"
 	"github.com/ava-labs/gecko/utils/codec"
 	"github.com/ava-labs/gecko/utils/crypto"
