@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Note: this script will build a docker image by cloning a remote version of avalanche-e2e-tests and gecko into a temporary
+# Note: this script will build a docker image by cloning a remote version of avalanche-testing and gecko into a temporary
 # location and using that version's Dockerfile to build the image.
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
@@ -16,12 +16,12 @@ DOCKER="${DOCKER:-docker}"
 
 
 GECKO_REMOTE="https://github.com/ava-labs/gecko-internal.git"
-E2E_REMOTE="https://github.com/ava-labs/avalanche-e2e-tests.git"
+E2E_REMOTE="https://github.com/ava-labs/avalanche-testing.git"
 
 
 # Clone the remotes and checkout the desired branch/commits
 GECKO_CLONE="$WORKPREFIX/gecko"
-E2E_CLONE="$WORKPREFIX/avalanche-e2e-tests"
+E2E_CLONE="$WORKPREFIX/avalanche-testing"
 
 # Create the WORKPREFIX directory if it does not exist yet
 if [[ ! -d "$WORKPREFIX" ]]; then
@@ -49,7 +49,7 @@ git -C "$E2E_CLONE" checkout "$E2E_COMMIT"
 
 
 DOCKER_ORG="avaplatform"
-REPO_BASE="avalanche-e2e-tests"
+REPO_BASE="avalanche-testing"
 CONTROLLER_REPO="${REPO_BASE}_controller"
 
 CONTROLLER_TAG="$DOCKER_ORG/$CONTROLLER_REPO-$E2E_COMMIT-$GECKO_COMMIT"

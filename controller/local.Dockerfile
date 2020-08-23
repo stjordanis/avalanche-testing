@@ -6,9 +6,9 @@ RUN mkdir -p /go/src/github.com/ava-labs
 # Copy the code into the container
 WORKDIR $GOPATH/src/github.com/ava-labs
 COPY gecko gecko
-COPY avalanche-e2e-tests avalanche-e2e-tests
+COPY avalanche-testing avalanche-testing
 
-WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-e2e-tests
+WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-testing
 RUN go mod download
 
 # Build the application
