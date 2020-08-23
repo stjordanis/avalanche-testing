@@ -5,9 +5,9 @@ ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 DOCKER_REPO="avaplatform"
 
 # login to AWS for byzantine images
-echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin "${DOCKER_REPO}"
+echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
-DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-e2e-tests_controller"
+DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-testing_controller"
 
 # Use stable version of Everest for CI
 GECKO_IMAGE="$DOCKER_REPO/gecko:everest-latest"
