@@ -3,7 +3,7 @@ package kurtosis
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/testsuite/tests/admin_rpc"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/adminrpc"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
@@ -34,7 +34,7 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 			NormalImageName:    a.NormalImageName,
 		}
 	}
-	result["stakingNetworkAdminRPCTest"] = admin_rpc.StakingNetworkAdminRPCTest{
+	result["stakingNetworkAdminRPCTest"] = adminrpc.StakingNetworkAdminRPCTest{
 		ImageName:         a.NormalImageName,
 		NumTxs:            1000,
 		TxFee:             1000000,

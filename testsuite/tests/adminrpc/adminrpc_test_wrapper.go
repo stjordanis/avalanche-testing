@@ -1,4 +1,4 @@
-package admin_rpc
+package adminrpc
 
 import (
 	"time"
@@ -21,7 +21,6 @@ const (
 )
 
 // StakingNetworkAdminRPCTest test avalanche.go's Admin RPCs
-
 type StakingNetworkAdminRPCTest struct {
 	ImageName         string
 	NumTxs            uint64
@@ -49,27 +48,26 @@ func (test StakingNetworkAdminRPCTest) Run(network networks.Network, context tes
 		context.Fatal(stacktrace.Propagate(err, "Admin RPC Test Failed."))
 	}
 
-	logrus.Infof("Admin RPC test completed successfully.")
-	logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")
+	// logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")
 	// Add two additional nodes to ensure that they can successfully bootstrap the additional data
-	availabilityChecker1, err := castedNetwork.AddService(normalNodeConfigID, additionalNode1ServiceID)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to add %s to the network.", additionalNode1ServiceID))
-	}
-	availabilityChecker2, err := castedNetwork.AddService(normalNodeConfigID, additionalNode2ServiceID)
-	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to add %s to the network.", additionalNode2ServiceID))
-	}
+	// availabilityChecker1, err := castedNetwork.AddService(normalNodeConfigID, additionalNode1ServiceID)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Failed to add %s to the network.", additionalNode1ServiceID))
+	// }
+	// availabilityChecker2, err := castedNetwork.AddService(normalNodeConfigID, additionalNode2ServiceID)
+	// if err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Failed to add %s to the network.", additionalNode2ServiceID))
+	// }
 
 	// Wait for the nodes to finish bootstrapping
-	if err = availabilityChecker1.WaitForStartup(); err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode1ServiceID))
-	}
-	logrus.Infof("Node1 finished bootstrapping.")
-	if err = availabilityChecker2.WaitForStartup(); err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode2ServiceID))
-	}
-	logrus.Infof("Node2 finished bootstrapping.")
+	// if err = availabilityChecker1.WaitForStartup(); err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode1ServiceID))
+	// }
+	// logrus.Infof("Node1 finished bootstrapping.")
+	// if err = availabilityChecker2.WaitForStartup(); err != nil {
+	// 	context.Fatal(stacktrace.Propagate(err, "Failed to wait for startup of %s.", additionalNode2ServiceID))
+	// }
+	// logrus.Infof("Node2 finished bootstrapping.")
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface

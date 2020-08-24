@@ -1,4 +1,4 @@
-package admin_rpc
+package adminrpc
 
 import (
 	"fmt"
