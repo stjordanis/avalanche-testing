@@ -134,7 +134,7 @@ func (c *Client) SampleValidators(subnetID ids.ID, sampleSize uint16) (*platform
 func (c *Client) AddDefaultSubnetValidator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate float32) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addDefaultSubnetValidator", &platformvm.AddDefaultSubnetValidatorArgs{
+	err := c.requester.SendRequest("addValidator", &platformvm.AddDefaultSubnetValidatorArgs{
 		UserPass: user,
 		FormattedAPIDefaultSubnetValidator: platformvm.FormattedAPIDefaultSubnetValidator{
 			RewardAddress:     rewardAddress,
@@ -154,7 +154,7 @@ func (c *Client) AddDefaultSubnetValidator(user api.UserPass, rewardAddress, nod
 func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addDefaultSubnetDelegator", &platformvm.AddDefaultSubnetDelegatorArgs{
+	err := c.requester.SendRequest("addDelegator", &platformvm.AddDefaultSubnetDelegatorArgs{
 		UserPass: user,
 		FormattedAPIValidator: platformvm.FormattedAPIValidator{
 			ID:          nodeID,
@@ -171,7 +171,7 @@ func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, rewardAddress, nod
 func (c *Client) AddNonDefaultSubnetValidator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64, subnetID string) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addNonDefaultSubnetValidator", &platformvm.AddNonDefaultSubnetValidatorArgs{
+	err := c.requester.SendRequest("addSubnetValidator", &platformvm.AddNonDefaultSubnetValidatorArgs{
 		UserPass: user,
 		FormattedAPIValidator: platformvm.FormattedAPIValidator{
 			ID:          nodeID,
