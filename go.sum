@@ -30,6 +30,7 @@ github.com/ava-labs/coreth v0.2.5/go.mod h1:pGolKipwq5vGIY2IBBcBkMYrqniXMsS5SBn+
 github.com/ava-labs/coreth v0.2.8-rc.6/go.mod h1:oehxP9cO+evpMiWB6dCyG4cc6ObKyWrMRN45rMtjJj8=
 github.com/ava-labs/coreth v0.2.10/go.mod h1:Yom/FjrfvJrNQwbsY5if1QrVH+gC8vgqUJvrXPAb2ks=
 github.com/ava-labs/coreth v0.2.12-rc.1/go.mod h1:ZwQ7rzHvQLorZsMoUm2FDWmLwOvDDoNzB+EEp2NhWyI=
+github.com/ava-labs/coreth v0.2.13/go.mod h1:ZwQ7rzHvQLorZsMoUm2FDWmLwOvDDoNzB+EEp2NhWyI=
 github.com/ava-labs/gecko v0.5.7 h1:8jivA5z3LQ92MA2qIBa6izVGtOqJSVH2lCik6S8xnOI=
 github.com/ava-labs/gecko v0.5.7/go.mod h1:EdaEuYNRZ3UB+Efr1Nn+DsM3EzdUtg641ZF6FUBCACs=
 github.com/ava-labs/gecko v0.6.1-rc.1/go.mod h1:TT6uA1BETZpVMR0xiFtE8I5Mv4DULlS+lAL3xuYKnpA=

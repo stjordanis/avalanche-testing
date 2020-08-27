@@ -96,16 +96,16 @@ func (runner RPCWorkFlowRunner) ImportGenesisFundsAndStartValidating(
 		return "", stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
 	}
 	// Adding staker
-	err = runner.AddValidatorOnSubnet(stakerNodeID, pChainAddress, stakeAmount)
+	err = runner.AddValidatorToPrimaryNetwork(stakerNodeID, pChainAddress, stakeAmount)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
+		return "", stacktrace.Propagate(err, "Could not add staker %s to primary network.", stakerNodeID)
 	}
 	return pChainAddress, nil
 }
 
-// AddDelegatorOnSubnet delegates to [delegateeNodeID] and blocks until the transaction is confirmed and the delegation
+// AddDelegatorToPrimaryNetwork delegates to [delegateeNodeID] and blocks until the transaction is confirmed and the delegation
 // period begins
-func (runner RPCWorkFlowRunner) AddDelegatorOnSubnet(
+func (runner RPCWorkFlowRunner) AddDelegatorToPrimaryNetwork(
 	delegateeNodeID string,
 	pChainAddress string,
 	stakeAmount uint64,
@@ -114,7 +114,7 @@ func (runner RPCWorkFlowRunner) AddDelegatorOnSubnet(
 	delegatorStartTime := time.Now().Add(DefaultDelegationDelay)
 	startTime := uint64(delegatorStartTime.Unix())
 	endTime := uint64(delegatorStartTime.Add(DefaultDelegationPeriod).Unix())
-	addDelegatorTxID, err := client.PChainAPI().AddDefaultSubnetDelegator(
+	addDelegatorTxID, err := client.PChainAPI().AddDelegator(
 		runner.geckoUser,
 		pChainAddress,
 		delegateeNodeID,
@@ -123,10 +123,10 @@ func (runner RPCWorkFlowRunner) AddDelegatorOnSubnet(
 		endTime,
 	)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to add default subnet delegator %s", pChainAddress)
+		return stacktrace.Propagate(err, "Failed to add delegator %s", pChainAddress)
 	}
 	if err := runner.waitForPChainTransactionAcceptance(addDelegatorTxID); err != nil {
-		return stacktrace.Propagate(err, "Failed to accept AddDefaultSubnetDelegator tx: %s", addDelegatorTxID)
+		return stacktrace.Propagate(err, "Failed to accept AddDelegator tx: %s", addDelegatorTxID)
 	}
 
 	// Sleep until delegator starts validating
@@ -134,19 +134,19 @@ func (runner RPCWorkFlowRunner) AddDelegatorOnSubnet(
 	return nil
 }
 
-// AddValidatorOnSubnet adds [nodeID] as a validator and blocks until the transaction is confirmed and the validation
+// AddValidatorToPrimaryNetwork adds [nodeID] as a validator and blocks until the transaction is confirmed and the validation
 // period begins
-func (runner RPCWorkFlowRunner) AddValidatorOnSubnet(
+func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 	nodeID string,
 	pchainAddress string,
 	stakeAmount uint64,
 ) error {
-	// Replace with simple call to AddDefaultSubnetValidator
+	// Replace with simple call to AddValidator
 	client := runner.client
 	stakingStartTime := time.Now().Add(DefaultStakingDelay)
 	startTime := uint64(stakingStartTime.Unix())
 	endTime := uint64(stakingStartTime.Add(DefaultStakingPeriod).Unix())
-	addStakerTxID, err := client.PChainAPI().AddDefaultSubnetValidator(
+	addStakerTxID, err := client.PChainAPI().AddValidator(
 		runner.geckoUser,
 		pchainAddress,
 		nodeID,
@@ -156,11 +156,11 @@ func (runner RPCWorkFlowRunner) AddValidatorOnSubnet(
 		DefaultDelegationFeeRate,
 	)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to add default subnet staker %s", nodeID)
+		return stacktrace.Propagate(err, "Failed to add validator to primrary network %s", nodeID)
 	}
 
 	if err := runner.waitForPChainTransactionAcceptance(addStakerTxID); err != nil {
-		return stacktrace.Propagate(err, "Failed to confirm AddDefaultSubnetValidator Tx: %s", addStakerTxID)
+		return stacktrace.Propagate(err, "Failed to confirm AddValidator Tx: %s", addStakerTxID)
 	}
 
 	time.Sleep(time.Until(stakingStartTime) + stakingPeriodSynchronyDelay)
