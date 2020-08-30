@@ -56,7 +56,6 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 		g.bootstrappedXChain = true
 	}
 
-	time.Sleep(5 * time.Second)
 	return true
 }
 
