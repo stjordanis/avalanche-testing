@@ -70,7 +70,7 @@ func (c *Client) GetUTXOs(addrs []string, limit uint32, startAddress, startUTXOI
 		Limit:     cjson.Uint32(limit),
 		StartIndex: avm.Index{
 			Address: startAddress,
-			Utxo:    startUTXOID,
+			UTXO:    startUTXOID,
 		},
 	}, res)
 	return res, err

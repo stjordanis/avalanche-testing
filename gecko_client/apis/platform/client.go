@@ -130,13 +130,13 @@ func (c *Client) SampleValidators(subnetID ids.ID, sampleSize uint16) (*platform
 	return res, err
 }
 
-// AddDefaultSubnetValidator issues a transaction to add a default subnet validator and returns the txID
-func (c *Client) AddDefaultSubnetValidator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate float32) (ids.ID, error) {
+// AddValidator issues a transaction to add a validator to the primary network and returns the txID
+func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate float32) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addDefaultSubnetValidator", &platformvm.AddDefaultSubnetValidatorArgs{
+	err := c.requester.SendRequest("addValidator", &platformvm.AddValidatorArgs{
 		UserPass: user,
-		FormattedAPIDefaultSubnetValidator: platformvm.FormattedAPIDefaultSubnetValidator{
+		FormattedAPIPrimaryValidator: platformvm.FormattedAPIPrimaryValidator{
 			RewardAddress:     rewardAddress,
 			DelegationFeeRate: cjson.Float32(delegationFeeRate),
 			FormattedAPIValidator: platformvm.FormattedAPIValidator{
@@ -150,11 +150,11 @@ func (c *Client) AddDefaultSubnetValidator(user api.UserPass, rewardAddress, nod
 	return res.TxID, err
 }
 
-// AddDefaultSubnetDelegator issues a transaction to add a default subnet delegator and returns the txID
-func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
+// AddDelegator issues a transaction to add a delegator to the primary network and returns the txID
+func (c *Client) AddDelegator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addDefaultSubnetDelegator", &platformvm.AddDefaultSubnetDelegatorArgs{
+	err := c.requester.SendRequest("addDelegator", &platformvm.AddDelegatorArgs{
 		UserPass: user,
 		FormattedAPIValidator: platformvm.FormattedAPIValidator{
 			ID:          nodeID,
@@ -167,11 +167,11 @@ func (c *Client) AddDefaultSubnetDelegator(user api.UserPass, rewardAddress, nod
 	return res.TxID, err
 }
 
-// AddNonDefaultSubnetValidator issues a transaction to add a non-default subnet validator to subnet with ID [subnetID] and returns the txID
-func (c *Client) AddNonDefaultSubnetValidator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64, subnetID string) (ids.ID, error) {
+// AddSubnetValidator issues a transaction to add validator [nodeID] to subnet with ID [subnetID] and returns the txID
+func (c *Client) AddSubnetValidator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64, subnetID string) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
-	err := c.requester.SendRequest("addNonDefaultSubnetValidator", &platformvm.AddNonDefaultSubnetValidatorArgs{
+	err := c.requester.SendRequest("addSubnetValidator", &platformvm.AddSubnetValidatorArgs{
 		UserPass: user,
 		FormattedAPIValidator: platformvm.FormattedAPIValidator{
 			ID:          nodeID,

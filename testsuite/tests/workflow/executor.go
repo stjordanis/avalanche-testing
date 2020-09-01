@@ -105,14 +105,14 @@ func (e *executor) ExecuteTest() error {
 	if err := highLevelStakerClient.VerifyXChainAVABalance(stakerXChainAddress, 0); err != nil {
 		return stacktrace.Propagate(err, "X Chain Balance not updated correctly after X -> P Transfer for validator")
 	}
-	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeID, stakerPChainAddress, stakeAmount)
+	err = highLevelStakerClient.AddValidatorToPrimaryNetwork(stakerNodeID, stakerPChainAddress, stakeAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
+		return stacktrace.Propagate(err, "Could not add staker %s to primary network.", stakerNodeID)
 	}
 	logrus.Infof("Transferred funds from X Chain to P Chain and added a new staker.")
 
 	// ====================================== VERIFY NETWORK STATE ===============================
-	currentStakers, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.DefaultSubnetID)
+	currentStakers, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.PrimaryNetworkID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current stakers.")
 	}
@@ -124,7 +124,7 @@ func (e *executor) ExecuteTest() error {
 	}
 	expectedStakerBalance := seedAmount - stakeAmount
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, expectedStakerBalance); err != nil {
-		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding default subnet validator to the network")
+		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding  validator to the primary network")
 	}
 	logrus.Infof("Verified the staker was added to current validators and has the expected P Chain balance.")
 
@@ -140,9 +140,9 @@ func (e *executor) ExecuteTest() error {
 		return stacktrace.Propagate(err, "Unexpected X Chain Balance after X -> P Transfer for Delegator")
 	}
 
-	err = highLevelDelegatorClient.AddDelegatorOnSubnet(stakerNodeID, delegatorPChainAddress, delegatorAmount)
+	err = highLevelDelegatorClient.AddDelegatorToPrimaryNetwork(stakerNodeID, delegatorPChainAddress, delegatorAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not add delegator %s to default subnet.", delegatorNodeID)
+		return stacktrace.Propagate(err, "Could not add delegator %s to the primary network.", delegatorNodeID)
 	}
 	expectedDelegatorBalance := seedAmount - delegatorAmount
 	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPChainAddress, expectedDelegatorBalance); err != nil {
