@@ -107,7 +107,7 @@ func (e *executor) ExecuteTest() error {
 	}
 	err = highLevelStakerClient.AddValidatorOnSubnet(stakerNodeID, stakerPChainAddress, stakeAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not add staker %s to default subnet.", stakerNodeID)
+		return stacktrace.Propagate(err, "Could not add staker %s to primary subnet.", stakerNodeID)
 	}
 	logrus.Infof("Transferred funds from X Chain to P Chain and added a new staker.")
 
@@ -124,7 +124,7 @@ func (e *executor) ExecuteTest() error {
 	}
 	expectedStakerBalance := seedAmount - stakeAmount
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, expectedStakerBalance); err != nil {
-		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding default subnet validator to the network")
+		return stacktrace.Propagate(err, "Unexpected P Chain Balance after adding primary subnet validator to the network")
 	}
 	logrus.Infof("Verified the staker was added to current validators and has the expected P Chain balance.")
 

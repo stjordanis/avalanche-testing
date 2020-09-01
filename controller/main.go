@@ -16,7 +16,7 @@ A CLI entrypoint that will be packaged inside a Docker image to form the test co
 	for tests in the Avalanche E2E test suite.
 */
 func main() {
-	// NOTE: we'll want to chnage the ForceColors to false if we ever want structured logging
+	// NOTE: we'll want to change the ForceColors to false if we ever want structured logging
 	logrus.SetFormatter(&logrus.TextFormatter{
 		ForceColors:   true,
 		FullTimestamp: true,
