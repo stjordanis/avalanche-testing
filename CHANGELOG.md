@@ -1,4 +1,6 @@
-# 0.8.2-dev
+# 0.9.0
+* Update to v0.7.0 of gecko and gecko-byzantine
+* Rename delegator/staker functions
 * Add conflicting transactions vertex test
 * Switch to using AvaLabs Docker registry for gecko and gecko-byzantine images
 * Add docs to every public function and struct
