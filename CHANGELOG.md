@@ -1,3 +1,6 @@
+# 0.9.1 WIP
+* Update Gecko client to use hex encoding
+
 # 0.9.0
 * Update to v0.7.0 of gecko and gecko-byzantine
 * Rename delegator/staker functions

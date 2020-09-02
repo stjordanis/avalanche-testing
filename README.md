@@ -45,9 +45,9 @@ Additionally, for ease of writing tests, this repo also contains a Go client for
 
 ### Adding A Test
 1. Create a new file in `commons/testsuite` for your test
-1. Create a struct that implements the `testsuite.Test` interface from Kurtosis
-1. Fill in the interface's functions
-1. Register the test in `AvalancheTestSuite`'s `GetTests` method
+2. Create a struct that implements the `testsuite.Test` interface from Kurtosis
+3. Fill in the interface's functions
+4. Register the test in `AvalancheTestSuite`'s `GetTests` method
 
 ### Running Your Code
 The `scripts/full_rebuild_and_run.sh` will rebuild and rerun both the initializer and controller Docker image; rerun this every time that you make a change. Arguments passed to this script will get passed to the initializer binary CLI as-is.
