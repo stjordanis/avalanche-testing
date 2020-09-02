@@ -32,7 +32,7 @@ func NewClient(uri, chain string, requestTimeout time.Duration) *Client {
 func (c *Client) IssueTx(txBytes []byte) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("issueTx", &avm.FormattedTx{
-		Tx: formatting.CB58{Bytes: txBytes},
+		Tx: formatting.HexWrapper{Bytes: txBytes},
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -234,7 +234,7 @@ func (c *Client) MintNFT(user api.UserPass, assetID string, payload []byte, to s
 	err := c.requester.SendRequest("mintNFT", &avm.MintNFTArgs{
 		UserPass: user,
 		AssetID:  assetID,
-		Payload:  formatting.CB58{Bytes: payload},
+		Payload:  formatting.HexWrapper{Bytes: payload},
 		To:       to,
 	}, res)
 	if err != nil {

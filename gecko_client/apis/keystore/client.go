@@ -45,7 +45,7 @@ func (c *Client) ImportUser(user api.UserPass, account []byte) (bool, error) {
 	res := &api.SuccessResponse{}
 	err := c.requester.SendRequest("importUser", &keystore.ImportUserArgs{
 		UserPass: user,
-		User:     formatting.CB58{Bytes: account},
+		User:     formatting.HexWrapper{Bytes: account},
 	}, res)
 	return res.Success, err
 }

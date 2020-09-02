@@ -225,7 +225,7 @@ func (c *Client) CreateBlockchain(user api.UserPass, subnetID ids.ID, vmID strin
 		VMID:        vmID,
 		FxIDs:       fxIDs,
 		Name:        name,
-		GenesisData: formatting.CB58{Bytes: genesisData},
+		GenesisData: formatting.HexWrapper{Bytes: genesisData},
 	}, res)
 	return res.TxID, err
 }
