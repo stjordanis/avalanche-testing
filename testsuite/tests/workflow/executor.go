@@ -112,15 +112,21 @@ func (e *executor) ExecuteTest() error {
 	logrus.Infof("Transferred funds from X Chain to P Chain and added a new staker.")
 
 	// ====================================== VERIFY NETWORK STATE ===============================
-	currentStakers, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.PrimaryNetworkID)
+	currentStakers, currentDelegators, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.PrimaryNetworkID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current stakers.")
 	}
 	actualNumStakers := len(currentStakers)
-	logrus.Debugf("Number of current validators: %d", actualNumStakers)
+	logrus.Debugf("Number of current stakers: %d", actualNumStakers)
 	expectedNumStakers := 6
 	if actualNumStakers != expectedNumStakers {
 		return stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers)
+	}
+	actualNumDelegators := len(currentDelegators)
+	logrus.Debugf("Number of current delegators: %d", actualNumDelegators)
+	expectedNumDelegators := 0
+	if actualNumDelegators != expectedNumDelegators {
+		return stacktrace.NewError("Actual number of delegators, %v, != expected number of delegators, %v", actualNumDelegators, expectedNumDelegators)
 	}
 	expectedStakerBalance := seedAmount - stakeAmount
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, expectedStakerBalance); err != nil {

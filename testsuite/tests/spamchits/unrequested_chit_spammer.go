@@ -60,11 +60,11 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
 		}
-		currentStakers, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
+		currentStakers, currentDelegators, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 		}
-		logrus.Debugf("Number of current stakers: %d", len(currentStakers))
+		logrus.Debugf("Current Stakers: %d, Current Delegators: %d", len(currentStakers), len(currentDelegators))
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
@@ -94,15 +94,21 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	logrus.Infof("Validating network state...")
-	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
+	currentStakers, currentDelegators, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
-	logrus.Debugf("Number of current stakers: %d, expected number of stakers: %d", len(currentStakers), expectedNumStakers)
+	logrus.Debugf("Number of current stakers: %d, expected number of stakers: %d", actualNumStakers, expectedNumStakers)
 	if actualNumStakers != expectedNumStakers {
 		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
+	}
+	actualNumDelegators := len(currentDelegators)
+	expectedNumDelegators := 0
+	logrus.Debugf("Number of current delegators: %d, expected number of delegators: %d", actualNumDelegators, expectedNumDelegators)
+	if actualNumStakers != expectedNumStakers {
+		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of delegators, %v, != expected number of delegators, %v", actualNumDelegators, expectedNumDelegators))
 	}
 }
 
