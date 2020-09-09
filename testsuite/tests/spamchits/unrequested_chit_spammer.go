@@ -64,7 +64,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 		}
-		logrus.Debugf("Current Stakers: %d, Current Delegators: %d", len(currentStakers), len(currentDelegators))
+		logrus.Infof("Current Stakers: %d, Current Delegators: %d", len(currentStakers), len(currentDelegators))
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
@@ -122,6 +122,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 			test.ByzantineImageName,
 			2,
 			2,
+			2*time.Second,
 			map[string]string{
 				byzantineBehavior: chitSpammerBehavior,
 			},
@@ -132,6 +133,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 			test.NormalImageName,
 			6,
 			8,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -151,6 +153,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		serviceIDConfigMap,
 	)

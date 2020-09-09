@@ -170,6 +170,7 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 		sameCertConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
@@ -178,6 +179,7 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -191,6 +193,7 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

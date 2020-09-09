@@ -93,6 +93,7 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -107,6 +108,7 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

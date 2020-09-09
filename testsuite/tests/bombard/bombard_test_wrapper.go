@@ -84,6 +84,7 @@ func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader
 		test.ImageName,
 		2,
 		2,
+		2*time.Second,
 		make(map[string]string),
 	)
 
@@ -94,6 +95,7 @@ func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader
 		2,
 		2,
 		test.TxFee,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

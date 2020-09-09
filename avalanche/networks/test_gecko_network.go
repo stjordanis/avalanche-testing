@@ -111,6 +111,8 @@ type TestGeckoNetworkServiceConfig struct {
 	// The Snow protocol sample size that Gecko services started from this configuration should have
 	snowSampleSize int
 
+	networkInitialTimeout time.Duration
+
 	// TODO Make these named parameters, so we don't have an arbitrary bag of extra CLI args!
 	// A list of extra CLI args that should be passed to the Gecko services started with this configuration
 	additionalCLIArgs map[string]string
@@ -132,14 +134,16 @@ func NewTestGeckoNetworkServiceConfig(
 	imageName string,
 	snowQuorumSize int,
 	snowSampleSize int,
+	networkInitialTimeout time.Duration,
 	additionalCLIArgs map[string]string) *TestGeckoNetworkServiceConfig {
 	return &TestGeckoNetworkServiceConfig{
-		varyCerts:         varyCerts,
-		serviceLogLevel:   serviceLogLevel,
-		imageName:         imageName,
-		snowQuorumSize:    snowQuorumSize,
-		snowSampleSize:    snowSampleSize,
-		additionalCLIArgs: additionalCLIArgs,
+		varyCerts:             varyCerts,
+		serviceLogLevel:       serviceLogLevel,
+		imageName:             imageName,
+		snowQuorumSize:        snowQuorumSize,
+		snowSampleSize:        snowSampleSize,
+		networkInitialTimeout: networkInitialTimeout,
+		additionalCLIArgs:     additionalCLIArgs,
 	}
 }
 
@@ -173,6 +177,9 @@ type TestGeckoNetworkLoader struct {
 
 	// The fixed transaction fee for the network
 	txFee uint64
+
+	// The initial timeout for the network
+	networkInitialTimeout time.Duration
 }
 
 // NewTestGeckoNetworkLoader creates a new loader to create a TestGeckoNetwork with the specified parameters, transparently handling the creation
@@ -194,6 +201,7 @@ func NewTestGeckoNetworkLoader(
 	bootstrapperSnowQuorumSize int,
 	bootstrapperSnowSampleSize int,
 	txFee uint64,
+	networkInitialTimeout time.Duration,
 	serviceConfigs map[networks.ConfigurationID]TestGeckoNetworkServiceConfig,
 	desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestGeckoNetworkLoader, error) {
 	// Defensive copy
@@ -229,6 +237,7 @@ func NewTestGeckoNetworkLoader(
 		bootstrapperSnowQuorumSize: bootstrapperSnowQuorumSize,
 		bootstrapperSnowSampleSize: bootstrapperSnowSampleSize,
 		txFee:                      txFee,
+		networkInitialTimeout:      networkInitialTimeout,
 	}, nil
 }
 
@@ -255,6 +264,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			loader.bootstrapperSnowQuorumSize,
 			loader.txFee,
 			loader.isStaking,
+			loader.networkInitialTimeout,
 			make(map[string]string), // No additional CLI args for the default network
 			bootNodeIDs[0:i],        // Only the node IDs of the already-started nodes
 			certs.NewStaticGeckoCertProvider(*keyBytes, *certBytes),
@@ -277,6 +287,7 @@ func (loader TestGeckoNetworkLoader) ConfigureNetwork(builder *networks.ServiceN
 			configParams.snowQuorumSize,
 			loader.txFee,
 			loader.isStaking,
+			configParams.networkInitialTimeout,
 			configParams.additionalCLIArgs,
 			bootNodeIDs,
 			certProvider,

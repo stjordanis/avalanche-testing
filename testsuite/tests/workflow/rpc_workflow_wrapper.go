@@ -57,6 +57,7 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -73,6 +74,7 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

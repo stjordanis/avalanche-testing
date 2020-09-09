@@ -87,6 +87,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 			normalImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
@@ -95,6 +96,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 			byzantineImageName,
 			2,
 			2,
+			2*time.Second,
 			map[string]string{byzantineBehavior: conflictingTxVertexBehavior},
 		),
 	}
@@ -108,6 +110,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 		2,
 		2,
 		1000000,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

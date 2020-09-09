@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/docker/go-connections/nat"
@@ -47,6 +48,9 @@ type GeckoServiceInitializerCore struct {
 	// The fixed transaction fee for the network
 	txFee uint64
 
+	// The initial timeout for the network
+	networkInitialTimeout time.Duration
+
 	// TODO Switch these to be named properties of this struct, so that we're being explicit about what arguments
 	//  are consumed
 	// A set of CLI args that will be passed as-is to the Gecko service
@@ -80,6 +84,7 @@ func NewGeckoServiceInitializerCore(
 	snowQuorumSize int,
 	txFee uint64,
 	stakingEnabled bool,
+	networkInitialTimeout time.Duration,
 	additionalCLIArgs map[string]string,
 	bootstrapperNodeIDs []string,
 	certProvider certs.GeckoCertProvider,
@@ -91,14 +96,15 @@ func NewGeckoServiceInitializerCore(
 	}
 
 	return &GeckoServiceInitializerCore{
-		snowSampleSize:      snowSampleSize,
-		snowQuorumSize:      snowQuorumSize,
-		txFee:               txFee,
-		stakingEnabled:      stakingEnabled,
-		additionalCLIArgs:   additionalCLIArgs,
-		bootstrapperNodeIDs: bootstrapperIDsCopy,
-		certProvider:        certProvider,
-		logLevel:            logLevel,
+		snowSampleSize:        snowSampleSize,
+		snowQuorumSize:        snowQuorumSize,
+		txFee:                 txFee,
+		stakingEnabled:        stakingEnabled,
+		networkInitialTimeout: networkInitialTimeout,
+		additionalCLIArgs:     additionalCLIArgs,
+		bootstrapperNodeIDs:   bootstrapperIDsCopy,
+		certProvider:          certProvider,
+		logLevel:              logLevel,
 	}
 }
 
@@ -163,6 +169,7 @@ func (core GeckoServiceInitializerCore) GetStartCommand(mountedFileFilepaths map
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
 		fmt.Sprintf("--staking-enabled=%v", core.stakingEnabled),
 		fmt.Sprintf("--tx-fee=%d", core.txFee),
+		fmt.Sprintf("--network-initial-timeout=%d", int64(core.networkInitialTimeout)),
 	}
 
 	if core.stakingEnabled {
