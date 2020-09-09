@@ -136,16 +136,14 @@ func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, s
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addValidator", &platformvm.AddValidatorArgs{
 		UserPass: user,
-		APIPrimaryValidator: platformvm.APIPrimaryValidator{
-			RewardAddress:     rewardAddress,
-			DelegationFeeRate: cjson.Float32(delegationFeeRate),
-			APIStaker: platformvm.APIStaker{
-				NodeID:      nodeID,
-				StakeAmount: &jsonStakeAmount,
-				StartTime:   cjson.Uint64(startTime),
-				EndTime:     cjson.Uint64(endTime),
-			},
+		APIStaker: platformvm.APIStaker{
+			NodeID:      nodeID,
+			StakeAmount: &jsonStakeAmount,
+			StartTime:   cjson.Uint64(startTime),
+			EndTime:     cjson.Uint64(endTime),
 		},
+		RewardAddress:     rewardAddress,
+		DelegationFeeRate: cjson.Float32(delegationFeeRate),
 	}, res)
 	return res.TxID, err
 }
@@ -156,15 +154,13 @@ func (c *Client) AddDelegator(user api.UserPass, rewardAddress, nodeID string, s
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDelegator", &platformvm.AddDelegatorArgs{
 		UserPass: user,
-		APIPrimaryDelegator: platformvm.APIPrimaryDelegator{
-			APIStaker: platformvm.APIStaker{
-				NodeID:      nodeID,
-				StakeAmount: &jsonStakeAmount,
-				StartTime:   cjson.Uint64(startTime),
-				EndTime:     cjson.Uint64(endTime),
-			},
-			RewardAddress: rewardAddress,
+		APIStaker: platformvm.APIStaker{
+			NodeID:      nodeID,
+			StakeAmount: &jsonStakeAmount,
+			StartTime:   cjson.Uint64(startTime),
+			EndTime:     cjson.Uint64(endTime),
 		},
+		RewardAddress: rewardAddress,
 	}, res)
 	return res.TxID, err
 }
