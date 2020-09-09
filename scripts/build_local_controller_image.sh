@@ -15,7 +15,7 @@ WORKPREFIX="$GOPATH/src/github.com/ava-labs"
 DOCKER="${DOCKER:-docker}"
 
 
-GECKO_REMOTE="https://github.com/aaronbuchwald/gecko.git"
+GECKO_REMOTE="https://github.com/ava-labs/gecko.git"
 E2E_REMOTE="https://github.com/ava-labs/avalanche-testing.git"
 
 
