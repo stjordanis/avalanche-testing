@@ -9,6 +9,7 @@ COPY avalanchego avalanchego
 COPY avalanche-testing avalanche-testing
 
 WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-testing
+RUN go mod edit -replace github.com/ava-labs/avalanchego=../avalanchego
 RUN go mod download
 
 # Build the application
