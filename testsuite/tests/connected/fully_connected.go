@@ -8,7 +8,7 @@ import (
 	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
-	"github.com/ava-labs/gecko/api"
+	"github.com/ava-labs/avalanche-go/api"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"

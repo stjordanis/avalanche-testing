@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/utils/formatting"
+	"github.com/ava-labs/avalanche-go/utils/formatting"
 
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/api/keystore"
+	"github.com/ava-labs/avalanche-go/api"
+	"github.com/ava-labs/avalanche-go/api/keystore"
 )
 
 type Client struct {

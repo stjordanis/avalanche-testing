@@ -22,7 +22,7 @@ const (
 	stakingTLSKeyFileID  = "staking-tls-key"
 
 	testVolumeMountpoint = "/shared"
-	avalancheBinary      = "/gecko/build/avalanche"
+	avalancheBinary      = "/avalanche-go/build/avalanche"
 )
 
 // GeckoLogLevel specifies the log level for a Gecko client

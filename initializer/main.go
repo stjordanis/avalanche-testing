@@ -42,7 +42,7 @@ func main() {
 
 	// Define and parse command line flags.
 	geckoImageNameArg := flag.String(
-		"gecko-image-name",
+		"avalanche-image-name",
 		"",
 		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
 	)

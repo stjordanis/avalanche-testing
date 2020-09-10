@@ -41,7 +41,7 @@ func main() {
 	)
 
 	geckoImageNameArg := flag.String(
-		"gecko-image-name",
+		"avalanche-image-name",
 		"",
 		"Name of Docker image of the Gecko version being tested",
 	)

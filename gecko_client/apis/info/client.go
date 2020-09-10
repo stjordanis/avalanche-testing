@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/api/info"
-	"github.com/ava-labs/gecko/network"
+	"github.com/ava-labs/avalanche-go/api/info"
+	"github.com/ava-labs/avalanche-go/network"
 )
 
 // Client is an Info API Client

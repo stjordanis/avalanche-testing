@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/api/admin"
+	"github.com/ava-labs/avalanche-go/api"
+	"github.com/ava-labs/avalanche-go/api/admin"
 )
 
 // Client for the Avalanche Platform Info API Endpoint

@@ -23,7 +23,7 @@ var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 In Gecko, you need at least $snow_consensus stakers for anything to happen. But, you can't register new stakers... without
 $snow_conensus stakers already staking. Thus, you have to start with some staker IDs already registered. To do this, Gecko
 hardcodes 5 staker IDs already registered on the PChain:
-https://github.com/ava-labs/gecko/blob/master/genesis/config.go#L407
+https://github.com/ava-labs/avalanche-go/blob/master/genesis/config.go#L407
 
 These IDs are those stakers, and all local testnets
 */

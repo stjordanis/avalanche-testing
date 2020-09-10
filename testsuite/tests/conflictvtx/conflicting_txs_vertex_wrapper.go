@@ -14,11 +14,11 @@ import (
 const (
 	normalNodeConfigID          networks.ConfigurationID = "normal-config"
 	byzantineConfigID           networks.ConfigurationID = "byzantine-config"
-	byzantineUsername                                    = "byzantine_gecko"
+	byzantineUsername                                    = "byzantine_avalanche"
 	byzantinePassword                                    = "byzant1n3!"
 	byzantineBehavior                                    = "byzantine-behavior"
 	conflictingTxVertexBehavior                          = "conflicting-txs-vertex"
-	stakerUsername                                       = "staker_gecko"
+	stakerUsername                                       = "staker_avalanche"
 	stakerPassword                                       = "test34test!23"
 	byzantineNodeServiceID                               = "byzantine-node"
 	normalNodeServiceID                                  = "virtuous-node"

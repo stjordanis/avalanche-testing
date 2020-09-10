@@ -6,9 +6,9 @@ import (
 	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/utils/constants"
-	"github.com/ava-labs/gecko/utils/units"
+	"github.com/ava-labs/avalanche-go/api"
+	"github.com/ava-labs/avalanche-go/utils/constants"
+	"github.com/ava-labs/avalanche-go/utils/units"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
