@@ -40,16 +40,16 @@ func main() {
 		"Comma-separated list of specific tests to run (leave empty or omit to run all tests)",
 	)
 
-	geckoImageNameArg := flag.String(
+	avalancheImageNameArg := flag.String(
 		"avalanche-image-name",
 		"",
-		"Name of Docker image of the Gecko version being tested",
+		"The name of a pre-built Avalanche image, either on the local Docker engine or in Docker Hub",
 	)
 
 	byzantineImageNameArg := flag.String(
 		"byzantine-image-name",
 		"",
-		"The name of a pre-built byzantine Gecko image, either on the local Docker engine or in Docker Hub",
+		"The name of a pre-built avalanche-byzantine image, either on the local Docker engine or in Docker Hub",
 	)
 
 	dockerNetworkArg := flag.String(
@@ -98,12 +98,12 @@ func main() {
 		*subnetMaskArg,
 		*gatewayIPArg,
 		*testControllerIPArg,
-		*geckoImageNameArg)
+		*avalancheImageNameArg)
 
 	logrus.Debugf("Byzantine image name: %s", *byzantineImageNameArg)
 	testSuite := testsuite.AvalancheTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
-		NormalImageName:    *geckoImageNameArg,
+		NormalImageName:    *avalancheImageNameArg,
 	}
 	controller := controller.NewTestController(
 		*testVolumeArg,

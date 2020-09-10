@@ -3,12 +3,12 @@ package connected
 import (
 	"time"
 
+	"github.com/ava-labs/avalanche-go/api"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
-	"github.com/ava-labs/avalanche-go/api"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -37,7 +37,7 @@ type StakingNetworkFullyConnectedTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	stakerIDs := castedNetwork.GetAllBootServiceIDs()
@@ -49,15 +49,15 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	allServiceIDs[nonBootValidatorServiceID] = true
 	allServiceIDs[nonBootNonValidatorServiceID] = true
 
-	allNodeIDs, allGeckoClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
+	allNodeIDs, allAvalancheClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
 	logrus.Infof("Verifying that the network is fully connected...")
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("Network is fully connected.")
 
 	logrus.Infof("Adding additional staker to the network...")
-	nonBootValidatorClient := allGeckoClients[nonBootValidatorServiceID]
+	nonBootValidatorClient := allAvalancheClients[nonBootValidatorServiceID]
 	highLevelExtraStakerClient := helpers.NewRPCWorkFlowRunner(
 		nonBootValidatorClient,
 		api.UserPass{Username: stakerUsername, Password: stakerPassword},
@@ -78,7 +78,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 		2) The validators will have ALL other nodes in the network (propagated via gossip)
 		3) The non-validators will have all the validators in the network (propagated via gossip)
 	*/
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
 	logrus.Infof("The network is fully connected.")
@@ -86,8 +86,8 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.ImageName,
@@ -101,7 +101,7 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 		nonBootValidatorServiceID:    normalNodeConfigID,
 		nonBootNonValidatorServiceID: normalNodeConfigID,
 	}
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.ImageName,
 		avalancheService.DEBUG,
@@ -127,25 +127,25 @@ func (test StakingNetworkFullyConnectedTest) GetSetupBuffer() time.Duration {
 
 // ================ Helper functions =========================
 /*
-This helper function will grab node IDs and Gecko clients
+This helper function will grab node IDs and Avalanche clients
 */
 func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
-	network avalancheNetwork.TestGeckoNetwork,
+	network avalancheNetwork.TestAvalancheNetwork,
 	allServiceIDs map[networks.ServiceID]bool,
-) (allNodeIDs map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
-	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
+) (allNodeIDs map[networks.ServiceID]string, allAvalancheClients map[networks.ServiceID]*apis.Client) {
+	allAvalancheClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
 	for serviceID := range allServiceIDs {
 		client, err := network.GetAvalancheClient(serviceID)
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche client for service with ID %v", serviceID))
 		}
-		allGeckoClients[serviceID] = client
+		allAvalancheClients[serviceID] = client
 		nodeID, err := client.InfoAPI().GetNodeID()
 
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceID))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche node ID for service with ID %v", serviceID))
 		}
 		allNodeIDs[serviceID] = nodeID
 	}

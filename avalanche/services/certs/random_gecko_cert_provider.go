@@ -37,29 +37,29 @@ var rootCert = x509.Certificate{
 	BasicConstraintsValid: true,
 }
 
-// RandomGeckoCertProvider implements GeckoCertProviders by providing certs signed by the same root CA
-type RandomGeckoCertProvider struct {
+// RandomAvalancheCertProvider implements AvalancheCertProviders by providing certs signed by the same root CA
+type RandomAvalancheCertProvider struct {
 	nextSerialNumber int64
 	varyCerts        bool
 }
 
-// NewRandomGeckoCertProvider creates a new cert provider that can optionally return either the same cert every time, or different ones
+// NewRandomAvalancheCertProvider creates a new cert provider that can optionally return either the same cert every time, or different ones
 // Args:
 // 	varyCerts: True to produce a different cert on each call to GetCertAndKey, or false to yield the same
 // 		randomly-generated cert each time
-func NewRandomGeckoCertProvider(varyCerts bool) *RandomGeckoCertProvider {
-	return &RandomGeckoCertProvider{
+func NewRandomAvalancheCertProvider(varyCerts bool) *RandomAvalancheCertProvider {
+	return &RandomAvalancheCertProvider{
 		nextSerialNumber: mathrand.Int63(),
 		varyCerts:        varyCerts,
 	}
 }
 
-// GetCertAndKey implements GeckoCertProvider function that yields a new cert and private key based off the configuration parameters
+// GetCertAndKey implements AvalancheCertProvider function that yields a new cert and private key based off the configuration parameters
 // defined at construction time
 // Returns:
 // 	certPemBytes: The bytes of the generated cert
 // 	keyPemBytes: The bytes of the private key that was generated alongside the cert
-func (r *RandomGeckoCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
+func (r *RandomAvalancheCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
 	if r.varyCerts {
 		r.nextSerialNumber = mathrand.Int63()

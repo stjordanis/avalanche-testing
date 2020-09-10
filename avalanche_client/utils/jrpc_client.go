@@ -21,8 +21,8 @@ const (
 	defaultMaxID = 1000000
 )
 
-// GeckoRPCRequester ...
-type GeckoRPCRequester interface {
+// AvalancheRPCRequester ...
+type AvalancheRPCRequester interface {
 	SendJSONRPCRequest(endpoint string, method string, params interface{}, reply interface{}) error
 }
 
@@ -31,8 +31,8 @@ type jsonRPCRequester struct {
 	client http.Client
 }
 
-// NewGeckoRPCRequester ...
-func NewGeckoRPCRequester(uri string, requestTimeout time.Duration) GeckoRPCRequester {
+// NewAvalancheRPCRequester ...
+func NewAvalancheRPCRequester(uri string, requestTimeout time.Duration) AvalancheRPCRequester {
 	return &jsonRPCRequester{
 		uri: uri,
 		client: http.Client{
@@ -74,21 +74,21 @@ type EndpointRequester interface {
 	SendRequest(method string, params interface{}, reply interface{}) error
 }
 
-type geckoEndpointRequester struct {
-	requester      GeckoRPCRequester
+type avalancheEndpointRequester struct {
+	requester      AvalancheRPCRequester
 	endpoint, base string
 }
 
 // NewEndpointRequester ...
 func NewEndpointRequester(uri, endpoint, base string, requestTimeout time.Duration) EndpointRequester {
-	return &geckoEndpointRequester{
-		requester: NewGeckoRPCRequester(uri, requestTimeout),
+	return &avalancheEndpointRequester{
+		requester: NewAvalancheRPCRequester(uri, requestTimeout),
 		endpoint:  endpoint,
 		base:      base,
 	}
 }
 
-func (e *geckoEndpointRequester) SendRequest(method string, params interface{}, reply interface{}) error {
+func (e *avalancheEndpointRequester) SendRequest(method string, params interface{}, reply interface{}) error {
 	return e.requester.SendJSONRPCRequest(
 		e.endpoint,
 		fmt.Sprintf("%s.%s", e.base, method),

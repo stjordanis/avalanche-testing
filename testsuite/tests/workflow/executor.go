@@ -3,12 +3,12 @@ package workflow
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
-	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
-	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/avalanche-go/api"
 	"github.com/ava-labs/avalanche-go/utils/constants"
 	"github.com/ava-labs/avalanche-go/utils/units"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -97,7 +97,7 @@ func (e *executor) ExecuteTest() error {
 	//  ====================================== ADD VALIDATOR ===============================
 	err = highLevelStakerClient.TransferAvaXChainToPChain(stakerPChainAddress, seedAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
+		return stacktrace.Propagate(err, "Could not transfer AVAX from XChain to PChain account information")
 	}
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, seedAmount); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain balance after X -> P Transfer.")
@@ -137,7 +137,7 @@ func (e *executor) ExecuteTest() error {
 	// ====================================== ADD DELEGATOR ======================================
 	err = highLevelDelegatorClient.TransferAvaXChainToPChain(delegatorPChainAddress, seedAmount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Could not transfer AVA from X Chain to P Chain account.")
+		return stacktrace.Propagate(err, "Could not transfer AVAX from X Chain to P Chain account.")
 	}
 	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPChainAddress, seedAmount); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain balance after X -> P Transfer for Delegator.")
@@ -159,7 +159,7 @@ func (e *executor) ExecuteTest() error {
 	// ====================================== TRANSFER TO X CHAIN ================================
 	err = highLevelStakerClient.TransferAvaPChainToXChain(stakerXChainAddress, expectedStakerBalance)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to transfer Ava from P Chain to X Chain.")
+		return stacktrace.Propagate(err, "Failed to transfer AvaX from P Chain to X Chain.")
 	}
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, 0); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain Balance after P -> X Transfer.")
@@ -171,7 +171,7 @@ func (e *executor) ExecuteTest() error {
 
 	err = highLevelDelegatorClient.TransferAvaPChainToXChain(delegatorXChainAddress, expectedStakerBalance)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to transfer Ava from P Chain to X Chain.")
+		return stacktrace.Propagate(err, "Failed to transfer AVAX from P Chain to X Chain.")
 	}
 	if err := highLevelDelegatorClient.VerifyPChainBalance(delegatorPChainAddress, 0); err != nil {
 		return stacktrace.Propagate(err, "Unexpected P Chain Balance after P -> X Transfer.")

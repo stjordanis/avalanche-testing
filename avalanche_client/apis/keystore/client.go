@@ -6,7 +6,7 @@ package keystore
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 	"github.com/ava-labs/avalanche-go/utils/formatting"
 
 	"github.com/ava-labs/avalanche-go/api"

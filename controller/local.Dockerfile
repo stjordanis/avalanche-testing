@@ -27,7 +27,7 @@ CMD set -euo pipefail && ./test-controller \
     --test-volume=${TEST_VOLUME} \
     --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
-    --avalanche-image-name=${GECKO_IMAGE_NAME} \
+    --avalanche-image-name=${AVALANCHE_IMAGE_NAME} \
     --byzantine-image-name=${BYZANTINE_IMAGE_NAME} \
     --docker-network=${NETWORK_ID} \
     --subnet-mask=${SUBNET_MASK} \

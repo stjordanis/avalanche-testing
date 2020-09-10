@@ -3,7 +3,7 @@ package health
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 	"github.com/ava-labs/avalanche-go/api/health"
 )
 

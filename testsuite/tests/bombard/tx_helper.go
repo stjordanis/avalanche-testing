@@ -3,7 +3,6 @@ package bombard
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils/constants"
 	"github.com/ava-labs/avalanche-go/ids"
 	"github.com/ava-labs/avalanche-go/utils/codec"
 	"github.com/ava-labs/avalanche-go/utils/crypto"
@@ -12,6 +11,7 @@ import (
 	"github.com/ava-labs/avalanche-go/vms/components/avax"
 	"github.com/ava-labs/avalanche-go/vms/propertyfx"
 	"github.com/ava-labs/avalanche-go/vms/secp256k1fx"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
 )
 
 const (

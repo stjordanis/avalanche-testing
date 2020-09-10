@@ -12,7 +12,7 @@ import (
 	cjson "github.com/ava-labs/avalanche-go/utils/json"
 	"github.com/ava-labs/avalanche-go/vms/platformvm"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )
 
 // Client ...

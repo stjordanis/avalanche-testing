@@ -14,7 +14,7 @@ import (
 	cjson "github.com/ava-labs/avalanche-go/utils/json"
 	"github.com/ava-labs/avalanche-go/vms/avm"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )
 
 type Client struct {

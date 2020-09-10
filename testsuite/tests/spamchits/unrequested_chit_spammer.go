@@ -42,7 +42,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
@@ -115,8 +115,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		byzantineConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.ByzantineImageName,
@@ -127,7 +127,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.NormalImageName,
@@ -146,7 +146,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
 
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.NormalImageName,
 		avalancheService.DEBUG,

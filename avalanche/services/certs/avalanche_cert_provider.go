@@ -2,10 +2,10 @@ package certs
 
 import "bytes"
 
-// GeckoCertProvider defines an interface representing a cert provider for a Gecko service
-// (used in the duplicate node ID test, which requires that multiple Gecko services start
+// AvalancheCertProvider defines an interface representing a cert provider for an Avalanche service
+// (used in the duplicate node ID test, which requires that multiple Avalanche services start
 // with the same cert)
-type GeckoCertProvider interface {
+type AvalancheCertProvider interface {
 	// GetCertAndKey generates a cert and accompanying private key
 	// Returns:
 	// 	certPemBytes: The bytes of the generated cert

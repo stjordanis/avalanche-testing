@@ -15,7 +15,7 @@ import (
 var testPublicIP = net.ParseIP("172.17.0.2")
 
 func TestNoDepsStartCommand(t *testing.T) {
-	initializerCore := NewGeckoServiceInitializerCore(
+	initializerCore := NewAvalancheServiceInitializerCore(
 		1,
 		1,
 		0,
@@ -23,7 +23,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		2*time.Second,
 		make(map[string]string),
 		[]string{},
-		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticAvalancheCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		INFO,
 	)
 
@@ -53,7 +53,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 	bootstrapperNodeIDs := []string{
 		testNodeID,
 	}
-	initializerCore := NewGeckoServiceInitializerCore(
+	initializerCore := NewAvalancheServiceInitializerCore(
 		1,
 		1,
 		0,
@@ -61,7 +61,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		2*time.Second,
 		make(map[string]string),
 		bootstrapperNodeIDs,
-		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticAvalancheCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		INFO,
 	)
 
@@ -81,7 +81,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIP),
 	}
 
-	testDependency := GeckoService{
+	testDependency := AvalancheService{
 		ipAddr:      "1.2.3.4",
 		jsonRPCPort: "9650/tcp",
 		stakingPort: "9651/tcp",
