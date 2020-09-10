@@ -20,6 +20,8 @@ github.com/aristanetworks/fsnotify v1.4.2/go.mod h1:D/rtu7LpjYM8tRJphJ0hUBYpjai8
 github.com/aristanetworks/glog v0.0.0-20191112221043-67e8567f59f3/go.mod h1:KASm+qXFKs/xjSoWn30NrWBBvdTTQq+UjkhjEJHfSFA=
 github.com/aristanetworks/goarista v0.0.0-20200812190859-4cb0e71f3c0e/go.mod h1:QZe5Yh80Hp1b6JxQdpfSEEe8X7hTyTEZSosSrFf/oJE=
 github.com/aristanetworks/splunk-hec-go v0.3.3/go.mod h1:1VHO9r17b0K7WmOlLb9nTk/2YanvOEnLMUgsFrxBROc=
+github.com/ava-labs/avalanche-go v0.8.0-beta h1:VdSvj5DKIdzdmK0tk8l1jQIc1m3N7KRTHXTW+9I1LfI=
+github.com/ava-labs/avalanche-go v0.8.0-beta/go.mod h1:quYojL1hu0ue2glUT1ng28kADs9R94zGdEvfW0/HRg8=
 github.com/ava-labs/coreth v0.2.13/go.mod h1:ZwQ7rzHvQLorZsMoUm2FDWmLwOvDDoNzB+EEp2NhWyI=
 github.com/ava-labs/coreth v0.2.14-rc.1/go.mod h1:Zhb60GFIB7G5AnUCks0Jo4Rezx/EovL8o+z51aBF1A8=
 github.com/ava-labs/coreth v0.2.15-rc.1/go.mod h1:+sK2XGKCNA48uzeHWe4iBzmiOBYmYvnnzLtOkQeQfkk=

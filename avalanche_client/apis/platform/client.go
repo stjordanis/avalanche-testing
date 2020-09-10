@@ -6,11 +6,11 @@ package platform
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/ids"
-	"github.com/ava-labs/avalanche-go/utils/formatting"
-	cjson "github.com/ava-labs/avalanche-go/utils/json"
-	"github.com/ava-labs/avalanche-go/vms/platformvm"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	cjson "github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/vms/platformvm"
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )

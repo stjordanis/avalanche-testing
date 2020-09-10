@@ -3,7 +3,8 @@ module github.com/ava-labs/avalanche-testing
 go 1.13
 
 require (
-	github.com/ava-labs/avalanche-go v0.8.0
+	github.com/ava-labs/avalanche-go v0.8.0-beta
+	github.com/ava-labs/avalanchego v0.8.0
 	github.com/docker/go-connections v0.4.0
 	github.com/gorilla/rpc v1.2.0
 	github.com/kurtosis-tech/kurtosis v0.0.0-20200810120239-94d43a13679e
@@ -11,3 +12,5 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 )
+
+replace github.com/ava-labs/avalanchego => ../gecko

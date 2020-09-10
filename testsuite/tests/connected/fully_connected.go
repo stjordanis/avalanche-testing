@@ -3,7 +3,7 @@ package connected
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
+	"github.com/ava-labs/avalanchego/api"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"

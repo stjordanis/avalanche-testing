@@ -2,11 +2,11 @@
 
 set -euo pipefail
 
-# Note: this script will build a docker image by cloning a remote version of avalanche-testing and avalanche-go into a temporary
+# Note: this script will build a docker image by cloning a remote version of avalanche-testing and avalanchego into a temporary
 # location and using that version's Dockerfile to build the image.
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
-AVALANCHE_PATH="$GOPATH/src/github.com/ava-labs/avalanche-go"
+AVALANCHE_PATH="$GOPATH/src/github.com/ava-labs/avalanchego"
 E2E_COMMIT="$(git --git-dir="$ROOT_DIRPATH/.git" rev-parse --short HEAD)"
 AVALANCHE_COMMIT="$(git --git-dir="$AVALANCHE_PATH/.git" rev-parse --short HEAD)"
 
@@ -15,12 +15,12 @@ WORKPREFIX="$GOPATH/src/github.com/ava-labs"
 DOCKER="${DOCKER:-docker}"
 
 
-AVALANCHE_REMOTE="https://github.com/ava-labs/avalanche-go.git"
+AVALANCHE_REMOTE="https://github.com/ava-labs/avalanchego.git"
 E2E_REMOTE="https://github.com/ava-labs/avalanche-testing.git"
 
 
 # Clone the remotes and checkout the desired branch/commits
-AVALANCHE_CLONE="$WORKPREFIX/avalanche-go"
+AVALANCHE_CLONE="$WORKPREFIX/avalanchego"
 E2E_CLONE="$WORKPREFIX/avalanche-testing"
 
 # Create the WORKPREFIX directory if it does not exist yet

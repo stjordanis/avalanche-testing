@@ -1,16 +1,16 @@
 # 0.9.0
-* Update to v0.7.0 of avalanche-go and avalanche-byzantine
+* Update to v0.7.0 of avalanchego and avalanche-byzantine
 * Rename delegator/staker functions
 * Add conflicting transactions vertex test
-* Switch to using AvaLabs Docker registry for avalanche-go and avalanche-byzantine images
+* Switch to using AvaLabs Docker registry for avalanchego and avalanche-byzantine images
 * Add docs to every public function and struct
-* Update avalanche client to use the same structs used by avalanche-go API services
+* Update avalanche client to use the same structs used by avalanchego API services
 * Fix bug in RPCWorkFlowTest where multiple clients shared the genesis key leading to undefined behavior
 * Refactor code organization and comments
-* Point CI to latest everest images for both avalanche-go and avalanche-byzantine
+* Point CI to latest everest images for both avalanchego and avalanche-byzantine
 * Add bombard test to bombard the X chain with transactions and then add two nodes to bootstrap the new data
 * Update get current and pending validators calls in platform API
-* Rename from gecko -> avalanche-go
+* Rename from gecko -> avalanchego
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints

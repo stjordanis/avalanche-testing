@@ -5,7 +5,7 @@ RUN mkdir -p /go/src/github.com/ava-labs
 
 # Copy the code into the container
 WORKDIR $GOPATH/src/github.com/ava-labs
-COPY avalanche-go avalanche-go
+COPY avalanchego avalanchego
 COPY avalanche-testing avalanche-testing
 
 WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-testing

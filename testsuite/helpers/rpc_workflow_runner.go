@@ -3,10 +3,10 @@ package helpers
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/ids"
-	"github.com/ava-labs/avalanche-go/snow/choices"
-	"github.com/ava-labs/avalanche-go/vms/platformvm"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/vms/platformvm"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"

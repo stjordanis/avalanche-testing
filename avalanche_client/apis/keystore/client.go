@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
-	"github.com/ava-labs/avalanche-go/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/api/keystore"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/api/keystore"
 )
 
 type Client struct {

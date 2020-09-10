@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
-	"github.com/ava-labs/avalanche-go/api/health"
+	"github.com/ava-labs/avalanchego/api/health"
 )
 
 // Client for Avalanche Health API Endpoint

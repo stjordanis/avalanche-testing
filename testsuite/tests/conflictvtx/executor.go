@@ -6,8 +6,8 @@ import (
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
-	"github.com/ava-labs/avalanche-go/snow/choices"
-	"github.com/ava-labs/avalanche-go/utils/formatting"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )

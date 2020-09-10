@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/ids"
-	"github.com/ava-labs/avalanche-go/snow/choices"
-	"github.com/ava-labs/avalanche-go/utils/formatting"
-	cjson "github.com/ava-labs/avalanche-go/utils/json"
-	"github.com/ava-labs/avalanche-go/vms/avm"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	cjson "github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/vms/avm"
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )

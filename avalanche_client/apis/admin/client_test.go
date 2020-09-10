@@ -5,8 +5,8 @@ import (
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/test"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/api/admin"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/api/admin"
 )
 
 type mockClient struct {

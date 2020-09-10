@@ -3,9 +3,9 @@ package workflow
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/utils/constants"
-	"github.com/ava-labs/avalanche-go/utils/units"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/units"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"

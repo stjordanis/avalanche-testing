@@ -1,6 +1,6 @@
 Avalanche End-to-End Tests
 ====================
-This repo contains end-to-end tests for the Avalanche network and avalanche-go client using [the Kurtosis testing framework](https://github.com/kurtosis-tech/kurtosis)
+This repo contains end-to-end tests for the Avalanche network and avalanchego client using [the Kurtosis testing framework](https://github.com/kurtosis-tech/kurtosis)
 
 * [Requirements](#requirements)
 * [Running Locally](#running-locally)
@@ -32,10 +32,10 @@ This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurt
 
 In this implementation of Kurtosis, we have:
 * `NodeService` interface to represent the actions a test can take against a generic node exposing a staking socket and implementing the Kurtosis services.Service interface
-* `AvalancheService` interface to represent the actions a test can take against an avalanche-go client participating in the Avalanche network being tested
-* `AvalancheServiceInitializerCore` and `AvalancheServiceAvailabilityChecker` for instantiating avalanche-go clients in test networks
-    * `AvalancheCertProvider` to allow controlling the cert that a avalanche-go node starts with, to allow for writing duplicate-node-ID tests
-* `TestAvalancheNetwork` to encapsulate a test Avalanche network of avalanche-go nodes of arbitrary size
+* `AvalancheService` interface to represent the actions a test can take against an avalanchego client participating in the Avalanche network being tested
+* `AvalancheServiceInitializerCore` and `AvalancheServiceAvailabilityChecker` for instantiating avalanchego clients in test networks
+    * `AvalancheCertProvider` to allow controlling the cert that a avalanchego node starts with, to allow for writing duplicate-node-ID tests
+* `TestAvalancheNetwork` to encapsulate a test Avalanche network of avalanchego nodes of arbitrary size
 * Several tests
 * `AvalancheTestSuite` to contain all the tests Kurtosis can run
 * A `main.go` for running a controller Docker image under the `controller` package

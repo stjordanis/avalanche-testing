@@ -10,7 +10,7 @@ echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdi
 DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-testing_controller"
 
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanche-go:everest-latest"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:everest-latest"
 # Use stable version of avalanche-byzantine based on everest for CI
 BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:everest-latest"
 

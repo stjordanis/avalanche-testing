@@ -22,7 +22,7 @@ const (
 	stakingTLSKeyFileID  = "staking-tls-key"
 
 	testVolumeMountpoint = "/shared"
-	avalancheBinary      = "/avalanche-go/build/avalanche"
+	avalancheBinary      = "/avalanchego/build/avalanchego"
 )
 
 // AvalancheLogLevel specifies the log level for an Avalanche client

@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ava-labs/avalanche-go/api"
-	"github.com/ava-labs/avalanche-go/ids"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"

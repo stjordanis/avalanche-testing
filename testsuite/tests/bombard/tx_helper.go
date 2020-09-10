@@ -3,14 +3,14 @@ package bombard
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-go/ids"
-	"github.com/ava-labs/avalanche-go/utils/codec"
-	"github.com/ava-labs/avalanche-go/utils/crypto"
-	"github.com/ava-labs/avalanche-go/utils/wrappers"
-	"github.com/ava-labs/avalanche-go/vms/avm"
-	"github.com/ava-labs/avalanche-go/vms/components/avax"
-	"github.com/ava-labs/avalanche-go/vms/propertyfx"
-	"github.com/ava-labs/avalanche-go/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/codec"
+	"github.com/ava-labs/avalanchego/utils/crypto"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/ava-labs/avalanchego/vms/avm"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/propertyfx"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
 )
 
