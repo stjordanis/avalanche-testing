@@ -3,7 +3,6 @@ module github.com/ava-labs/avalanche-testing
 go 1.13
 
 require (
-	github.com/ava-labs/avalanchego v0.8.0-beta
 	github.com/ava-labs/avalanchego v0.8.0
 	github.com/docker/go-connections v0.4.0
 	github.com/gorilla/rpc v1.2.0
