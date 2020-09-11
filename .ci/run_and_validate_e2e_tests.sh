@@ -10,9 +10,9 @@ echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdi
 DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-testing_controller"
 
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:everest-latest"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:testing-ci-stable"
 # Use stable version of avalanche-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:everest-latest"
+BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:testing-ci-stable"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
