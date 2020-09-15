@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/kurtosis-tech/kurtosis/commons/services"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 )
 
 // NodeService implements the Kurtosis generic services.Service interface that represents the minimum interface for a

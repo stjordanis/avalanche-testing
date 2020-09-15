@@ -2,21 +2,19 @@ package services
 
 import (
 	"fmt"
-	"net"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
-	"github.com/docker/go-connections/nat"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	httpPort    nat.Port = "9650/tcp"
-	stakingPort nat.Port = "9651/tcp"
+	httpPort             = 9650
+	stakingPort          = 9651
 
 	stakingTLSCertFileID = "staking-tls-cert"
 	stakingTLSKeyFileID  = "staking-tls-key"
@@ -109,8 +107,8 @@ func NewAvalancheServiceInitializerCore(
 }
 
 // GetUsedPorts implements services.ServiceInitializerCore to declare the ports used by the node
-func (core AvalancheServiceInitializerCore) GetUsedPorts() map[nat.Port]bool {
-	return map[nat.Port]bool{
+func (core AvalancheServiceInitializerCore) GetUsedPorts() map[int]bool {
+	return map[int]bool{
 		httpPort:    true,
 		stakingPort: true,
 	}
@@ -145,7 +143,8 @@ func (core AvalancheServiceInitializerCore) InitializeMountedFiles(osFiles map[s
 }
 
 // GetStartCommand implements services.ServiceInitializerCore to build the command line that will be used to launch an Avalanche node
-func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, publicIPAddr net.IP, dependencies []services.Service) ([]string, error) {
+// The IP placeholder is a string that can be used in place of the IP, since we don't yet know the IP when we ask to start a new service
+func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths map[string]string, ipPlaceholder string, dependencies []services.Service) ([]string, error) {
 	numBootNodeIDs := len(core.bootstrapperNodeIDs)
 	numDependencies := len(dependencies)
 	if numDependencies > numBootNodeIDs {
@@ -156,14 +155,14 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 		)
 	}
 
-	publicIPFlag := fmt.Sprintf("--public-ip=%s", publicIPAddr.String())
+	publicIPFlag := fmt.Sprintf("--public-ip=%s", ipPlaceholder)
 	commandList := []string{
 		avalancheBinary,
 		publicIPFlag,
 		"--network-id=local",
-		fmt.Sprintf("--http-port=%d", httpPort.Int()),
+		fmt.Sprintf("--http-port=%d", httpPort),
 		"--http-host=", // Leave empty to make API openly accessible
-		fmt.Sprintf("--staking-port=%d", stakingPort.Int()),
+		fmt.Sprintf("--staking-port=%d", stakingPort),
 		fmt.Sprintf("--log-level=%s", core.logLevel),
 		fmt.Sprintf("--snow-sample-size=%d", core.snowSampleSize),
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
@@ -200,7 +199,7 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 		socketStrs := make([]string, 0, len(avaDependencies))
 		for _, service := range avaDependencies {
 			socket := service.GetStakingSocket()
-			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort().Int()))
+			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort()))
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips="+joinedSockets)

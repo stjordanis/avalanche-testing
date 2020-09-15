@@ -2,11 +2,11 @@ package services
 
 import (
 	"fmt"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/info"
 	"github.com/ava-labs/avalanche-testing/utils/constants"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
 )
 
 // NewAvalancheServiceAvailabilityChecker returns a new services.ServiceAvailabilityCheckerCore to
@@ -32,7 +32,7 @@ func (g AvalancheServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Se
 
 	castedService := toCheck.(AvalancheService)
 	jsonRPCSocket := castedService.GetJSONRPCSocket()
-	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
+	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort())
 	client := info.NewClient(uri, constants.DefaultRequestTimeout)
 
 	if !g.bootstrappedPChain {
