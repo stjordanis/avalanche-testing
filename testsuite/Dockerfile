@@ -1,12 +1,12 @@
 FROM golang:1.13-alpine
 WORKDIR /build
 # Copy and download dependencies using go mod
-COPY ../go.mod .
-COPY ../go.sum .
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
 # Copy the code into the container
-COPY .. .
+COPY . .
 
 # Build the application
 RUN go build -o avalanche-test-suite testsuite/main.go

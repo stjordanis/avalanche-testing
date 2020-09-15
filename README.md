@@ -15,7 +15,7 @@ Requirements
 * Golang version 1.13x.x
 * [A Docker engine running in your environment](https://docs.docker.com/engine/install/)
 
-Running Locally
+Running Locally (TODO TODO TODO rework this entire section!)
 ---------------
 1. Clone this repository
 1. Run `scripts/full_rebuild_and_run.sh` and wait for it to finish (which will take a while)
@@ -26,7 +26,7 @@ NOTE: The Avalanche E2E test suite defaults to running 4 tests in parallel to sp
 
 Once `full_rebuild_and_run.sh` has finished, you can now execute `scripts/run.sh` to re-run the testing suite without needing to rebuild. `run.sh` will accept arguments to modify test suite execution; to see the full list of supported arguments, pass in the `--help` flag.
 
-Developing Locally
+Developing Locally (TODO TODO revisit this section!)
 ------------------
 This repo uses the [Kurtosis architecture](https://github.com/kurtosis-tech/kurtosis), so you should first go through the tutorial there to familiarize yourself with the core Kurtosis concepts.
 
