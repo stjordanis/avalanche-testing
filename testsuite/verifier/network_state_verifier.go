@@ -2,7 +2,7 @@ package verifier
 
 import (
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/kurtosis-tech/kurtosis/commons/networks"
+	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )

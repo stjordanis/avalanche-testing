@@ -1,6 +1,7 @@
 package kurtosis
 
 import (
+	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
@@ -10,7 +11,12 @@ import (
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
-	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
+)
+
+const (
+	// The number of bits to make each test network, which dictates the max number of services a test can spin up
+	// Here we choose 8 bits = 256 max services per test
+	networkWidthBits = 8
 )
 
 // AvalancheTestSuite implements the Kurtosis TestSuite interface
@@ -53,3 +59,8 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 
 	return result
 }
+
+func (a AvalancheTestSuite) GetNetworkWidthBits() uint32 {
+	return networkWidthBits
+}
+
