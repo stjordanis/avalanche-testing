@@ -12,7 +12,7 @@ COPY . .
 RUN go build -o avalanche-test-suite testsuite/main.go
 
 # TODO Get rid of tee/LOG_FILEPATH in favor of using a Docker logging driver in the initializer
-CMD set -euo pipefail && ./kurtosis-go-example \
+CMD set -euo pipefail && ./avalanche-test-suite \
     --metadata-filepath=${METADATA_FILEPATH} \
     --test=${TEST} \
     --log-level=${LOG_LEVEL} \

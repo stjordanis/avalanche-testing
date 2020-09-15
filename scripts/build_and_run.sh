@@ -56,21 +56,16 @@ if "${do_build}"; then
     docker build -t "${SUITE_IMAGE}:${docker_tag}" -f "${root_dirpath}/testsuite/Dockerfile" "${root_dirpath}"
 fi
 
-custom_env_vars_json=$(cat <<EOF
-{
-    "AVALANCHE_IMAGE": "${AVALANCHE_IMAGE}",
-    "BYZANTINE_IMAGE": ""
-}
-EOF
-)
-
 if "${do_run}"; then
     suite_execution_volume="avalanche-test-suite_${docker_tag}_$(date +%s)"
     docker volume create "${suite_execution_volume}"
+
+    custom_env_vars_json_flag="CUSTOM_ENV_VARS_JSON={\"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",\"BYZANTINE_IMAGE\":\"\"}"
+    echo "${custom_env_vars_json_flag}"
     docker run \
         --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock" \
         --mount "type=volume,source=${suite_execution_volume},target=/suite-execution" \
-        --env "CUSTOM_ENV_VARS_JSON=${custom_env_vars_json}" \
+        --env "${custom_env_vars_json_flag}" \
         --env "TEST_SUITE_IMAGE=${SUITE_IMAGE}:${docker_tag}" \
         --env "SUITE_EXECUTION_VOLUME=${suite_execution_volume}" \
         --env "KURTOSIS_API_IMAGE=${API_IMAGE}" \
