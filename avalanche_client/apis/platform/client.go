@@ -102,7 +102,7 @@ func (c *Client) GetSubnets(ids []ids.ID) ([]platformvm.APISubnet, error) {
 	return res.Subnets, err
 }
 
-// GetCurrentValidators returns the list of current validators for subnet with ID [subnetID]
+// GetCurrentValidators returns the list of current validators and the list of delegators for subnet with ID [subnetID]
 func (c *Client) GetCurrentValidators(subnetID ids.ID) ([]interface{}, []interface{}, error) {
 	res := &platformvm.GetCurrentValidatorsReply{}
 	err := c.requester.SendRequest("getCurrentValidators", &platformvm.GetCurrentValidatorsArgs{

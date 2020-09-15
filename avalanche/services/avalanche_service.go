@@ -12,11 +12,11 @@ type AvalancheService struct {
 }
 
 // GetStakingSocket implements AvalancheService
-func (g AvalancheService) GetStakingSocket() ServiceSocket {
-	return *NewServiceSocket(g.ipAddr, g.stakingPort)
+func (service AvalancheService) GetStakingSocket() ServiceSocket {
+	return *NewServiceSocket(service.ipAddr, service.stakingPort)
 }
 
 // GetJSONRPCSocket implements AvalancheService
-func (g AvalancheService) GetJSONRPCSocket() ServiceSocket {
-	return *NewServiceSocket(g.ipAddr, g.jsonRPCPort)
+func (service AvalancheService) GetJSONRPCSocket() ServiceSocket {
+	return *NewServiceSocket(service.ipAddr, service.jsonRPCPort)
 }
