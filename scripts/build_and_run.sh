@@ -52,8 +52,8 @@ if "${do_build}"; then
         echo "Tests succeeded"
     fi
 
-    echo "Building example Go implementation image..."
-    docker build -t "${SUITE_IMAGE}:${docker_tag}" -f "${root_dirpath}/example_impl/Dockerfile" "${root_dirpath}"
+    echo "Building Avalanche testing suite image..."
+    docker build -t "${SUITE_IMAGE}:${docker_tag}" -f "${root_dirpath}/testsuite/Dockerfile" "${root_dirpath}"
 fi
 
 custom_env_vars_json=$(cat <<EOF
@@ -65,14 +65,14 @@ EOF
 )
 
 if "${do_run}"; then
-    go_suite_execution_volume="go-example-suite_${docker_tag}_$(date +%s)"
-    docker volume create "${go_suite_execution_volume}"
+    suite_execution_volume="avalanche-test-suite_${docker_tag}_$(date +%s)"
+    docker volume create "${suite_execution_volume}"
     docker run \
         --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock" \
-        --mount "type=volume,source=${go_suite_execution_volume},target=/suite-execution" \
+        --mount "type=volume,source=${suite_execution_volume},target=/suite-execution" \
         --env "CUSTOM_ENV_VARS_JSON=${custom_env_vars_json}" \
         --env "TEST_SUITE_IMAGE=${SUITE_IMAGE}:${docker_tag}" \
-        --env "SUITE_EXECUTION_VOLUME=${go_suite_execution_volume}" \
+        --env "SUITE_EXECUTION_VOLUME=${suite_execution_volume}" \
         --env "KURTOSIS_API_IMAGE=${API_IMAGE}" \
         ${extra_docker_args} \
         "${INITIALIZER_IMAGE}"
