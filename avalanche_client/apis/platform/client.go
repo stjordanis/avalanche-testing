@@ -135,7 +135,9 @@ func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, s
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addValidator", &platformvm.AddValidatorArgs{
-		UserPass: user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass: user,
+		},
 		APIStaker: platformvm.APIStaker{
 			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
@@ -149,12 +151,24 @@ func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, s
 }
 
 // AddDelegator issues a transaction to add a delegator to the primary network and returns the txID
-func (c *Client) AddDelegator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64) (ids.ID, error) {
+func (c *Client) AddDelegator(
+	user api.UserPass,
+	rewardAddress,
+	nodeID string,
+	stakeAmount,
+	startTime,
+	endTime uint64,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDelegator", &platformvm.AddDelegatorArgs{
-		UserPass: user,
-		APIStaker: platformvm.APIStaker{
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		}, APIStaker: platformvm.APIStaker{
 			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
 			StartTime:   cjson.Uint64(startTime),
@@ -166,11 +180,25 @@ func (c *Client) AddDelegator(user api.UserPass, rewardAddress, nodeID string, s
 }
 
 // AddSubnetValidator issues a transaction to add validator [nodeID] to subnet with ID [subnetID] and returns the txID
-func (c *Client) AddSubnetValidator(user api.UserPass, destination, nodeID string, stakeAmount, startTime, endTime uint64, subnetID string) (ids.ID, error) {
+func (c *Client) AddSubnetValidator(
+	user api.UserPass,
+	destination,
+	nodeID string,
+	stakeAmount,
+	startTime,
+	endTime uint64,
+	subnetID string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addSubnetValidator", &platformvm.AddSubnetValidatorArgs{
-		UserPass: user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		APIStaker: platformvm.APIStaker{
 			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
@@ -183,31 +211,60 @@ func (c *Client) AddSubnetValidator(user api.UserPass, destination, nodeID strin
 }
 
 // CreateSubnet issues a transaction to create [subnet] and returns the txID
-func (c *Client) CreateSubnet(user api.UserPass, subnet platformvm.APISubnet) (ids.ID, error) {
+func (c *Client) CreateSubnet(
+	user api.UserPass,
+	subnet platformvm.APISubnet,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("createSubnet", &platformvm.CreateSubnetArgs{
-		UserPass:  user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		APISubnet: subnet,
 	}, res)
 	return res.TxID, err
 }
 
 // ExportAVAX issues an ExportAVAX transaction and returns the txID
-func (c *Client) ExportAVAX(user api.UserPass, to string, amount uint64) (ids.ID, error) {
+func (c *Client) ExportAVAX(
+	user api.UserPass,
+	to string,
+	amount uint64,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("exportAVAX", &platformvm.ExportAVAXArgs{
-		UserPass: user,
-		To:       to,
-		Amount:   cjson.Uint64(amount),
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		To:     to,
+		Amount: cjson.Uint64(amount),
 	}, res)
 	return res.TxID, err
 }
 
 // ImportAVAX issues an ImportAVAX transaction and returns the txID
-func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, error) {
+func (c *Client) ImportAVAX(
+	user api.UserPass,
+	to,
+	sourceChain string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("importAVAX", &platformvm.ImportAVAXArgs{
-		UserPass:    user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		To:          to,
 		SourceChain: sourceChain,
 	}, res)
@@ -215,10 +272,23 @@ func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, 
 }
 
 // CreateBlockchain issues a CreateBlockchain transaction and returns the txID
-func (c *Client) CreateBlockchain(user api.UserPass, subnetID ids.ID, vmID string, fxIDs []string, name string, genesisData []byte) (ids.ID, error) {
+func (c *Client) CreateBlockchain(
+	user api.UserPass,
+	subnetID ids.ID,
+	vmID string,
+	fxIDs []string,
+	name string,
+	genesisData []byte,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("createBlockchain", &platformvm.CreateBlockchainArgs{
-		UserPass:    user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		SubnetID:    subnetID,
 		VMID:        vmID,
 		FxIDs:       fxIDs,
