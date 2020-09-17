@@ -3,10 +3,9 @@ package admin
 import (
 	"testing"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis/test"
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/api/admin"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/test"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
+	"github.com/ava-labs/avalanchego/api"
 )
 
 type mockClient struct {
@@ -30,9 +29,6 @@ func (mc *mockClient) SendRequest(method string, params interface{}, reply inter
 	switch p := reply.(type) {
 	case *api.SuccessResponse:
 		response := mc.response.(api.SuccessResponse)
-		*p = response
-	case *admin.StacktraceReply:
-		response := mc.response.(admin.StacktraceReply)
 		*p = response
 	default:
 		panic("illegal type")

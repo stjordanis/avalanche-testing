@@ -5,7 +5,7 @@ import (
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -32,7 +32,7 @@ type StakingNetworkBombardTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkBombardTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
 	clients := make([]*apis.Client, 0, len(bootServiceIDs))
 	for serviceID := range bootServiceIDs {
@@ -77,23 +77,25 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Add config for a normal node, to add an additional node during the test
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
-	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig)
-	serviceConfigs[normalNodeConfigID] = *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
+	serviceConfigs[normalNodeConfigID] = *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 		true,
 		avalancheService.DEBUG,
 		test.ImageName,
 		2,
 		2,
+		2*time.Second,
 		make(map[string]string),
 	)
 
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.ImageName,
 		avalancheService.DEBUG,
 		2,
 		2,
 		test.TxFee,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

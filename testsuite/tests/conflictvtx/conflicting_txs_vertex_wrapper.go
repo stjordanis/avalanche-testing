@@ -14,11 +14,11 @@ import (
 const (
 	normalNodeConfigID          networks.ConfigurationID = "normal-config"
 	byzantineConfigID           networks.ConfigurationID = "byzantine-config"
-	byzantineUsername                                    = "byzantine_gecko"
+	byzantineUsername                                    = "byzantine_avalanche"
 	byzantinePassword                                    = "byzant1n3!"
 	byzantineBehavior                                    = "byzantine-behavior"
 	conflictingTxVertexBehavior                          = "conflicting-txs-vertex"
-	stakerUsername                                       = "staker_gecko"
+	stakerUsername                                       = "staker_avalanche"
 	stakerPassword                                       = "test34test!23"
 	byzantineNodeServiceID                               = "byzantine-node"
 	normalNodeServiceID                                  = "virtuous-node"
@@ -36,7 +36,7 @@ type StakingNetworkConflictingTxsVertexTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkConflictingTxsVertexTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 
 	byzantineClient, err := castedNetwork.GetAvalancheClient(byzantineNodeServiceID)
 	if err != nil {
@@ -80,34 +80,37 @@ Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
 func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.ConfigurationID, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			normalImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
-		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+		byzantineConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			byzantineImageName,
 			2,
 			2,
+			2*time.Second,
 			map[string]string{byzantineBehavior: conflictingTxVertexBehavior},
 		),
 	}
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", normalImageName)
 
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		normalImageName,
 		avalancheService.DEBUG,
 		2,
 		2,
 		1000000,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

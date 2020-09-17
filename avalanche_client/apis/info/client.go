@@ -3,9 +3,9 @@ package info
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/api/info"
-	"github.com/ava-labs/gecko/network"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
+	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/ava-labs/avalanchego/network"
 )
 
 // Client is an Info API Client

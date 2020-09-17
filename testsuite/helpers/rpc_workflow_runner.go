@@ -3,13 +3,13 @@ package helpers
 import (
 	"time"
 
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/vms/platformvm"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils/constants"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/ids"
-	"github.com/ava-labs/gecko/snow/choices"
-	"github.com/ava-labs/gecko/vms/platformvm"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -25,14 +25,14 @@ const (
 )
 
 // RPCWorkFlowRunner executes standard testing workflows like funding accounts from
-// genesis and adding nodes as validators, using the a given gecko client handle as the
+// genesis and adding nodes as validators, using the a given avalanche client handle as the
 // entry point to the test network. It runs the RpcWorkflows using the credential
-// set in the GeckoUser field.
+// set in the userPass field.
 // Note: RPCWorkFlowRunner does not store user credentials in a secure way. It is
 // only suitable for testing purposes.
 type RPCWorkFlowRunner struct {
-	client    *apis.Client
-	geckoUser api.UserPass
+	client   *apis.Client
+	userPass api.UserPass
 
 	// This timeout represents the time the RPCWorkFlowRunner will wait for some state change to be accepted
 	// and implemented by the underlying client.
@@ -46,26 +46,26 @@ func NewRPCWorkFlowRunner(
 	networkAcceptanceTimeout time.Duration) *RPCWorkFlowRunner {
 	return &RPCWorkFlowRunner{
 		client:                   client,
-		geckoUser:                user,
+		userPass:                 user,
 		networkAcceptanceTimeout: networkAcceptanceTimeout,
 	}
 }
 
 // User returns the user credentials for this worker
 func (runner RPCWorkFlowRunner) User() api.UserPass {
-	return runner.geckoUser
+	return runner.userPass
 }
 
 // ImportGenesisFunds imports the genesis private key to this user's keystore
 func (runner RPCWorkFlowRunner) ImportGenesisFunds() (string, error) {
 	client := runner.client
 	keystore := client.KeystoreAPI()
-	if _, err := keystore.CreateUser(runner.geckoUser); err != nil {
+	if _, err := keystore.CreateUser(runner.userPass); err != nil {
 		return "", err
 	}
 
 	genesisAccountAddress, err := client.XChainAPI().ImportKey(
-		runner.geckoUser,
+		runner.userPass,
 		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
@@ -87,13 +87,13 @@ func (runner RPCWorkFlowRunner) ImportGenesisFundsAndStartValidating(
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Could not seed XChain account from Genesis.")
 	}
-	pChainAddress, err := client.PChainAPI().CreateAddress(runner.geckoUser)
+	pChainAddress, err := client.PChainAPI().CreateAddress(runner.userPass)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to create new address on PChain")
 	}
 	err = runner.TransferAvaXChainToPChain(pChainAddress, seedAmount)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "Could not transfer AVA from XChain to PChain account information")
+		return "", stacktrace.Propagate(err, "Could not transfer AVAX from XChain to PChain account information")
 	}
 	// Adding staker
 	err = runner.AddValidatorToPrimaryNetwork(stakerNodeID, pChainAddress, stakeAmount)
@@ -115,7 +115,7 @@ func (runner RPCWorkFlowRunner) AddDelegatorToPrimaryNetwork(
 	startTime := uint64(delegatorStartTime.Unix())
 	endTime := uint64(delegatorStartTime.Add(DefaultDelegationPeriod).Unix())
 	addDelegatorTxID, err := client.PChainAPI().AddDelegator(
-		runner.geckoUser,
+		runner.userPass,
 		pChainAddress,
 		delegateeNodeID,
 		stakeAmount,
@@ -147,7 +147,7 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 	startTime := uint64(stakingStartTime.Unix())
 	endTime := uint64(stakingStartTime.Add(DefaultStakingPeriod).Unix())
 	addStakerTxID, err := client.PChainAPI().AddValidator(
-		runner.geckoUser,
+		runner.userPass,
 		pchainAddress,
 		nodeID,
 		stakeAmount,
@@ -168,11 +168,11 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 	return nil
 }
 
-// FundXChainAddresses sends [amount] AVA to each address in [addresses] and returns the created txIDs
+// FundXChainAddresses sends [amount] AVAX to each address in [addresses] and returns the created txIDs
 func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount uint64) error {
 	client := runner.client.XChainAPI()
 	for _, address := range addresses {
-		txID, err := client.Send(runner.geckoUser, amount, AvaxAssetID, address)
+		txID, err := client.Send(runner.userPass, amount, AvaxAssetID, address)
 		if err != nil {
 			return err
 		}
@@ -184,9 +184,9 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 	return nil
 }
 
-// SendAVAX attempts to send [amount] AVAX to address [to] using [runner]'s geckoUser
+// SendAVAX attempts to send [amount] AVAX to address [to] using [runner]'s userPass
 func (runner RPCWorkFlowRunner) SendAVAX(to string, amount uint64) (ids.ID, error) {
-	return runner.client.XChainAPI().Send(runner.geckoUser, amount, AvaxAssetID, to)
+	return runner.client.XChainAPI().Send(runner.userPass, amount, AvaxAssetID, to)
 }
 
 // CreateDefaultAddresses creates the keystore user for this workflow runner and
@@ -194,25 +194,25 @@ func (runner RPCWorkFlowRunner) SendAVAX(to string, amount uint64) (ids.ID, erro
 func (runner RPCWorkFlowRunner) CreateDefaultAddresses() (string, string, error) {
 	client := runner.client
 	keystore := client.KeystoreAPI()
-	if _, err := keystore.CreateUser(runner.geckoUser); err != nil {
+	if _, err := keystore.CreateUser(runner.userPass); err != nil {
 		return "", "", err
 	}
 
-	xAddress, err := client.XChainAPI().CreateAddress(runner.geckoUser)
+	xAddress, err := client.XChainAPI().CreateAddress(runner.userPass)
 	if err != nil {
 		return "", "", err
 	}
 
-	pAddress, err := client.PChainAPI().CreateAddress(runner.geckoUser)
+	pAddress, err := client.PChainAPI().CreateAddress(runner.userPass)
 	return xAddress, pAddress, err
 }
 
-// SendAVAXBackAndForth sends [amount] AVAX to address [to] using funds from [runner.geckoUser], [numTxs] times
+// SendAVAXBackAndForth sends [amount] AVAX to address [to] using funds from [runner.userPass], [numTxs] times
 func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, numTxs uint64, errs chan error) {
 	client := runner.client.XChainAPI()
 
 	for i := uint64(1); i < numTxs; i++ {
-		txID, err := client.Send(runner.geckoUser, amount-txFee*uint64(i), AvaxAssetID, to)
+		txID, err := client.Send(runner.userPass, amount-txFee*uint64(i), AvaxAssetID, to)
 		if err != nil {
 			errs <- stacktrace.Propagate(err, "Failed to send transaction.")
 		}
@@ -224,22 +224,22 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 	errs <- nil
 }
 
-// TransferAvaXChainToPChain exports AVA from the X Chain and then imports it to the P Chain
+// TransferAvaXChainToPChain exports AVAX from the X Chain and then imports it to the P Chain
 // and blocks until both transactions have been accepted
 func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, amount uint64) error {
 	client := runner.client
-	txID, err := client.XChainAPI().ExportAVAX(runner.geckoUser, amount, pChainAddress)
+	txID, err := client.XChainAPI().ExportAVAX(runner.userPass, amount, pChainAddress)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to export AVA to pchainAddress %s", pChainAddress)
+		return stacktrace.Propagate(err, "Failed to export AVAX to pchainAddress %s", pChainAddress)
 	}
 	err = runner.waitForXchainTransactionAcceptance(txID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 
-	importTxID, err := client.PChainAPI().ImportAVAX(runner.geckoUser, pChainAddress, constants.XChainID.String())
+	importTxID, err := client.PChainAPI().ImportAVAX(runner.userPass, pChainAddress, constants.XChainID.String())
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed import AVA to pchainAddress %s", pChainAddress)
+		return stacktrace.Propagate(err, "Failed import AVAX to pchainAddress %s", pChainAddress)
 	}
 	if err := runner.waitForPChainTransactionAcceptance(importTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to Accept ImportTx: %s", importTxID)
@@ -248,22 +248,22 @@ func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, 
 	return nil
 }
 
-// TransferAvaPChainToXChain exports AVA from the P Chain and then imports it to the X Chain
+// TransferAvaPChainToXChain exports AVAX from the P Chain and then imports it to the X Chain
 // and blocks until both transactions have been accepted
 func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	xChainAddress string,
 	amount uint64) error {
 	client := runner.client
 
-	exportTxID, err := client.PChainAPI().ExportAVAX(runner.geckoUser, xChainAddress, amount)
+	exportTxID, err := client.PChainAPI().ExportAVAX(runner.userPass, xChainAddress, amount)
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to export AVA to xChainAddress %s", xChainAddress)
+		return stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", xChainAddress)
 	}
 	if err := runner.waitForPChainTransactionAcceptance(exportTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to accept ExportTx: %s", exportTxID)
 	}
 
-	txID, err := client.XChainAPI().ImportAVAX(runner.geckoUser, xChainAddress, constants.PlatformChainID.String())
+	txID, err := client.XChainAPI().ImportAVAX(runner.userPass, xChainAddress, constants.PlatformChainID.String())
 	err = runner.waitForXchainTransactionAcceptance(txID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")

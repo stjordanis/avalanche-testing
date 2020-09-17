@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 	allServiceIDs map[networks.ServiceID]bool,
 	stakerServiceIDs map[networks.ServiceID]bool,
 	allNodeIDs map[networks.ServiceID]string,
-	allGeckoClients map[networks.ServiceID]*apis.Client,
+	allAvalalancheClients map[networks.ServiceID]*apis.Client,
 ) error {
 	logrus.Tracef("All node IDs in network being verified: %v", allNodeIDs)
 	for serviceID := range allServiceIDs {
@@ -49,7 +49,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 		}
 
 		logrus.Infof("Expecting serviceID %v to have the following peer node IDs, %v", serviceID, acceptableNodeIDs)
-		if err := verifier.VerifyExpectedPeers(serviceID, allGeckoClients[serviceID], acceptableNodeIDs, len(acceptableNodeIDs), false); err != nil {
+		if err := verifier.VerifyExpectedPeers(serviceID, allAvalalancheClients[serviceID], acceptableNodeIDs, len(acceptableNodeIDs), false); err != nil {
 			return stacktrace.Propagate(err, "An error occurred verifying the expected peers list")
 		}
 	}
@@ -59,7 +59,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 // VerifyExpectedPeers verifies that a node's actual peers match the expected value
 // Args:
 // 		serviceID: Service ID of the node whose peers are being examined
-// 		client: Gecko client for the node being examined
+// 		client: avalanche client for the node being examined
 // 		acceptableNodeIDs: A "set" of acceptable node IDs where, if a peer doesn't have this ID, the test will be failed
 // 		expectedNumPeers: The number of peers we expect this node to have
 // 		atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact

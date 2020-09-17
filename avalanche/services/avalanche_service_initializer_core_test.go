@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
@@ -14,14 +15,15 @@ import (
 var testPublicIP = net.ParseIP("172.17.0.2")
 
 func TestNoDepsStartCommand(t *testing.T) {
-	initializerCore := NewGeckoServiceInitializerCore(
+	initializerCore := NewAvalancheServiceInitializerCore(
 		1,
 		1,
 		0,
 		false,
+		2*time.Second,
 		make(map[string]string),
 		[]string{},
-		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticAvalancheCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		INFO,
 	)
 
@@ -37,6 +39,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
 		"--tx-fee=0",
+		fmt.Sprintf("--network-initial-timeout=%d", int64(2*time.Second)),
 	}
 	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIP, make([]services.Service, 0))
 	assert.NoError(t, err, "An error occurred getting the start command")
@@ -50,14 +53,15 @@ func TestWithDepsStartCommand(t *testing.T) {
 	bootstrapperNodeIDs := []string{
 		testNodeID,
 	}
-	initializerCore := NewGeckoServiceInitializerCore(
+	initializerCore := NewAvalancheServiceInitializerCore(
 		1,
 		1,
 		0,
 		false,
+		2*time.Second,
 		make(map[string]string),
 		bootstrapperNodeIDs,
-		certs.NewStaticGeckoCertProvider(bytes.Buffer{}, bytes.Buffer{}),
+		certs.NewStaticAvalancheCertProvider(bytes.Buffer{}, bytes.Buffer{}),
 		INFO,
 	)
 
@@ -73,10 +77,11 @@ func TestWithDepsStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
 		"--tx-fee=0",
+		fmt.Sprintf("--network-initial-timeout=%d", int64(2*time.Second)),
 		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIP),
 	}
 
-	testDependency := GeckoService{
+	testDependency := AvalancheService{
 		ipAddr:      "1.2.3.4",
 		jsonRPCPort: "9650/tcp",
 		stakingPort: "9651/tcp",

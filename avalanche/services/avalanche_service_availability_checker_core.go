@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis/info"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/info"
 	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/kurtosis-tech/kurtosis/commons/services"
 )
@@ -12,25 +12,25 @@ import (
 // NewAvalancheServiceAvailabilityChecker returns a new services.ServiceAvailabilityCheckerCore to
 // check if an AvalancheService is ready
 func NewAvalancheServiceAvailabilityChecker(timeout time.Duration) services.ServiceAvailabilityCheckerCore {
-	return &GeckoServiceAvailabilityCheckerCore{
+	return &AvalancheServiceAvailabilityCheckerCore{
 		timeout: timeout,
 	}
 }
 
-// GeckoServiceAvailabilityCheckerCore implements services.ServiceAvailabilityCheckerCore
-// that defines the criteria for a Gecko service being available
-type GeckoServiceAvailabilityCheckerCore struct {
+// AvalancheServiceAvailabilityCheckerCore implements services.ServiceAvailabilityCheckerCore
+// that defines the criteria for an Avalanche service being available
+type AvalancheServiceAvailabilityCheckerCore struct {
 	timeout                                                    time.Duration
 	bootstrappedPChain, bootstrappedCChain, bootstrappedXChain bool
 }
 
 // IsServiceUp implements services.ServiceAvailabilityCheckerCore#IsServiceUp
-// and returns true when the Gecko healthcheck reports that the node is available
-func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
-	// NOTE: we don't check the dependencies intentionally, because we don't need to - a Gecko service won't report itself
+// and returns true when the Avalanche healthcheck reports that the node is available
+func (g AvalancheServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Service, dependencies []services.Service) bool {
+	// NOTE: we don't check the dependencies intentionally, because we don't need to - an Avalanche service won't report itself
 	//  as up until its bootstrappers are up
 
-	castedService := toCheck.(GeckoService)
+	castedService := toCheck.(AvalancheService)
 	jsonRPCSocket := castedService.GetJSONRPCSocket()
 	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
 	client := info.NewClient(uri, constants.DefaultRequestTimeout)
@@ -61,6 +61,6 @@ func (g GeckoServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Servic
 }
 
 // GetTimeout implements services.AvailabilityCheckerCore
-func (g GeckoServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
+func (g AvalancheServiceAvailabilityCheckerCore) GetTimeout() time.Duration {
 	return 90 * time.Second
 }

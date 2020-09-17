@@ -4,11 +4,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/ids"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
@@ -18,9 +18,9 @@ import (
 const (
 	normalNodeConfigID     networks.ConfigurationID = "normal-config"
 	byzantineConfigID      networks.ConfigurationID = "byzantine-config"
-	byzantineUsername                               = "byzantine_gecko"
+	byzantineUsername                               = "byzantine_avalanche"
 	byzantinePassword                               = "byzant1n3!"
-	stakerUsername                                  = "staker_gecko"
+	stakerUsername                                  = "staker_avalanche"
 	stakerPassword                                  = "test34test!23"
 	normalNodeServiceID    networks.ServiceID       = "normal-node"
 	byzantineNodePrefix    string                   = "byzantine-node-"
@@ -42,7 +42,7 @@ type StakingNetworkUnrequestedChitSpammerTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
@@ -60,11 +60,11 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
 		}
-		currentStakers, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
+		currentStakers, currentDelegators, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 		}
-		logrus.Debugf("Number of current stakers: %d", len(currentStakers))
+		logrus.Infof("Current Stakers: %d, Current Delegators: %d", len(currentStakers), len(currentDelegators))
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
@@ -94,38 +94,46 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
 	logrus.Infof("Validating network state...")
-	currentStakers, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
+	currentStakers, currentDelegators, err := normalClient.PChainAPI().GetCurrentValidators(ids.Empty)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
 	}
 	actualNumStakers := len(currentStakers)
 	expectedNumStakers := 10
-	logrus.Debugf("Number of current stakers: %d, expected number of stakers: %d", len(currentStakers), expectedNumStakers)
+	logrus.Debugf("Number of current stakers: %d, expected number of stakers: %d", actualNumStakers, expectedNumStakers)
 	if actualNumStakers != expectedNumStakers {
 		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers))
+	}
+	actualNumDelegators := len(currentDelegators)
+	expectedNumDelegators := 0
+	logrus.Debugf("Number of current delegators: %d, expected number of delegators: %d", actualNumDelegators, expectedNumDelegators)
+	if actualNumStakers != expectedNumStakers {
+		context.AssertTrue(actualNumStakers == expectedNumStakers, stacktrace.NewError("Actual number of delegators, %v, != expected number of delegators, %v", actualNumDelegators, expectedNumDelegators))
 	}
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		byzantineConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		byzantineConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.ByzantineImageName,
 			2,
 			2,
+			2*time.Second,
 			map[string]string{
 				byzantineBehavior: chitSpammerBehavior,
 			},
 		),
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.NormalImageName,
 			6,
 			8,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -138,13 +146,14 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
 
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.NormalImageName,
 		avalancheService.DEBUG,
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		serviceIDConfigMap,
 	)

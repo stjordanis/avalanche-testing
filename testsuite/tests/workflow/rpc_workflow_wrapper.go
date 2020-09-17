@@ -26,8 +26,8 @@ type StakingNetworkRPCWorkflowTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context testsuite.TestContext) {
-	// =============================== SETUP GECKO CLIENTS ======================================
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	// =============================== SETUP AVALANCHE CLIENTS ======================================
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	networkAcceptanceTimeout := time.Duration(networkAcceptanceTimeoutRatio * float64(test.GetExecutionTimeout().Nanoseconds()))
 	stakerClient, err := castedNetwork.GetAvalancheClient(regularNodeServiceID)
 	if err != nil {
@@ -50,13 +50,14 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
@@ -65,14 +66,15 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		regularNodeServiceID:   normalNodeConfigID,
 		delegatorNodeServiceID: normalNodeConfigID,
 	}
-	// Return a Gecko test net with this service:configuration mapping.
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	// Return an Avalanche Test Network with this service:configuration mapping.
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.ImageName,
 		avalancheService.DEBUG,
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)

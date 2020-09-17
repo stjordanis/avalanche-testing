@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/ids"
-	"github.com/ava-labs/gecko/snow/choices"
-	"github.com/ava-labs/gecko/utils/formatting"
-	cjson "github.com/ava-labs/gecko/utils/json"
-	"github.com/ava-labs/gecko/vms/avm"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	cjson "github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/vms/avm"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )
 
 type Client struct {

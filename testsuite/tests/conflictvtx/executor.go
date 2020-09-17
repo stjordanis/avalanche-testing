@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
-	"github.com/ava-labs/gecko/snow/choices"
-	"github.com/ava-labs/gecko/utils/formatting"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )

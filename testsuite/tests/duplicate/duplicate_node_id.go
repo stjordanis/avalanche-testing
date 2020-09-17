@@ -5,7 +5,7 @@ import (
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/gecko_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 	"github.com/kurtosis-tech/kurtosis/commons/networks"
 	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
@@ -31,7 +31,7 @@ type DuplicateNodeIDTest struct {
 
 // Run implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.TestContext) {
-	castedNetwork := network.(avalancheNetwork.TestGeckoNetwork)
+	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
 
@@ -41,8 +41,8 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	}
 	allServiceIDs[vanillaNodeServiceID] = true
 
-	allNodeIDs, allGeckoClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allGeckoClients); err != nil {
+	allNodeIDs, allAvalancheClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
@@ -53,7 +53,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	}
 
 	logrus.Debugf("Service IDs before adding any nodes: %v", allServiceIDs)
-	logrus.Debugf("Gecko node IDs before adding any nodes: %v", allNodeIDs)
+	logrus.Debugf("Avalanche node IDs before adding any nodes: %v", allNodeIDs)
 
 	// Add the first dupe node ID (should look normal from a network perspective
 	logrus.Info("Adding first node with soon-to-be-duplicated node ID...")
@@ -68,9 +68,9 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 	badServiceClient1, err := castedNetwork.GetAvalancheClient(badServiceID1)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the first dupe node ID service with ID %v", badServiceID1))
+		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche client for the first dupe node ID service with ID %v", badServiceID1))
 	}
-	allGeckoClients[badServiceID1] = badServiceClient1
+	allAvalancheClients[badServiceID1] = badServiceClient1
 
 	badServiceNodeID1, err := badServiceClient1.InfoAPI().GetNodeID()
 	if err != nil {
@@ -82,7 +82,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 	// Verify that the new node got accepted by everyone
 	logrus.Infof("Verifying that the new node with service ID %v was accepted by all bootstrappers...", badServiceID1)
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceID1)
@@ -100,9 +100,9 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 	badServiceClient2, err := castedNetwork.GetAvalancheClient(badServiceID2)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for the second dupe node ID service with ID %v", badServiceID2))
+		context.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche client for the second dupe node ID service with ID %v", badServiceID2))
 	}
-	allGeckoClients[badServiceID2] = badServiceClient2
+	allAvalancheClients[badServiceID2] = badServiceClient2
 
 	badServiceNodeID2, err := badServiceClient2.InfoAPI().GetNodeID()
 	if err != nil {
@@ -130,12 +130,12 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 			acceptableNodeIDs[allNodeIDs[vanillaNodeServiceID]] = true
 			acceptableNodeIDs[badServiceNodeID1] = true
 			acceptableNodeIDs[badServiceNodeID2] = true
-			if err := test.Verifier.VerifyExpectedPeers(serviceID, allGeckoClients[serviceID], acceptableNodeIDs, len(originalServiceIDs)-1, true); err != nil {
+			if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(originalServiceIDs)-1, true); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
 		} else {
 			// The original non-boot node should have exactly the boot nodes
-			if err := test.Verifier.VerifyExpectedPeers(serviceID, allGeckoClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
+			if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
 		}
@@ -148,14 +148,14 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 		context.Fatal(stacktrace.Propagate(err, "Could not remove the first service with duped node ID"))
 	}
 	delete(allServiceIDs, badServiceID1)
-	delete(allGeckoClients, badServiceID1)
+	delete(allAvalancheClients, badServiceID1)
 	delete(allNodeIDs, badServiceID1)
 	logrus.Info("Successfully removed first node with duplicate ID, leaving only the second")
 
 	// Now that the first duped node is gone, verify that the original node is still connected to just boot nodes and
 	//  the second duped-ID node is now accepted by the boot nodes
 	logrus.Info("Verifying that the network has connected to the second node with a previously-duplicated node ID...")
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allGeckoClients); err != nil {
+	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
@@ -163,34 +163,37 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, error) {
-	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestGeckoNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
-		sameCertConfigID: *avalancheNetwork.NewTestGeckoNetworkServiceConfig(
+		sameCertConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			false,
 			avalancheService.DEBUG,
 			test.ImageName,
 			2,
 			2,
+			2*time.Second,
 			make(map[string]string),
 		),
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		vanillaNodeServiceID: normalNodeConfigID,
 	}
-	return avalancheNetwork.NewTestGeckoNetworkLoader(
+	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		test.ImageName,
 		avalancheService.DEBUG,
 		2,
 		2,
 		0,
+		2*time.Second,
 		serviceConfigs,
 		desiredServices,
 	)
@@ -209,24 +212,24 @@ func (test DuplicateNodeIDTest) GetSetupBuffer() time.Duration {
 
 // ================ Helper functions ==================================
 /*
-This helper function will grab node IDs and Gecko clients
+This helper function will grab node IDs and Avalanche clients
 */
 func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
-	network avalancheNetwork.TestGeckoNetwork,
+	network avalancheNetwork.TestAvalancheNetwork,
 	allServiceIDs map[networks.ServiceID]bool,
-) (allNodeIDs map[networks.ServiceID]string, allGeckoClients map[networks.ServiceID]*apis.Client) {
-	allGeckoClients = make(map[networks.ServiceID]*apis.Client)
+) (allNodeIDs map[networks.ServiceID]string, allAvalancheClients map[networks.ServiceID]*apis.Client) {
+	allAvalancheClients = make(map[networks.ServiceID]*apis.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
 	for serviceID := range allServiceIDs {
 		client, err := network.GetAvalancheClient(serviceID)
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko client for service with ID %v", serviceID))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche client for service with ID %v", serviceID))
 		}
-		allGeckoClients[serviceID] = client
+		allAvalancheClients[serviceID] = client
 		nodeID, err := client.InfoAPI().GetNodeID()
 		if err != nil {
-			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Gecko node ID for service with ID %v", serviceID))
+			testContext.Fatal(stacktrace.Propagate(err, "An error occurred getting the Avalanche node ID for service with ID %v", serviceID))
 		}
 		allNodeIDs[serviceID] = nodeID
 	}

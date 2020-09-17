@@ -3,9 +3,9 @@ package admin
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/api/admin"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/api/admin"
 )
 
 // Client for the Avalanche Platform Info API Endpoint
@@ -87,11 +87,11 @@ func (c *Client) AliasChain(chain, alias string) (bool, error) {
 }
 
 // Stacktrace ...
-func (c *Client) Stacktrace() (*admin.StacktraceReply, error) {
-	res := &admin.StacktraceReply{}
+func (c *Client) Stacktrace() (bool, error) {
+	res := &api.SuccessResponse{}
 	err := c.requester.SendRequest("stacktrace", struct{}{}, res)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	return res, nil
+	return res.Success, nil
 }

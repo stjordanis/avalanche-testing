@@ -6,13 +6,13 @@ package platform
 import (
 	"time"
 
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/ids"
-	"github.com/ava-labs/gecko/utils/formatting"
-	cjson "github.com/ava-labs/gecko/utils/json"
-	"github.com/ava-labs/gecko/vms/platformvm"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	cjson "github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/vms/platformvm"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
 )
 
 // Client ...
@@ -102,22 +102,22 @@ func (c *Client) GetSubnets(ids []ids.ID) ([]platformvm.APISubnet, error) {
 	return res.Subnets, err
 }
 
-// GetCurrentValidators returns the list of current validators for subnet with ID [subnetID]
-func (c *Client) GetCurrentValidators(subnetID ids.ID) ([]platformvm.FormattedAPIValidator, error) {
+// GetCurrentValidators returns the list of current validators and the list of delegators for subnet with ID [subnetID]
+func (c *Client) GetCurrentValidators(subnetID ids.ID) ([]interface{}, []interface{}, error) {
 	res := &platformvm.GetCurrentValidatorsReply{}
 	err := c.requester.SendRequest("getCurrentValidators", &platformvm.GetCurrentValidatorsArgs{
 		SubnetID: subnetID,
 	}, res)
-	return res.Validators, err
+	return res.Validators, res.Delegators, err
 }
 
 // GetPendingValidators returns the list of pending validators for subnet with ID [subnetID]
-func (c *Client) GetPendingValidators(subnetID ids.ID) ([]platformvm.FormattedAPIValidator, error) {
+func (c *Client) GetPendingValidators(subnetID ids.ID) ([]interface{}, []interface{}, error) {
 	res := &platformvm.GetPendingValidatorsReply{}
 	err := c.requester.SendRequest("getPendingValidators", &platformvm.GetPendingValidatorsArgs{
 		SubnetID: subnetID,
 	}, res)
-	return res.Validators, err
+	return res.Validators, res.Delegators, err
 }
 
 // SampleValidators returns the nodeIDs of a sample of [sampleSize] validators from the current validator set for subnet with ID [subnetID]
@@ -136,16 +136,14 @@ func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, s
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addValidator", &platformvm.AddValidatorArgs{
 		UserPass: user,
-		FormattedAPIPrimaryValidator: platformvm.FormattedAPIPrimaryValidator{
-			RewardAddress:     rewardAddress,
-			DelegationFeeRate: cjson.Float32(delegationFeeRate),
-			FormattedAPIValidator: platformvm.FormattedAPIValidator{
-				ID:          nodeID,
-				StakeAmount: &jsonStakeAmount,
-				StartTime:   cjson.Uint64(startTime),
-				EndTime:     cjson.Uint64(endTime),
-			},
+		APIStaker: platformvm.APIStaker{
+			NodeID:      nodeID,
+			StakeAmount: &jsonStakeAmount,
+			StartTime:   cjson.Uint64(startTime),
+			EndTime:     cjson.Uint64(endTime),
 		},
+		RewardAddress:     rewardAddress,
+		DelegationFeeRate: cjson.Float32(delegationFeeRate),
 	}, res)
 	return res.TxID, err
 }
@@ -156,8 +154,8 @@ func (c *Client) AddDelegator(user api.UserPass, rewardAddress, nodeID string, s
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDelegator", &platformvm.AddDelegatorArgs{
 		UserPass: user,
-		FormattedAPIValidator: platformvm.FormattedAPIValidator{
-			ID:          nodeID,
+		APIStaker: platformvm.APIStaker{
+			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
 			StartTime:   cjson.Uint64(startTime),
 			EndTime:     cjson.Uint64(endTime),
@@ -173,8 +171,8 @@ func (c *Client) AddSubnetValidator(user api.UserPass, destination, nodeID strin
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addSubnetValidator", &platformvm.AddSubnetValidatorArgs{
 		UserPass: user,
-		FormattedAPIValidator: platformvm.FormattedAPIValidator{
-			ID:          nodeID,
+		APIStaker: platformvm.APIStaker{
+			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
 			StartTime:   cjson.Uint64(startTime),
 			EndTime:     cjson.Uint64(endTime),

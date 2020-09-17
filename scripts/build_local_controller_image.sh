@@ -2,25 +2,25 @@
 
 set -euo pipefail
 
-# Note: this script will build a docker image by cloning a remote version of avalanche-testing and gecko into a temporary
+# Note: this script will build a docker image by cloning a remote version of avalanche-testing and avalanchego into a temporary
 # location and using that version's Dockerfile to build the image.
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
-GECKO_PATH="$GOPATH/src/github.com/ava-labs/gecko"
+AVALANCHE_PATH="$GOPATH/src/github.com/ava-labs/avalanchego"
 E2E_COMMIT="$(git --git-dir="$ROOT_DIRPATH/.git" rev-parse --short HEAD)"
-GECKO_COMMIT="$(git --git-dir="$GECKO_PATH/.git" rev-parse --short HEAD)"
+AVALANCHE_COMMIT="$(git --git-dir="$AVALANCHE_PATH/.git" rev-parse --short HEAD)"
 
 export GOPATH="$SCRIPT_DIRPATH/.build_image_gopath"
 WORKPREFIX="$GOPATH/src/github.com/ava-labs"
 DOCKER="${DOCKER:-docker}"
 
 
-GECKO_REMOTE="https://github.com/ava-labs/gecko-internal.git"
+AVALANCHE_REMOTE="https://github.com/ava-labs/avalanchego.git"
 E2E_REMOTE="https://github.com/ava-labs/avalanche-testing.git"
 
 
 # Clone the remotes and checkout the desired branch/commits
-GECKO_CLONE="$WORKPREFIX/gecko"
+AVALANCHE_CLONE="$WORKPREFIX/avalanchego"
 E2E_CLONE="$WORKPREFIX/avalanche-testing"
 
 # Create the WORKPREFIX directory if it does not exist yet
@@ -31,13 +31,13 @@ fi
 # Configure git credential helper
 git config --global credential.helper cache
 
-if [[ ! -d "$GECKO_CLONE" ]]; then
-    git clone "$GECKO_REMOTE" "$GECKO_CLONE"
+if [[ ! -d "$AVALANCHE_CLONE" ]]; then
+    git clone "$AVALANCHE_REMOTE" "$AVALANCHE_CLONE"
 else
-    git -C "$GECKO_CLONE" fetch origin
+    git -C "$AVALANCHE_CLONE" fetch origin
 fi
 
-git -C "$GECKO_CLONE" checkout "$GECKO_COMMIT"
+git -C "$AVALANCHE_CLONE" checkout "$AVALANCHE_COMMIT"
 
 if [[ ! -d "$E2E_CLONE" ]]; then
     git clone "$E2E_REMOTE" "$E2E_CLONE"
@@ -52,6 +52,6 @@ DOCKER_ORG="avaplatform"
 REPO_BASE="avalanche-testing"
 CONTROLLER_REPO="${REPO_BASE}_controller"
 
-CONTROLLER_TAG="$DOCKER_ORG/$CONTROLLER_REPO-$E2E_COMMIT-$GECKO_COMMIT"
+CONTROLLER_TAG="$DOCKER_ORG/$CONTROLLER_REPO-$E2E_COMMIT-$AVALANCHE_COMMIT"
 
 "${DOCKER}" build -t "${CONTROLLER_TAG}" "${WORKPREFIX}" -f "$ROOT_DIRPATH/controller/local.Dockerfile"

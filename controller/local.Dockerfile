@@ -5,10 +5,11 @@ RUN mkdir -p /go/src/github.com/ava-labs
 
 # Copy the code into the container
 WORKDIR $GOPATH/src/github.com/ava-labs
-COPY gecko gecko
+COPY avalanchego avalanchego
 COPY avalanche-testing avalanche-testing
 
 WORKDIR $GOPATH/src/github.com/ava-labs/avalanche-testing
+RUN go mod edit -replace github.com/ava-labs/avalanchego=../avalanchego
 RUN go mod download
 
 # Build the application
@@ -27,7 +28,7 @@ CMD set -euo pipefail && ./test-controller \
     --test-volume=${TEST_VOLUME} \
     --test-volume-mountpoint=${TEST_VOLUME_MOUNTPOINT} \
     --test=${TEST_NAME} \
-    --gecko-image-name=${GECKO_IMAGE_NAME} \
+    --avalanche-image-name=${AVALANCHE_IMAGE_NAME} \
     --byzantine-image-name=${BYZANTINE_IMAGE_NAME} \
     --docker-network=${NETWORK_ID} \
     --subnet-mask=${SUBNET_MASK} \

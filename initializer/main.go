@@ -15,7 +15,7 @@ import (
 
 const (
 	testNameArgSeparator     = ","
-	geckoImageNameEnvVar     = "GECKO_IMAGE_NAME"
+	avalancheImageNameEnvVar = "AVALANCHE_IMAGE_NAME"
 	byzantineImageNameEnvVar = "BYZANTINE_IMAGE_NAME"
 	defaultParallelism       = 4
 
@@ -41,16 +41,16 @@ func main() {
 	)
 
 	// Define and parse command line flags.
-	geckoImageNameArg := flag.String(
-		"gecko-image-name",
+	avalancheImageNameArg := flag.String(
+		"avalanche-image-name",
 		"",
-		"The name of a pre-built Gecko image, either on the local Docker engine or in Docker Hub",
+		"The name of a pre-built Avalanche image, either on the local Docker engine or in Docker Hub",
 	)
 
 	byzantineImageNameArg := flag.String(
 		"byzantine-image-name",
 		"",
-		"The name of a pre-built Byzantine Gecko image, on the local Docker engine",
+		"The name of a pre-built avalanche-byzantine image, on the local Docker engine",
 	)
 
 	testControllerImageNameArg := flag.String(
@@ -88,7 +88,7 @@ func main() {
 	logrus.Info("Welcome to the Avalanche E2E test suite, powered by the Kurtosis framework")
 	testSuite := testsuite.AvalancheTestSuite{
 		ByzantineImageName: *byzantineImageNameArg,
-		NormalImageName:    *geckoImageNameArg,
+		NormalImageName:    *avalancheImageNameArg,
 	}
 	if *doListArg {
 		testNames := []string{}
@@ -135,7 +135,7 @@ func main() {
 		*testControllerImageNameArg,
 		*controllerLogLevelArg,
 		map[string]string{
-			geckoImageNameEnvVar:     *geckoImageNameArg,
+			avalancheImageNameEnvVar: *avalancheImageNameArg,
 			byzantineImageNameEnvVar: *byzantineImageNameArg,
 		},
 		networkWidthBits)

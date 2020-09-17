@@ -6,11 +6,11 @@ package keystore
 import (
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/gecko_client/utils"
-	"github.com/ava-labs/gecko/utils/formatting"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 
-	"github.com/ava-labs/gecko/api"
-	"github.com/ava-labs/gecko/api/keystore"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/api/keystore"
 )
 
 type Client struct {
