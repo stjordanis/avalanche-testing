@@ -101,10 +101,22 @@ func (c *Client) GetAllBalances(addr string, assetID string) (*avm.GetAllBalance
 	return res, err
 }
 
-func (c *Client) CreateFixedCapAsset(user api.UserPass, name, symbol string, denomination byte, holders []*avm.Holder) (ids.ID, error) {
+func (c *Client) CreateFixedCapAsset(
+	user api.UserPass,
+	name,
+	symbol string,
+	denomination byte,
+	holders []*avm.Holder,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createFixedCapAsset", &avm.CreateFixedCapAssetArgs{
-		UserPass:       user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		Name:           name,
 		Symbol:         symbol,
 		Denomination:   denomination,
@@ -116,10 +128,22 @@ func (c *Client) CreateFixedCapAsset(user api.UserPass, name, symbol string, den
 	return res.AssetID, nil
 }
 
-func (c *Client) CreateVariableCapAsset(user api.UserPass, name, symbol string, denomination byte, minters []avm.Owners) (ids.ID, error) {
+func (c *Client) CreateVariableCapAsset(
+	user api.UserPass,
+	name,
+	symbol string,
+	denomination byte,
+	minters []avm.Owners,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createVariableCapAsset", &avm.CreateVariableCapAssetArgs{
-		UserPass:     user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		Name:         name,
 		Symbol:       symbol,
 		Denomination: denomination,
@@ -131,10 +155,21 @@ func (c *Client) CreateVariableCapAsset(user api.UserPass, name, symbol string, 
 	return res.AssetID, nil
 }
 
-func (c *Client) CreateNFTAsset(user api.UserPass, name, symbol string, minters []avm.Owners) (ids.ID, error) {
+func (c *Client) CreateNFTAsset(
+	user api.UserPass,
+	name,
+	symbol string,
+	minters []avm.Owners,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createNFTAsset", &avm.CreateNFTAssetArgs{
-		UserPass:   user,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
 		Name:       name,
 		Symbol:     symbol,
 		MinterSets: minters,
@@ -187,13 +222,24 @@ func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error)
 	return res.Address, nil
 }
 
-func (c *Client) Send(user api.UserPass, amount uint64, assetID, to string) (ids.ID, error) {
+func (c *Client) Send(
+	user api.UserPass,
+	amount uint64,
+	assetID,
+	to string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("send", &avm.SendArgs{
-		UserPass: user,
-		Amount:   cjson.Uint64(amount),
-		AssetID:  assetID,
-		To:       to,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		Amount:  cjson.Uint64(amount),
+		AssetID: assetID,
+		To:      to,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -201,13 +247,24 @@ func (c *Client) Send(user api.UserPass, amount uint64, assetID, to string) (ids
 	return res.TxID, nil
 }
 
-func (c *Client) Mint(user api.UserPass, amount uint64, assetID, to string) (ids.ID, error) {
+func (c *Client) Mint(
+	user api.UserPass,
+	amount uint64,
+	assetID,
+	to string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("mint", &avm.MintArgs{
-		UserPass: user,
-		Amount:   cjson.Uint64(amount),
-		AssetID:  assetID,
-		To:       to,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		Amount:  cjson.Uint64(amount),
+		AssetID: assetID,
+		To:      to,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -215,13 +272,24 @@ func (c *Client) Mint(user api.UserPass, amount uint64, assetID, to string) (ids
 	return res.TxID, nil
 }
 
-func (c *Client) SendNFT(user api.UserPass, assetID string, groupID uint32, to string) (ids.ID, error) {
+func (c *Client) SendNFT(
+	user api.UserPass,
+	assetID string,
+	groupID uint32,
+	to string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("sendNFT", &avm.SendNFTArgs{
-		UserPass: user,
-		AssetID:  assetID,
-		GroupID:  cjson.Uint32(groupID),
-		To:       to,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		AssetID: assetID,
+		GroupID: cjson.Uint32(groupID),
+		To:      to,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -229,13 +297,24 @@ func (c *Client) SendNFT(user api.UserPass, assetID string, groupID uint32, to s
 	return res.TxID, nil
 }
 
-func (c *Client) MintNFT(user api.UserPass, assetID string, payload []byte, to string) (ids.ID, error) {
+func (c *Client) MintNFT(
+	user api.UserPass,
+	assetID string,
+	payload []byte,
+	to string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("mintNFT", &avm.MintNFTArgs{
-		UserPass: user,
-		AssetID:  assetID,
-		Payload:  formatting.CB58{Bytes: payload},
-		To:       to,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		AssetID: assetID,
+		Payload: formatting.CB58{Bytes: payload},
+		To:      to,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -256,12 +335,22 @@ func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, 
 	return res.TxID, nil
 }
 
-func (c *Client) ExportAVAX(user api.UserPass, amount uint64, to string) (ids.ID, error) {
+func (c *Client) ExportAVAX(
+	user api.UserPass,
+	amount uint64,
+	to string,
+	from []string,
+	changeAddr string,
+) (ids.ID, error) {
 	res := &api.JsonTxID{}
 	err := c.requester.SendRequest("exportAVAX", &avm.ExportAVAXArgs{
-		UserPass: user,
-		Amount:   cjson.Uint64(amount),
-		To:       to,
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		Amount: cjson.Uint64(amount),
+		To:     to,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
