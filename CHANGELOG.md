@@ -11,6 +11,9 @@
 * Add bombard test to bombard the X chain with transactions and then add two nodes to bootstrap the new data
 * Update get current and pending validators calls in platform API
 * Rename from gecko -> avalanchego
+* Update API to include change addresses
+* Update P Chain Get Balance call
+* Bump coreth version
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints

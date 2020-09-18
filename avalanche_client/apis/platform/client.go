@@ -57,7 +57,7 @@ func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error)
 // GetBalance returns the balance of [address] on the P Chain
 func (c *Client) GetBalance(address string) (*platformvm.GetBalanceResponse, error) {
 	res := &platformvm.GetBalanceResponse{}
-	err := c.requester.SendRequest("getBalance", &platformvm.GetBalanceArgs{
+	err := c.requester.SendRequest("getBalance", &api.JsonAddress{
 		Address: address,
 	}, res)
 	return res, err
