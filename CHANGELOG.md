@@ -1,3 +1,7 @@
+# TBD
+* Upgraded to Kurtosis 1.0
+* Centralized run scripts into `build_and_run.sh`
+
 # 0.9.0
 * Update to v0.7.0 of avalanchego and avalanche-byzantine
 * Rename delegator/staker functions
