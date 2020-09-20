@@ -1,13 +1,12 @@
 set -euo pipefail
 SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
+PARALLELISM=4
 
 DOCKER_REPO="avaplatform"
 
 # login to AWS for byzantine images
 echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
-DEFAULT_CONTROLLER_TAG="$DOCKER_REPO/avalanche-testing_controller"
 
 # Use stable version of Everest for CI
 AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:testing-ci-stable"
@@ -20,25 +19,17 @@ docker pull "${BYZANTINE_IMAGE}"
 docker pull "${AVALANCHE_IMAGE}"
 
 E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/build_and_run.sh"
-CUSTOM_ENV_VARS_JSON_ARG="CUSTOM_ENV_VARS_JSON={
-    \"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",
-    \"BYZANTINE_IMAGE\":\"${BYZANTINE_IMAGE}\"
-}"
+
+# Docker only allows you to have spaces in the variable if you escape them or use a Docker env file
+CUSTOM_ENV_VARS_JSON_ARG="CUSTOM_ENV_VARS_JSON={\"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",\"BYZANTINE_IMAGE\":\"${BYZANTINE_IMAGE}\"}"
 
 return_code=0
-if ! bash "${E2E_TEST_COMMAND}" --env "${CUSTOM_ENV_VARS_JSON_ARG}"; then
+if ! bash "${E2E_TEST_COMMAND}" all --env "${CUSTOM_ENV_VARS_JSON_ARG}" --env "PARALLELISM=${PARALLELISM}"; then
     echo "Avalanche E2E tests failed"
     return_code=1
 else
     echo "Avalanche E2E tests succeeded"
     return_code=0
 fi
-
-# Clear containers.
-echo "Clearing Avalanche Docker containers..."
-docker rm $(docker stop $(docker ps -a -q --filter ancestor="${AVALANCHE_IMAGE}" --format="{{.ID}}")) >/dev/null
-docker rm $(docker stop $(docker ps -a -q --filter ancestor="${BYZANTINE_IMAGE}" --format="{{.ID}}")) >/dev/null
-docker rm $(docker stop $(docker ps -a -q --filter ancestor="${DEFAULT_CONTROLLER_TAG}" --format="{{.ID}}")) >/dev/null
-echo "Avalanche Docker containers cleared successfully"
 
 exit "${return_code}"
