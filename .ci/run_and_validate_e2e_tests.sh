@@ -19,11 +19,14 @@ BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:testing-ci-stable"
 docker pull "${BYZANTINE_IMAGE}"
 docker pull "${AVALANCHE_IMAGE}"
 
-E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/full_rebuild_and_run.sh"
-BYZANTINE_IMAGE_ARG="--byzantine-image-name=${BYZANTINE_IMAGE}"
-AVALANCHE_IMAGE_ARG="--avalanche-image-name=${AVALANCHE_IMAGE}"
+E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/build_and_run.sh"
+CUSTOM_ENV_VARS_JSON_ARG="CUSTOM_ENV_VARS_JSON={
+    \"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",
+    \"BYZANTINE_IMAGE\":\"${BYZANTINE_IMAGE}\"
+}"
+
 return_code=0
-if ! bash "${E2E_TEST_COMMAND}" "${BYZANTINE_IMAGE_ARG}" "${AVALANCHE_IMAGE_ARG}"; then
+if ! bash "${E2E_TEST_COMMAND}" --env "${CUSTOM_ENV_VARS_JSON_ARG}"; then
     echo "Avalanche E2E tests failed"
     return_code=1
 else

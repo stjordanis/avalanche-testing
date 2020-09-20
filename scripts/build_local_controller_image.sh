@@ -54,4 +54,4 @@ CONTROLLER_REPO="${REPO_BASE}_controller"
 
 CONTROLLER_TAG="$DOCKER_ORG/$CONTROLLER_REPO-$E2E_COMMIT-$AVALANCHE_COMMIT"
 
-"${DOCKER}" build -t "${CONTROLLER_TAG}" "${WORKPREFIX}" -f "$ROOT_DIRPATH/controller/local.Dockerfile"
+"${DOCKER}" build -t "${CONTROLLER_TAG}" "${WORKPREFIX}" -f "$ROOT_DIRPATH/testsuite/local.Dockerfile"
