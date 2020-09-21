@@ -15,13 +15,13 @@ import (
 )
 
 const (
-	AvaxAssetID                 = "AVAX"
-	DefaultStakingDelay         = 20 * time.Second
-	DefaultStakingPeriod        = 72 * time.Hour
-	DefaultDelegationDelay      = 20 * time.Second // Time until delegation period should begin
-	stakingPeriodSynchronyDelay = 3 * time.Second
-	DefaultDelegationPeriod     = 36 * time.Hour
-	DefaultDelegationFeeRate    = 0.1
+	AvaxAssetID                         = "AVAX"
+	DefaultStakingDelay                 = 20 * time.Second
+	DefaultStakingPeriod                = 72 * time.Hour
+	DefaultDelegationDelay              = 20 * time.Second // Time until delegation period should begin
+	stakingPeriodSynchronyDelay         = 3 * time.Second
+	DefaultDelegationPeriod             = 36 * time.Hour
+	DefaultDelegationFeeRate    float32 = 2
 )
 
 // RPCWorkFlowRunner executes standard testing workflows like funding accounts from
