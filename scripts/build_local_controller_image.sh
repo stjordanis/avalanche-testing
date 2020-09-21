@@ -15,7 +15,7 @@ WORKPREFIX="$GOPATH/src/github.com/ava-labs"
 DOCKER="${DOCKER:-docker}"
 
 
-AVALANCHE_REMOTE="https://github.com/ava-labs/avalanchego.git"
+AVALANCHE_REMOTE="https://github.com/ava-labs/avalanchego-internal.git"
 E2E_REMOTE="https://github.com/ava-labs/avalanche-testing.git"
 
 

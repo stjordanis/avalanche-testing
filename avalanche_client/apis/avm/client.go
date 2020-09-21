@@ -324,7 +324,7 @@ func (c *Client) MintNFT(
 
 func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, error) {
 	res := &api.JsonTxID{}
-	err := c.requester.SendRequest("importAVAX", &avm.ImportAVAXArgs{
+	err := c.requester.SendRequest("importAVAX", &avm.ImportArgs{
 		UserPass:    user,
 		To:          to,
 		SourceChain: sourceChain,
