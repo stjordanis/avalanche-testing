@@ -3,7 +3,8 @@ script_dirpath="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 
 # ====================== CONSTANTS =======================================================
 SUITE_IMAGE="avaplatform/avalanche-testing"
-AVALANCHE_IMAGE="avaplatform/avalanchego:testing-ci-stable"
+AVALANCHE_IMAGE="avaplatform/avalanchego:v1.0.0"
+BYZANTINE_IMAGE="avaplatform/avalanche-byzantine:v0.1.1"
 KURTOSIS_CORE_CHANNEL="master"
 INITIALIZER_IMAGE="kurtosistech/kurtosis-core_initializer:${KURTOSIS_CORE_CHANNEL}"
 API_IMAGE="kurtosistech/kurtosis-core_api:${KURTOSIS_CORE_CHANNEL}"
@@ -82,7 +83,7 @@ if "${do_run}"; then
     docker volume create "${suite_execution_volume}"
 
     # Docker only allows you to have spaces in the variable if you escape them or use a Docker env file
-    custom_env_vars_json_flag="CUSTOM_ENV_VARS_JSON={\"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",\"BYZANTINE_IMAGE\":\"\"}"
+    custom_env_vars_json_flag="CUSTOM_ENV_VARS_JSON={\"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",\"BYZANTINE_IMAGE\":\"${BYZANTINE_IMAGE}\"}"
 
     echo "${custom_env_vars_json_flag}"
     docker run \
