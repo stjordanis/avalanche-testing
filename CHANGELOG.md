@@ -14,6 +14,7 @@
 * Update API to include change addresses
 * Update P Chain Get Balance call
 * Bump coreth version
+* Bump avalanchego dependency to version 1.0.0
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints
