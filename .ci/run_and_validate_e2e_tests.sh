@@ -11,7 +11,7 @@ echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdi
 # Use stable version of Everest for CI
 AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.0"
 # Use stable version of avalanche-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/avaplatform/avalanche-byzantine:v0.1.1"
+BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.1"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
