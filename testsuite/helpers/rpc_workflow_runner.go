@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
@@ -188,6 +189,8 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 		if err := runner.waitForXchainTransactionAcceptance(txID); err != nil {
 			return err
 		}
+		fmt.Println("all balances ")
+		fmt.Println(client.GetAllBalances(address))
 	}
 
 	return nil

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	networkID uint32 = 12345 // TODO move to constants package
+	networkID uint32 = 54321 // TODO move to constants package
 )
 
 func createXChainCodec() (codec.Codec, error) {

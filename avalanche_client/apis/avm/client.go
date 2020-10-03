@@ -93,7 +93,7 @@ func (c *Client) GetBalance(addr string, assetID string) (*avm.GetBalanceReply, 
 	return res, err
 }
 
-func (c *Client) GetAllBalances(addr string, assetID string) (*avm.GetAllBalancesReply, error) {
+func (c *Client) GetAllBalances(addr string) (*avm.GetAllBalancesReply, error) {
 	res := &avm.GetAllBalancesReply{}
 	err := c.requester.SendRequest("getAllBalances", &api.JsonAddress{
 		Address: addr,
