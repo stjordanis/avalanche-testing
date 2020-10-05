@@ -1,4 +1,4 @@
-# TBD
+# 0.10.0
 * Upgraded to Kurtosis 1.0
 * Centralized run scripts into `build_and_run.sh`
 
