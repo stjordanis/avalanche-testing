@@ -9,7 +9,7 @@ DOCKER_REPO="avaplatform"
 echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.0"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.1"
 # Use stable version of avalanche-byzantine based on everest for CI
 BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.1"
 
