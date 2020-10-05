@@ -86,7 +86,8 @@ func (e *bombardExecutor) ExecuteTest() error {
 		return stacktrace.Propagate(err, "Failed to fund X Chain Addresses for Clients")
 	}
 	logrus.Infof("Funded X Chain Addresses with seedAmount %v.", seedAmount)
-	time.Sleep(5 * time.Second)
+	logrus.Info("Will sleep 20 seconds... ")
+	time.Sleep(20 * time.Second)
 	codec, err := createXChainCodec()
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to initialize codec.")
