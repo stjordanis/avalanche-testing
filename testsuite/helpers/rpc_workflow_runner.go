@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"github.com/ava-labs/gecko/utils/formatting"
 	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
@@ -290,7 +289,6 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	xChainAddress string,
 	amount uint64) error {
 	client := runner.client
-
 	exportTxID, err := client.PChainAPI().ExportAVAX(
 		runner.userPass,
 		xChainAddress,
@@ -316,23 +314,15 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 // IssueTxList issues each consecutive transaction in order
 func (runner RPCWorkFlowRunner) IssueTxList(
 	txList [][]byte,
-) ([]ids.ID, error) {
-	var issuedTxs []ids.ID
+) error {
 	xChainAPI := runner.client.XChainAPI()
 	for _, txBytes := range txList {
-		txID, err := xChainAPI.IssueTx(txBytes)
+		_, err := xChainAPI.IssueTx(txBytes)
 		if err != nil {
-			return nil, stacktrace.Propagate(err, "Failed to issue transaction.")
-		}
-		status, err := xChainAPI.GetTxStatus(txID); if err != nil {
-			return nil, stacktrace.Propagate(err, "Cannot get tx status")
-		}
-		logrus.Info("Transaction status ", status.String(),  " for tx ", formatting.CB58{txID.Bytes()})
-		if status.String() == "Accepted" {
-			issuedTxs = append(issuedTxs, txID)
+			return stacktrace.Propagate(err, "Failed to issue transaction.")
 		}
 	}
-	return issuedTxs, nil
+	return nil
 }
 
 // waitForXChainTransactionAcceptance gets the status of [txID] and keeps querying until it
