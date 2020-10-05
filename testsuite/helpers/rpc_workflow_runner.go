@@ -3,25 +3,25 @@ package helpers
 import (
 	"time"
 
+	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/vms/platformvm"
-	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	AvaxAssetID                 = "AVAX"
-	DefaultStakingDelay         = 20 * time.Second
-	DefaultStakingPeriod        = 72 * time.Hour
-	DefaultDelegationDelay      = 20 * time.Second // Time until delegation period should begin
-	stakingPeriodSynchronyDelay = 3 * time.Second
-	DefaultDelegationPeriod     = 36 * time.Hour
-	DefaultDelegationFeeRate    = 0.1
+	AvaxAssetID                         = "AVAX"
+	DefaultStakingDelay                 = 20 * time.Second
+	DefaultStakingPeriod                = 72 * time.Hour
+	DefaultDelegationDelay              = 20 * time.Second // Time until delegation period should begin
+	stakingPeriodSynchronyDelay         = 3 * time.Second
+	DefaultDelegationPeriod             = 36 * time.Hour
+	DefaultDelegationFeeRate    float32 = 2
 )
 
 // RPCWorkFlowRunner executes standard testing workflows like funding accounts from
@@ -121,6 +121,8 @@ func (runner RPCWorkFlowRunner) AddDelegatorToPrimaryNetwork(
 		stakeAmount,
 		startTime,
 		endTime,
+		nil, // from addrs
+		"",  // change addr
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to add delegator %s", pChainAddress)
@@ -172,7 +174,14 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount uint64) error {
 	client := runner.client.XChainAPI()
 	for _, address := range addresses {
-		txID, err := client.Send(runner.userPass, amount, AvaxAssetID, address)
+		txID, err := client.Send(
+			runner.userPass,
+			amount,
+			AvaxAssetID,
+			address,
+			nil, // from addrs
+			"",  // change addr
+		)
 		if err != nil {
 			return err
 		}
@@ -186,7 +195,14 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 
 // SendAVAX attempts to send [amount] AVAX to address [to] using [runner]'s userPass
 func (runner RPCWorkFlowRunner) SendAVAX(to string, amount uint64) (ids.ID, error) {
-	return runner.client.XChainAPI().Send(runner.userPass, amount, AvaxAssetID, to)
+	return runner.client.XChainAPI().Send(
+		runner.userPass,
+		amount,
+		AvaxAssetID,
+		to,
+		nil, // from addrs
+		"",  // change addr
+	)
 }
 
 // CreateDefaultAddresses creates the keystore user for this workflow runner and
@@ -212,7 +228,14 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 	client := runner.client.XChainAPI()
 
 	for i := uint64(1); i < numTxs; i++ {
-		txID, err := client.Send(runner.userPass, amount-txFee*uint64(i), AvaxAssetID, to)
+		txID, err := client.Send(
+			runner.userPass,
+			amount-txFee*uint64(i),
+			AvaxAssetID,
+			to,
+			nil, // from addrs
+			"",  // change addr
+		)
 		if err != nil {
 			errs <- stacktrace.Propagate(err, "Failed to send transaction.")
 		}
@@ -228,7 +251,13 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 // and blocks until both transactions have been accepted
 func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, amount uint64) error {
 	client := runner.client
-	txID, err := client.XChainAPI().ExportAVAX(runner.userPass, amount, pChainAddress)
+	txID, err := client.XChainAPI().ExportAVAX(
+		runner.userPass,
+		amount,
+		pChainAddress,
+		nil, // from addrs
+		"",  // change addr
+	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to pchainAddress %s", pChainAddress)
 	}
@@ -237,7 +266,13 @@ func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, 
 		return stacktrace.Propagate(err, "")
 	}
 
-	importTxID, err := client.PChainAPI().ImportAVAX(runner.userPass, pChainAddress, constants.XChainID.String())
+	importTxID, err := client.PChainAPI().ImportAVAX(
+		runner.userPass,
+		pChainAddress,
+		constants.XChainID.String(),
+		nil, // from addrs
+		"",  // change addr
+	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed import AVAX to pchainAddress %s", pChainAddress)
 	}
@@ -255,7 +290,13 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	amount uint64) error {
 	client := runner.client
 
-	exportTxID, err := client.PChainAPI().ExportAVAX(runner.userPass, xChainAddress, amount)
+	exportTxID, err := client.PChainAPI().ExportAVAX(
+		runner.userPass,
+		xChainAddress,
+		amount,
+		nil, // from addrs
+		"",  // change addr
+	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", xChainAddress)
 	}

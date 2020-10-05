@@ -1,12 +1,12 @@
 package conflictvtx
 
 import (
+	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
+	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/kurtosis-tech/kurtosis/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/testsuite"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )

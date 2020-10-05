@@ -1,15 +1,13 @@
 package services
 
-import "github.com/docker/go-connections/nat"
-
 // ServiceSocket ...
 type ServiceSocket struct {
 	ipAddr string
-	port   nat.Port
+	port   int
 }
 
 // NewServiceSocket ...
-func NewServiceSocket(ipAddr string, port nat.Port) *ServiceSocket {
+func NewServiceSocket(ipAddr string, port int) *ServiceSocket {
 	return &ServiceSocket{
 		ipAddr: ipAddr,
 		port:   port,
@@ -22,6 +20,6 @@ func (socket *ServiceSocket) GetIpAddr() string {
 }
 
 // GetPort ...
-func (socket *ServiceSocket) GetPort() nat.Port {
+func (socket *ServiceSocket) GetPort() int {
 	return socket.port
 }

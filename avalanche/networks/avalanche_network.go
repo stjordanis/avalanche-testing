@@ -3,6 +3,8 @@ package networks
 import (
 	"bytes"
 	"fmt"
+	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"time"
 
 	"strconv"
@@ -13,8 +15,6 @@ import (
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/utils/constants"
 
-	"github.com/kurtosis-tech/kurtosis/commons/networks"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/palantir/stacktrace"
 )
 
@@ -30,7 +30,7 @@ const (
 //                                    Avalanche Test Network
 // ========================================================================================================
 const (
-	containerStopTimeout = 30 * time.Second
+	containerStopTimeoutSeconds = 30
 )
 
 // TestAvalancheNetwork wraps Kurtosis' ServiceNetwork that is meant to be the interface tests use for interacting with Avalanche
@@ -49,7 +49,7 @@ func (network TestAvalancheNetwork) GetAvalancheClient(serviceID networks.Servic
 	}
 	avalancheService := node.Service.(avalancheService.AvalancheService)
 	jsonRPCSocket := avalancheService.GetJSONRPCSocket()
-	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort().Int())
+	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort())
 	return apis.NewClient(uri, constants.DefaultRequestTimeout), nil
 }
 
@@ -81,7 +81,7 @@ func (network TestAvalancheNetwork) AddService(configurationID networks.Configur
 // Args:
 // 	serviceID: The ID of the service to remove from the network
 func (network TestAvalancheNetwork) RemoveService(serviceID networks.ServiceID) error {
-	if err := network.svcNetwork.RemoveService(serviceID, containerStopTimeout); err != nil {
+	if err := network.svcNetwork.RemoveService(serviceID, containerStopTimeoutSeconds); err != nil {
 		return stacktrace.Propagate(err, "An error occurred removing service with ID %v", serviceID)
 	}
 	return nil

@@ -3,16 +3,17 @@ package services
 import (
 	"bytes"
 	"fmt"
-	"net"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"testing"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
-	"github.com/kurtosis-tech/kurtosis/commons/services"
 	"github.com/stretchr/testify/assert"
 )
 
-var testPublicIP = net.ParseIP("172.17.0.2")
+const (
+	ipPlaceholder = "IP_PLACEHOLDER"
+)
 
 func TestNoDepsStartCommand(t *testing.T) {
 	initializerCore := NewAvalancheServiceInitializerCore(
@@ -29,7 +30,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 
 	expected := []string{
 		avalancheBinary,
-		"--public-ip=" + testPublicIP.String(),
+		"--public-ip=" + ipPlaceholder,
 		"--network-id=local",
 		"--http-port=9650",
 		"--http-host=",
@@ -41,7 +42,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		"--tx-fee=0",
 		fmt.Sprintf("--network-initial-timeout=%d", int64(2*time.Second)),
 	}
-	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIP, make([]services.Service, 0))
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), ipPlaceholder, make([]services.Service, 0))
 	assert.NoError(t, err, "An error occurred getting the start command")
 	assert.Equal(t, expected, actual)
 }
@@ -67,7 +68,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 
 	expected := []string{
 		avalancheBinary,
-		"--public-ip=" + testPublicIP.String(),
+		"--public-ip=" + ipPlaceholder,
 		"--network-id=local",
 		"--http-port=9650",
 		"--http-host=",
@@ -83,13 +84,13 @@ func TestWithDepsStartCommand(t *testing.T) {
 
 	testDependency := AvalancheService{
 		ipAddr:      "1.2.3.4",
-		jsonRPCPort: "9650/tcp",
-		stakingPort: "9651/tcp",
+		jsonRPCPort: 9650,
+		stakingPort: 9651,
 	}
 	testDependencySlice := []services.Service{
 		testDependency,
 	}
-	actual, err := initializerCore.GetStartCommand(make(map[string]string), testPublicIP, testDependencySlice)
+	actual, err := initializerCore.GetStartCommand(make(map[string]string), ipPlaceholder, testDependencySlice)
 	assert.NoError(t, err, "An error occurred getting the start command")
 	assert.Equal(t, expected, actual)
 }

@@ -1,14 +1,10 @@
 package services
 
-import (
-	"github.com/docker/go-connections/nat"
-)
-
 // AvalancheService implements AvalancheService
 type AvalancheService struct {
 	ipAddr      string
-	stakingPort nat.Port
-	jsonRPCPort nat.Port
+	stakingPort int
+	jsonRPCPort int
 }
 
 // GetStakingSocket implements AvalancheService

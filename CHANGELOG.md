@@ -1,3 +1,7 @@
+# 0.10.0
+* Upgraded to Kurtosis 1.0
+* Centralized run scripts into `build_and_run.sh`
+
 # 0.9.0
 * Update to v0.7.0 of avalanchego and avalanche-byzantine
 * Rename delegator/staker functions
@@ -11,6 +15,10 @@
 * Add bombard test to bombard the X chain with transactions and then add two nodes to bootstrap the new data
 * Update get current and pending validators calls in platform API
 * Rename from gecko -> avalanchego
+* Update API to include change addresses
+* Update P Chain Get Balance call
+* Bump coreth version
+* Bump avalanchego dependency to version 1.0.0
 
 # 0.8.0
 * Switch configuration IDs to strings instead of ints
