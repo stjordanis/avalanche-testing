@@ -121,6 +121,8 @@ func (e *bombardExecutor) ExecuteTest() error {
 	privateKeys := make([]*crypto.PrivateKeySECP256K1R, len(secondaryClients))
 	txLists := make([][][]byte, len(secondaryClients))
 	txIDLists := make([][]ids.ID, len(secondaryClients))
+	xChainID, err := e.normalClients[0].InfoAPI().GetBlockchainID("X")
+	logrus.Info("X Chain ID ", xChainID)
 	for i, client := range e.normalClients[1:] {
 		utxo := utxoLists[i][0]
 		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[i].User(), xChainAddrs[i])

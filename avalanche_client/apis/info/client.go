@@ -42,9 +42,11 @@ func (c *Client) GetNetworkName() (string, error) {
 }
 
 // GetBlockchainID ...
-func (c *Client) GetBlockchainID() (string, error) {
+func (c *Client) GetBlockchainID(alias string) (string, error) {
 	res := &info.GetBlockchainIDReply{}
-	err := c.requester.SendRequest("getBlockchainID", struct{}{}, res)
+	err := c.requester.SendRequest("getBlockchainID", info.GetBlockchainIDArgs{
+		Alias: alias,
+	}, res)
 	return res.BlockchainID, err
 }
 
