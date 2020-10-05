@@ -43,6 +43,7 @@ func createRandomString() string {
 
 // ExecuteTest implements the AvalancheTester interface
 func (e *bombardExecutor) ExecuteTest() error {
+	logrus.Info("Bombard execution starts")
 	genesisClient := e.normalClients[0]
 	secondaryClients := make([]*helpers.RPCWorkFlowRunner, len(e.normalClients)-1)
 	xChainAddrs := make([]string, len(e.normalClients)-1)
@@ -85,7 +86,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 		return stacktrace.Propagate(err, "Failed to fund X Chain Addresses for Clients")
 	}
 	logrus.Infof("Funded X Chain Addresses with seedAmount %v.", seedAmount)
-
+	time.Sleep(5 * time.Second)
 	codec, err := createXChainCodec()
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to initialize codec.")
@@ -160,7 +161,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 		txLists[i] = txs
 		txIDLists[i] = txIDs
 	}
-
+	logrus.Info("Tx list created .. .")
 	wg := sync.WaitGroup{}
 	issueTxsAsync := func(runner *helpers.RPCWorkFlowRunner, txList [][]byte) {
 		if err = runner.IssueTxList(txList); err != nil {

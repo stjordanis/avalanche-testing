@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"time"
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
@@ -110,7 +111,7 @@ func bombardNetwork(clients []*apis.Client, numTxs, txFee uint64, done chan erro
 func main() {
 	// clients := fiveNodeAvashClients()
 	clients := privateNetClients()
-
+	logrus.Info("Private net clients generated")
 	if err := awaitSetup(clients...); err != nil {
 		fmt.Printf("Test did not run due to: %s\n", err)
 		return
@@ -119,6 +120,7 @@ func main() {
 	txFee := uint64(1000000)
 
 	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second)
+	logrus.Info("Bombard executor created")
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
 	}
