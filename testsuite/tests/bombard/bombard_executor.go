@@ -170,10 +170,11 @@ func (e *bombardExecutor) ExecuteTest() error {
 	}
 
 	startTime := time.Now()
+	logrus.Info("Number of secondary clients ", len(secondaryClients))
 	logrus.Infof("Beginning to issue transactions...")
 	for i, client := range secondaryClients {
 		wg.Add(1)
-		issueTxsAsync(client, txLists[i])
+		go issueTxsAsync(client, txLists[i])
 	}
 	wg.Wait()
 
