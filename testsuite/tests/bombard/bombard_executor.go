@@ -124,6 +124,14 @@ func (e *bombardExecutor) ExecuteTest() error {
 	xChainID, err := e.normalClients[0].InfoAPI().GetBlockchainID("X")
 	logrus.Info("X Chain ID ", xChainID)
 	for i, client := range e.normalClients[1:] {
+		nodeId, err := client.InfoAPI().GetNodeID()
+		logrus.Info("Client with nodeID ", nodeId)
+		bootstrapped, err := client.InfoAPI().IsBootstrapped(xChainID)
+		logrus.Info("Is bootstrapped ", bootstrapped)
+		peers, err := client.InfoAPI().Peers()
+		for j := 0; j < len(peers); j++ {
+			logrus.Info("Peer ", j, " with IP ", peers[j].IP, " and and nodeID ", peers[j].ID)
+		}
 		utxo := utxoLists[i][0]
 		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[i].User(), xChainAddrs[i])
 		if err != nil {
@@ -154,8 +162,9 @@ func (e *bombardExecutor) ExecuteTest() error {
 	}
 
 	wg := sync.WaitGroup{}
+	var txIds []ids.ID
 	issueTxsAsync := func(runner *helpers.RPCWorkFlowRunner, txList [][]byte) {
-		if err := runner.IssueTxList(txList); err != nil {
+		if txIds, err = runner.IssueTxList(txList); err != nil {
 			panic(err)
 		}
 		wg.Done()
@@ -168,6 +177,19 @@ func (e *bombardExecutor) ExecuteTest() error {
 		issueTxsAsync(client, txLists[i])
 	}
 	wg.Wait()
+	logrus.Info("will check clients if they have txs")
+	logrus.Println("Num of txs issued ", len(txIds))
+	var txId ids.ID
+	for i := 0; i < len(txIds); i++ {
+		txId = txIds[i]
+		for j := 0; j < len(e.normalClients); j++ {
+			client := e.normalClients[j]
+			nodeId, err := client.InfoAPI().GetNodeID()
+			_, err = client.XChainAPI().GetTx(txId); if err != nil {
+				logrus.Println("Accepted tx ", txId, " not in ", nodeId)
+			}
+		}
+	}
 
 	duration := time.Since(startTime)
 	logrus.Infof("Finished issuing transaction lists in %v seconds.", duration.Seconds())
