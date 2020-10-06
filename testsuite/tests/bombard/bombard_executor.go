@@ -138,14 +138,8 @@ func (e *bombardExecutor) ExecuteTest() error {
 			clientIndex := i + numSecondaryClients * j
 			nodeId, err := client.InfoAPI().GetNodeID()
 			logrus.Info("Client with nodeID ", nodeId)
-			bootstrapped, err := client.InfoAPI().IsBootstrapped(xChainID)
-			logrus.Info("Is bootstrapped ", bootstrapped)
-			peers, err := client.InfoAPI().Peers()
-			for j := 0; j < len(peers); j++ {
-				logrus.Info("Peer ", j, " with IP ", peers[j].IP, " and and nodeID ", peers[j].ID)
-			}
 			utxo := utxoLists[clientIndex][0]
-			pkStr, err := client.XChainAPI().ExportKey(secondaryClients[i].User(), xChainAddrs[i])
+			pkStr, err := client.XChainAPI().ExportKey(secondaryClients[clientIndex].User(), xChainAddrs[clientIndex])
 			if err != nil {
 				return stacktrace.Propagate(err, "Failed to export key.")
 			}
@@ -181,10 +175,10 @@ func (e *bombardExecutor) ExecuteTest() error {
 		}
 		wg.Done()
 	}
-
+	numTotalTxs := uint64(len(txLists)) * e.numTxs
 	startTime := time.Now()
 	logrus.Info("Number of secondary clients ", len(secondaryClients))
-	logrus.Infof("Beginning to issue transactions...")
+	logrus.Info("Beginning to issue ", numTotalTxs, " transactions...")
 	for i, client := range secondaryClients {
 		wg.Add(1)
 		go issueTxsAsync(client, txLists[i])
