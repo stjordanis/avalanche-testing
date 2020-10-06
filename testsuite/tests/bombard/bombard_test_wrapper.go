@@ -44,7 +44,7 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 	}
 
 	// Execute the bombard test to issue [NumTxs] to each node
-	executor := NewBombardExecutor(clients, test.NumTxs, test.TxFee, test.AcceptanceTimeout)
+	executor := NewBombardExecutor(clients, test.NumTxs, test.TxFee, test.AcceptanceTimeout, 1)
 	logrus.Infof("Executing bombard test...")
 	if err := executor.ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Bombard Test Failed."))
