@@ -99,7 +99,7 @@ func privateNetClients() []*apis.Client {
 }
 
 func bombardNetwork(clients []*apis.Client, numTxs, txFee uint64, done chan error) {
-	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 4)
+	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 2)
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
 		done <- fmt.Errorf("bombardNetwork failed due to: %s", err)
@@ -116,7 +116,7 @@ func main() {
 		fmt.Printf("Test did not run due to: %s\n", err)
 		return
 	}
-	numTxs := uint64(20000)
+	numTxs := uint64(5000)
 	txFee := uint64(1000000)
 
 	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 4)

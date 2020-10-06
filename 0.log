@@ -1,0 +1,95 @@
+WARN [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/main/main.go#57: Staking is disabled. Sybil control is not enforced.
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/main/main.go#76: assertions are enabled. This may slow down execution
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21001. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21002. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21003. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21004. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21005. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21006. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21007. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21008. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21009. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21010. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21011. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21012. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21013. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21014. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21015. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21016. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21017. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21018. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21019. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21020. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21001 External 21021. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#131: Unable to map port 21001~21021
+WARN [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/main/main.go#96: NAT traversal has failed. The node will be able to connect to less nodes.
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21000. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21001. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21002. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21003. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21004. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21005. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21006. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21007. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21008. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21009. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21010. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21011. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21012. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21013. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21014. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21015. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21016. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21017. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21018. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21019. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#91: Map port failed. Protocol TCP Internal 21000 External 21020. can't map ports without a known router
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/nat/nat.go#131: Unable to map port 21000~21020
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/main/main.go#104: initializing node state
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#742: Node version is: avalanche/1.0.1
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#379: Set node's ID to P3gMoDV9eAnVedTRGAYoJZZNTaVtBemMt
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#441: Initializing API server
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#573: initializing keystore
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#584: initializing keystore API
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/keystore
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#600: initializing metrics API
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/metrics
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#565: initializing SharedMemory
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/vm/rWhpuQPF1kb72esV2momhMuTYGkEb1oL29pt2EBXWmSy4kxnT
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/vm/jvYyfQTxGMJLuGWa55kdP2p2zSUYsQ5Raupu4TW34ZAUBAbtq
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#616: skipping admin API initialization because it has been disabled
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#632: initializing info API
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/info
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#656: initializing Health API
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#152: adding route /ext/health
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#694: skipping ipc API initializaion because it has been disabled
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#707: initializing aliases
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#425: initializing chains
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/chains/manager.go#188: creating chain:
+    ID: 11111111111111111111111111111111LpoYY
+    VMID:rWhpuQPF1kb72esV2momhMuTYGkEb1oL29pt2EBXWmSy4kxnT
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/snow/networking/router/chain_router.go#111: registering chain 11111111111111111111111111111111LpoYY with chain router
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#136: adding route /ext/bc/11111111111111111111111111111111LpoYY
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/main/main.go#113: dispatching node handlers
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/node/node.go#294: Initializing API server
+INFO [10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/api/server.go#82: HTTP API server listening on ":21000"
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to Myuqb7QGK6BJrtG41D5tB1WwE8vn492Cr at 54.183.208.204:21001
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to GLmCCgxNoRJ1EWoBnT3N9iKuFRGDLTzLh at 54.183.6.92:21001
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to 6F9kttyH5L64yVdswTygjGeL3UWzYMAeE at 18.144.100.250:21001
+DEBUG[10-06|21:04:59] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to KdS8K7MG4BNWrKQYNzqQzsm2aREZDePKP at 54.183.154.212:21001
+DEBUG[10-06|21:05:00] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:00] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:01] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:01] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1020: disconnected from GLmCCgxNoRJ1EWoBnT3N9iKuFRGDLTzLh at 54.183.6.92:21001
+DEBUG[10-06|21:05:01] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:01] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to AGQWZ49xRcmFCN7shKY1ctAYqS2QtbDmj at <nil>:0
+DEBUG[10-06|21:05:02] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:03] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to KuM1hA3Z7xeiQ9PaK9nfwh1UFcgFZ5xam at <nil>:0
+DEBUG[10-06|21:05:03] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:03] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:04] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to 8mpXyoLpMQhuz8VW4USVDfR2U8Ua8DFpF at <nil>:0
+DEBUG[10-06|21:05:04] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:05] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:05] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#1005: connected to GLmCCgxNoRJ1EWoBnT3N9iKuFRGDLTzLh at <nil>:0
+DEBUG[10-06|21:05:05] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection
+DEBUG[10-06|21:05:05] /home/ubuntu/go/src/github.com/ava-labs/avalanchego-internal/network/network.go#930: dropping peer connection due to: duplicated connection

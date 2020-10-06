@@ -17,6 +17,7 @@ const (
 )
 
 type Client struct {
+	uri 	 string
 	admin    *admin.Client
 	xChain   *avm.Client
 	health   *health.Client
@@ -29,6 +30,7 @@ type Client struct {
 // Returns a Client for interacting with the P Chain endpoint
 func NewClient(uri string, requestTimeout time.Duration) *Client {
 	return &Client{
+		uri:	uri,
 		admin:    admin.NewClient(uri, requestTimeout),
 		xChain:   avm.NewClient(uri, XChain, requestTimeout),
 		health:   health.NewClient(uri, requestTimeout),
@@ -65,4 +67,8 @@ func (c *Client) KeystoreAPI() *keystore.Client {
 
 func (c *Client) AdminAPI() *admin.Client {
 	return c.admin
+}
+
+func (c *Client) GetUri() string {
+	return c.uri
 }

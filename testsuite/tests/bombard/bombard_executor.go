@@ -187,6 +187,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 
 	duration := time.Since(startTime)
 	logrus.Infof("Finished issuing transaction lists in %v seconds.", duration.Seconds())
+	/*
 	for _, txIDs := range txIDLists {
 		if err := highLevelGenesisClient.AwaitXChainTxs(txIDs...); err != nil {
 			stacktrace.Propagate(err, "Failed to confirm transactions.")
@@ -194,6 +195,8 @@ func (e *bombardExecutor) ExecuteTest() error {
 	}
 
 	logrus.Infof("Confirmed all issued transactions.")
+
+	 */
 
 	return nil
 }
