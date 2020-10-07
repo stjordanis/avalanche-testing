@@ -119,7 +119,7 @@ func main() {
 	numTxs := uint64(5000)
 	txFee := uint64(1000000)
 
-	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 4)
+	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 2)
 	logrus.Info("Bombard executor created")
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
