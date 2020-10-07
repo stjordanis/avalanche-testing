@@ -53,18 +53,17 @@ func (e *bombardExecutor) ExecuteTest() error {
 	xChainAddrs := make([]string, numReplicatedClients)
 
 	for j := 0; j < e.threadNum; j++ {
-		clientIndex := j % numSecondaryClients
-		client := e.normalClients[1 + clientIndex]
-		secondaryClients[clientIndex] = helpers.NewRPCWorkFlowRunner(
+		client := e.normalClients[1 + j % numSecondaryClients]
+		secondaryClients[j] = helpers.NewRPCWorkFlowRunner(
 			client,
 			api.UserPass{Username: createRandomString(), Password: createRandomString()},
 			e.acceptanceTimeout,
 		)
-		xChainAddress, _, err := secondaryClients[clientIndex].CreateDefaultAddresses()
+		xChainAddress, _, err := secondaryClients[j].CreateDefaultAddresses()
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to create default addresses for client: %d", j)
 		}
-		xChainAddrs[clientIndex] = xChainAddress
+		xChainAddrs[j] = xChainAddress
 	}
 
 	genesisUser := api.UserPass{Username: createRandomString(), Password: createRandomString()}
@@ -132,13 +131,13 @@ func (e *bombardExecutor) ExecuteTest() error {
 	txIDLists := make([][]ids.ID, len(secondaryClients))
 	xChainID, err := e.normalClients[0].InfoAPI().GetBlockchainID("X")
 	logrus.Info("X Chain ID ", xChainID)
-	for j := 0; j < e.threadNum; j++ {
+	for j := 0; j < len(secondaryClients); j++ {
 		clientIndex := j % numSecondaryClients
 		client := e.normalClients[1 + clientIndex]
 		nodeId, err := client.InfoAPI().GetNodeID()
 		logrus.Info("Client with nodeID ", nodeId)
-		utxo := utxoLists[clientIndex][0]
-		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[clientIndex].User(), xChainAddrs[clientIndex])
+		utxo := utxoLists[j][0]
+		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[j].User(), xChainAddrs[j])
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to export key.")
 		}
@@ -155,15 +154,15 @@ func (e *bombardExecutor) ExecuteTest() error {
 		factory := crypto.FactorySECP256K1R{}
 		skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
 		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
-		privateKeys[clientIndex] = sk
+		privateKeys[j] = sk
 
 		logrus.Infof("Creating string of %d transactions", e.numTxs)
 		txs, txIDs, err := CreateConsecutiveTransactions(utxo, e.numTxs, seedAmount, e.txFee, sk)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to create transaction list.")
 		}
-		txLists[clientIndex] = txs
-		txIDLists[clientIndex] = txIDs
+		txLists[j] = txs
+		txIDLists[j] = txIDs
 	}
 	logrus.Info("Tx list created .. .")
 	wg := sync.WaitGroup{}
