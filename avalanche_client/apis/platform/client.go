@@ -78,11 +78,12 @@ func (c *Client) ListAddresses(user api.UserPass) ([]string, error) {
 }
 
 // GetUTXOs returns the byte representation of the UTXOs controlled by [addresses]
-func (c *Client) GetUTXOs(addresses []string) ([][]byte, error) {
+func (c *Client) GetUTXOs(addresses []string, sourceChain string) ([][]byte, error) {
 	res := &platformvm.GetUTXOsResponse{}
 	err := c.requester.SendRequest("getUTXOs", &platformvm.GetUTXOsArgs{
-		Addresses: addresses,
-		Encoding:  formatting.HexEncoding,
+		Addresses:   addresses,
+		SourceChain: sourceChain,
+		Encoding:    formatting.HexEncoding,
 	}, res)
 	if err != nil {
 		return nil, err
@@ -364,4 +365,13 @@ func (c *Client) GetTxStatus(txID ids.ID) (platformvm.Status, error) {
 		TxID: txID,
 	}, res)
 	return *res, err
+}
+
+// IssueTx ...
+func (c *Client) IssueTx(txBytes []byte) (ids.ID, error) {
+	res := &platformvm.IssueTxResponse{}
+	err := c.requester.SendRequest("issueTx", &platformvm.IssueTxArgs{
+		Tx: formatting.CB58{Bytes: txBytes},
+	}, res)
+	return res.TxID, err
 }

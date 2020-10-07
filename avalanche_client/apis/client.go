@@ -12,10 +12,7 @@ import (
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/platform"
 )
 
-const (
-	XChain = "X"
-)
-
+// Client ...
 type Client struct {
 	admin    *admin.Client
 	xChain   *avm.Client
@@ -26,11 +23,11 @@ type Client struct {
 	platform *platform.Client
 }
 
-// Returns a Client for interacting with the P Chain endpoint
+// NewClient returns a Client for interacting with the P Chain endpoint
 func NewClient(uri string, requestTimeout time.Duration) *Client {
 	return &Client{
 		admin:    admin.NewClient(uri, requestTimeout),
-		xChain:   avm.NewClient(uri, XChain, requestTimeout),
+		xChain:   avm.NewClient(uri, "X", requestTimeout),
 		health:   health.NewClient(uri, requestTimeout),
 		info:     info.NewClient(uri, requestTimeout),
 		ipcs:     ipcs.NewClient(uri, requestTimeout),
@@ -39,30 +36,37 @@ func NewClient(uri string, requestTimeout time.Duration) *Client {
 	}
 }
 
+// PChainAPI ...
 func (c *Client) PChainAPI() *platform.Client {
 	return c.platform
 }
 
+// XChainAPI ...
 func (c *Client) XChainAPI() *avm.Client {
 	return c.xChain
 }
 
+// InfoAPI ...
 func (c *Client) InfoAPI() *info.Client {
 	return c.info
 }
 
+// HealthAPI ...
 func (c *Client) HealthAPI() *health.Client {
 	return c.health
 }
 
-func (c *Client) IpcsAPI() *ipcs.Client {
+// IPCSAPI ...
+func (c *Client) IPCSAPI() *ipcs.Client {
 	return c.ipcs
 }
 
+// KeystoreAPI ...
 func (c *Client) KeystoreAPI() *keystore.Client {
 	return c.keystore
 }
 
+// AdminAPI ...
 func (c *Client) AdminAPI() *admin.Client {
 	return c.admin
 }

@@ -229,6 +229,7 @@ func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error)
 	return res.Address, nil
 }
 
+// Send ...
 func (c *Client) Send(
 	user api.UserPass,
 	amount uint64,
@@ -256,6 +257,28 @@ func (c *Client) Send(
 	return res.TxID, nil
 }
 
+// SendMultiple ...
+func (c *Client) SendMultiple(
+	user api.UserPass,
+	from []string,
+	changeAddr string,
+	outputs []avm.SendOutput,
+	memo string,
+) (ids.ID, error) {
+	res := &api.JsonTxID{}
+	err := c.requester.SendRequest("sendMultiple", &avm.SendMultipleArgs{
+		JsonSpendHeader: api.JsonSpendHeader{
+			UserPass:       user,
+			JsonFromAddrs:  api.JsonFromAddrs{From: from},
+			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+		},
+		Outputs: outputs,
+		Memo:    memo,
+	}, res)
+	return res.TxID, err
+}
+
+// Mint ...
 func (c *Client) Mint(
 	user api.UserPass,
 	amount uint64,

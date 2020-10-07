@@ -4,6 +4,11 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 )
 
+const (
+	// AVAXString ...
+	AVAXString = "AVAX"
+)
+
 var (
 	// XChainID ...
 	XChainID ids.ID
