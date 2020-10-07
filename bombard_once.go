@@ -116,7 +116,7 @@ func main() {
 		fmt.Printf("Test did not run due to: %s\n", err)
 		return
 	}
-	numTxs := uint64(20000)
+	numTxs := uint64(10000)
 	txFee := uint64(1000000)
 
 	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 2)
