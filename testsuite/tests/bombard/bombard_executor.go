@@ -21,13 +21,13 @@ import (
 )
 
 // NewBombardExecutor returns a new bombard test bombardExecutor
-func NewBombardExecutor(clients []*apis.Client, numTxs, txFee uint64, acceptanceTimeout time.Duration, numReplication int) tester.AvalancheTester {
+func NewBombardExecutor(clients []*apis.Client, numTxs, txFee uint64, acceptanceTimeout time.Duration, threadNum int) tester.AvalancheTester {
 	return &bombardExecutor{
 		normalClients:     clients,
 		numTxs:            numTxs,
 		acceptanceTimeout: acceptanceTimeout,
 		txFee:             txFee,
-		numReplication:numReplication,
+		threadNum:	threadNum,
 	}
 }
 
@@ -36,7 +36,7 @@ type bombardExecutor struct {
 	acceptanceTimeout time.Duration
 	numTxs            uint64
 	txFee             uint64
-	numReplication	  int
+	threadNum	  int
 }
 
 func createRandomString() string {
@@ -48,24 +48,23 @@ func (e *bombardExecutor) ExecuteTest() error {
 	logrus.Info("Bombard execution starts")
 	genesisClient := e.normalClients[0]
 	numSecondaryClients := len(e.normalClients)-1
-	numReplicatedClients := numSecondaryClients * e.numReplication
+	numReplicatedClients := e.threadNum
 	secondaryClients := make([]*helpers.RPCWorkFlowRunner, numReplicatedClients)
 	xChainAddrs := make([]string, numReplicatedClients)
 
-	for j := 0; j < e.numReplication; j++ {
-		for i, client := range e.normalClients[1:] {
-			clientIndex := i + numSecondaryClients * j
-			secondaryClients[clientIndex] = helpers.NewRPCWorkFlowRunner(
-				client,
-				api.UserPass{Username: createRandomString(), Password: createRandomString()},
-				e.acceptanceTimeout,
-			)
-			xChainAddress, _, err := secondaryClients[clientIndex].CreateDefaultAddresses()
-			if err != nil {
-				return stacktrace.Propagate(err, "Failed to create default addresses for client: %d", i)
-			}
-			xChainAddrs[clientIndex] = xChainAddress
+	for j := 0; j < e.threadNum; j++ {
+		clientIndex := j % numSecondaryClients
+		client := e.normalClients[1 + clientIndex]
+		secondaryClients[clientIndex] = helpers.NewRPCWorkFlowRunner(
+			client,
+			api.UserPass{Username: createRandomString(), Password: createRandomString()},
+			e.acceptanceTimeout,
+		)
+		xChainAddress, _, err := secondaryClients[clientIndex].CreateDefaultAddresses()
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to create default addresses for client: %d", j)
 		}
+		xChainAddrs[clientIndex] = xChainAddress
 	}
 
 	genesisUser := api.UserPass{Username: createRandomString(), Password: createRandomString()}
@@ -133,39 +132,38 @@ func (e *bombardExecutor) ExecuteTest() error {
 	txIDLists := make([][]ids.ID, len(secondaryClients))
 	xChainID, err := e.normalClients[0].InfoAPI().GetBlockchainID("X")
 	logrus.Info("X Chain ID ", xChainID)
-	for j := 0; j < e.numReplication; j++ {
-		for i, client := range e.normalClients[1:] {
-			clientIndex := i + numSecondaryClients * j
-			nodeId, err := client.InfoAPI().GetNodeID()
-			logrus.Info("Client with nodeID ", nodeId)
-			utxo := utxoLists[clientIndex][0]
-			pkStr, err := client.XChainAPI().ExportKey(secondaryClients[clientIndex].User(), xChainAddrs[clientIndex])
-			if err != nil {
-				return stacktrace.Propagate(err, "Failed to export key.")
-			}
-
-			if !strings.HasPrefix(pkStr, constants.SecretKeyPrefix) {
-				return fmt.Errorf("private key missing %s prefix", constants.SecretKeyPrefix)
-			}
-			trimmedPrivateKey := strings.TrimPrefix(pkStr, constants.SecretKeyPrefix)
-			formattedPrivateKey := formatting.CB58{}
-			if err := formattedPrivateKey.FromString(trimmedPrivateKey); err != nil {
-				return fmt.Errorf("problem parsing private key: %w", err)
-			}
-
-			factory := crypto.FactorySECP256K1R{}
-			skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
-			sk := skIntf.(*crypto.PrivateKeySECP256K1R)
-			privateKeys[clientIndex] = sk
-
-			logrus.Infof("Creating string of %d transactions", e.numTxs)
-			txs, txIDs, err := CreateConsecutiveTransactions(utxo, e.numTxs, seedAmount, e.txFee, sk)
-			if err != nil {
-				return stacktrace.Propagate(err, "Failed to create transaction list.")
-			}
-			txLists[clientIndex] = txs
-			txIDLists[clientIndex] = txIDs
+	for j := 0; j < e.threadNum; j++ {
+		clientIndex := j % numSecondaryClients
+		client := e.normalClients[1 + clientIndex]
+		nodeId, err := client.InfoAPI().GetNodeID()
+		logrus.Info("Client with nodeID ", nodeId)
+		utxo := utxoLists[clientIndex][0]
+		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[clientIndex].User(), xChainAddrs[clientIndex])
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to export key.")
 		}
+
+		if !strings.HasPrefix(pkStr, constants.SecretKeyPrefix) {
+			return fmt.Errorf("private key missing %s prefix", constants.SecretKeyPrefix)
+		}
+		trimmedPrivateKey := strings.TrimPrefix(pkStr, constants.SecretKeyPrefix)
+		formattedPrivateKey := formatting.CB58{}
+		if err := formattedPrivateKey.FromString(trimmedPrivateKey); err != nil {
+			return fmt.Errorf("problem parsing private key: %w", err)
+		}
+
+		factory := crypto.FactorySECP256K1R{}
+		skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
+		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
+		privateKeys[clientIndex] = sk
+
+		logrus.Infof("Creating string of %d transactions", e.numTxs)
+		txs, txIDs, err := CreateConsecutiveTransactions(utxo, e.numTxs, seedAmount, e.txFee, sk)
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to create transaction list.")
+		}
+		txLists[clientIndex] = txs
+		txIDLists[clientIndex] = txIDs
 	}
 	logrus.Info("Tx list created .. .")
 	wg := sync.WaitGroup{}
@@ -187,16 +185,5 @@ func (e *bombardExecutor) ExecuteTest() error {
 
 	duration := time.Since(startTime)
 	logrus.Infof("Finished issuing transaction lists in %v seconds.", duration.Seconds())
-	/*
-	for _, txIDs := range txIDLists {
-		if err := highLevelGenesisClient.AwaitXChainTxs(txIDs...); err != nil {
-			stacktrace.Propagate(err, "Failed to confirm transactions.")
-		}
-	}
-
-	logrus.Infof("Confirmed all issued transactions.")
-
-	 */
-
 	return nil
 }
