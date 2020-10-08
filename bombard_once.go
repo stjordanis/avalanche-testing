@@ -86,6 +86,9 @@ func privateNetClients() []*apis.Client {
 		//leveldb
 		apis.NewClient("http://52.53.202.86:21000", requestTimeout),
 		apis.NewClient("http://54.183.208.204:21000", requestTimeout),
+		//rocksdb
+		apis.NewClient("http://13.52.254.181:21000", requestTimeout),
+		apis.NewClient("http://18.144.100.250:21000", requestTimeout),
 	}
 }
 
@@ -110,7 +113,7 @@ func main() {
 	numTxs := uint64(10000)
 	txFee := uint64(1000000)
 
-	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 12)
+	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 15)
 	logrus.Info("Bombard executor created")
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
