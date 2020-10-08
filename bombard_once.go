@@ -16,7 +16,7 @@ var (
 const (
 	stakerClientURI    = "http://127.0.0.1:9660"
 	delegatorClientURI = "http://127.0.0.1:9662"
-	requestTimeout     = 10 * time.Second
+	requestTimeout     = 120 * time.Second
 )
 
 // cd $GOPATH
@@ -119,7 +119,7 @@ func main() {
 	numTxs := uint64(10000)
 	txFee := uint64(1000000)
 
-	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 5)
+	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 10)
 	logrus.Info("Bombard executor created")
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
