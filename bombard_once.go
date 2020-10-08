@@ -89,6 +89,9 @@ func privateNetClients() []*apis.Client {
 		//rocksdb
 		apis.NewClient("http://13.52.254.181:21000", requestTimeout),
 		apis.NewClient("http://18.144.100.250:21000", requestTimeout),
+		//rocksdb default
+		apis.NewClient("http://54.183.154.212:21000", requestTimeout),
+		apis.NewClient("http://13.52.98.57:21000", requestTimeout),
 	}
 }
 
@@ -110,10 +113,10 @@ func main() {
 		fmt.Printf("Test did not run due to: %s\n", err)
 		return
 	}
-	numTxs := uint64(10000)
+	numTxs := uint64(20000)
 	txFee := uint64(1000000)
 
-	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 15)
+	executor := bombard.NewBombardExecutor(clients, numTxs, txFee, 10*time.Second, 8)
 	logrus.Info("Bombard executor created")
 	if err := executor.ExecuteTest(); err != nil {
 		fmt.Printf("Test failed: %s\n", err)
