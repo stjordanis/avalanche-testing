@@ -8,3 +8,4 @@ build/
 test-controller
 test-initializer
 scripts/.build_image_gopath/*
+bombard_once
