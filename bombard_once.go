@@ -92,6 +92,9 @@ func privateNetClients() []*apis.Client {
 		//rocksdb default
 		apis.NewClient("http://54.183.154.212:21000", requestTimeout),
 		apis.NewClient("http://13.52.98.57:21000", requestTimeout),
+		//rocksdb multi
+		apis.NewClient("http://13.52.250.71:21000", requestTimeout),
+		apis.NewClient("http://54.183.6.92:21000", requestTimeout),
 	}
 }
 
