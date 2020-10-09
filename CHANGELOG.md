@@ -1,3 +1,6 @@
+# TBD
+* Small bugfix in `build_and_run.sh`, so it won't silently error on missing an argument
+
 # 0.10.0
 * Upgraded to Kurtosis 1.0
 * Centralized run scripts into `build_and_run.sh`

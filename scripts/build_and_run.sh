@@ -32,6 +32,11 @@ show_help() {
     echo ""
 }
 
+if [ "${#}" -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
 action="${1:-}"
 shift 1
 
