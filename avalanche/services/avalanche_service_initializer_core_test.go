@@ -3,9 +3,10 @@ package services
 import (
 	"bytes"
 	"fmt"
-	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"testing"
 	"time"
+
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func TestNoDepsStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
 		"--tx-fee=0",
-		fmt.Sprintf("--network-initial-timeout=%d", int64(2*time.Second)),
+		"--network-initial-timeout=2s",
 	}
 	actual, err := initializerCore.GetStartCommand(make(map[string]string), ipPlaceholder, make([]services.Service, 0))
 	assert.NoError(t, err, "An error occurred getting the start command")
@@ -78,7 +79,7 @@ func TestWithDepsStartCommand(t *testing.T) {
 		"--snow-quorum-size=1",
 		"--staking-enabled=false",
 		"--tx-fee=0",
-		fmt.Sprintf("--network-initial-timeout=%d", int64(2*time.Second)),
+		"--network-initial-timeout=2s",
 		fmt.Sprintf("--bootstrap-ips=%v:9651", testDependencyIP),
 	}
 
