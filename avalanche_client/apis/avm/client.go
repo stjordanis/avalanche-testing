@@ -30,9 +30,10 @@ func NewClient(uri, chain string, requestTimeout time.Duration) *Client {
 
 // IssueTx issues a transaction to a node and returns the TxID
 func (c *Client) IssueTx(txBytes []byte) (ids.ID, error) {
-	res := &api.JsonTxID{}
-	err := c.requester.SendRequest("issueTx", &avm.FormattedTx{
-		Tx: formatting.CB58{Bytes: txBytes},
+	res := &api.JSONTxID{}
+	err := c.requester.SendRequest("issueTx", &api.FormattedTx{
+		Tx:       formatting.Hex{Bytes: txBytes}.String(),
+		Encoding: formatting.HexEncoding,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -42,7 +43,7 @@ func (c *Client) IssueTx(txBytes []byte) (ids.ID, error) {
 
 func (c *Client) GetTxStatus(txID ids.ID) (choices.Status, error) {
 	res := &avm.GetTxStatusReply{}
-	err := c.requester.SendRequest("getTxStatus", &api.JsonTxID{
+	err := c.requester.SendRequest("getTxStatus", &api.JSONTxID{
 		TxID: txID,
 	}, res)
 	if err != nil {
@@ -52,14 +53,20 @@ func (c *Client) GetTxStatus(txID ids.ID) (choices.Status, error) {
 }
 
 func (c *Client) GetTx(txID ids.ID) ([]byte, error) {
-	res := &avm.FormattedTx{}
-	err := c.requester.SendRequest("getTx", &api.JsonTxID{
-		TxID: txID,
+	res := &api.FormattedTx{}
+	err := c.requester.SendRequest("getTx", &api.GetTxArgs{
+		TxID:     txID,
+		Encoding: formatting.HexEncoding,
 	}, res)
 	if err != nil {
 		return nil, err
 	}
-	return res.Tx.Bytes, nil
+	formatter := formatting.Hex{}
+	if err := formatter.FromString(res.Tx); err != nil {
+		return nil, err
+	}
+
+	return formatter.Bytes, nil
 }
 
 // GetUTXOs returns the byte representation of the UTXOs controlled by [addrs]
@@ -95,7 +102,7 @@ func (c *Client) GetBalance(addr string, assetID string) (*avm.GetBalanceReply, 
 
 func (c *Client) GetAllBalances(addr string, assetID string) (*avm.GetAllBalancesReply, error) {
 	res := &avm.GetAllBalancesReply{}
-	err := c.requester.SendRequest("getAllBalances", &api.JsonAddress{
+	err := c.requester.SendRequest("getAllBalances", &api.JSONAddress{
 		Address: addr,
 	}, res)
 	return res, err
@@ -112,10 +119,10 @@ func (c *Client) CreateFixedCapAsset(
 ) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createFixedCapAsset", &avm.CreateFixedCapAssetArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Name:           name,
 		Symbol:         symbol,
@@ -139,10 +146,10 @@ func (c *Client) CreateVariableCapAsset(
 ) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createVariableCapAsset", &avm.CreateVariableCapAssetArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Name:         name,
 		Symbol:       symbol,
@@ -165,10 +172,10 @@ func (c *Client) CreateNFTAsset(
 ) (ids.ID, error) {
 	res := &avm.FormattedAssetID{}
 	err := c.requester.SendRequest("createNFTAsset", &avm.CreateNFTAssetArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Name:       name,
 		Symbol:     symbol,
@@ -181,7 +188,7 @@ func (c *Client) CreateNFTAsset(
 }
 
 func (c *Client) CreateAddress(user api.UserPass) (string, error) {
-	res := &api.JsonAddress{}
+	res := &api.JSONAddress{}
 	err := c.requester.SendRequest("createAddress", &user, res)
 	if err != nil {
 		return "", err
@@ -190,7 +197,7 @@ func (c *Client) CreateAddress(user api.UserPass) (string, error) {
 }
 
 func (c *Client) ListAddresses(user api.UserPass) ([]string, error) {
-	res := &api.JsonAddresses{}
+	res := &api.JSONAddresses{}
 	err := c.requester.SendRequest("listAddresses", &user, res)
 	if err != nil {
 		return nil, err
@@ -211,7 +218,7 @@ func (c *Client) ExportKey(user api.UserPass, addr string) (string, error) {
 }
 
 func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error) {
-	res := &api.JsonAddress{}
+	res := &api.JSONAddress{}
 	err := c.requester.SendRequest("importKey", &avm.ImportKeyArgs{
 		UserPass:   user,
 		PrivateKey: privateKey,
@@ -230,16 +237,18 @@ func (c *Client) Send(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("send", &avm.SendArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
-		Amount:  cjson.Uint64(amount),
-		AssetID: assetID,
-		To:      to,
+		SendOutput: avm.SendOutput{
+			Amount:  cjson.Uint64(amount),
+			AssetID: assetID,
+			To:      to,
+		},
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -255,12 +264,12 @@ func (c *Client) Mint(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("mint", &avm.MintArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Amount:  cjson.Uint64(amount),
 		AssetID: assetID,
@@ -280,12 +289,12 @@ func (c *Client) SendNFT(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("sendNFT", &avm.SendNFTArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		AssetID: assetID,
 		GroupID: cjson.Uint32(groupID),
@@ -305,16 +314,17 @@ func (c *Client) MintNFT(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("mintNFT", &avm.MintNFTArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
-		AssetID: assetID,
-		Payload: formatting.CB58{Bytes: payload},
-		To:      to,
+		AssetID:  assetID,
+		Payload:  formatting.Hex{Bytes: payload}.String(),
+		To:       to,
+		Encoding: formatting.HexEncoding,
 	}, res)
 	if err != nil {
 		return ids.Empty, err
@@ -323,7 +333,7 @@ func (c *Client) MintNFT(
 }
 
 func (c *Client) ImportAVAX(user api.UserPass, to, sourceChain string) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("importAVAX", &avm.ImportArgs{
 		UserPass:    user,
 		To:          to,
@@ -342,12 +352,12 @@ func (c *Client) ExportAVAX(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("exportAVAX", &avm.ExportAVAXArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Amount: cjson.Uint64(amount),
 		To:     to,
