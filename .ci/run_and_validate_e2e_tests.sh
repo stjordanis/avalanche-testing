@@ -15,8 +15,16 @@ BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.1"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
-docker pull "${BYZANTINE_IMAGE}"
 docker pull "${AVALANCHE_IMAGE}"
+
+# If Docker Credentials are not available skip the Byzantine Tests
+if [[ ${#DOCKER_USERNAME} == 0 ]]; then
+    echo "Skipping Byzantine Tests because Docker Credentials were not present."
+    BYZANTINE_IMAGE=""
+else
+    echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
+    docker pull "${BYZANTINE_IMAGE}"
+fi
 
 E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/build_and_run.sh"
 
