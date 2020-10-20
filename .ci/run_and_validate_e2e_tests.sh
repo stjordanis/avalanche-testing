@@ -5,9 +5,6 @@ PARALLELISM=4
 
 DOCKER_REPO="avaplatform"
 
-# login to AWS for byzantine images
-echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
 # Use stable version of Everest for CI
 AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.1"
 # Use stable version of avalanche-byzantine based on everest for CI
