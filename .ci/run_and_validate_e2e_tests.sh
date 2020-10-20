@@ -15,7 +15,7 @@ BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.3-rc.1"
 docker pull "${AVALANCHE_IMAGE}"
 
 # If Docker Credentials are not available skip the Byzantine Tests
-if [[ ${#DOCKER_USERNAME} == 0 ]]; then
+if [[ -z ${DOCKER_USERNAME} ]]; then
     echo "Skipping Byzantine Tests because Docker Credentials were not present."
     BYZANTINE_IMAGE=""
 else
