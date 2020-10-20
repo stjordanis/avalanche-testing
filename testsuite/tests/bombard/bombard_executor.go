@@ -96,14 +96,12 @@ func (e *bombardExecutor) ExecuteTest() error {
 		if err := client.VerifyXChainAVABalance(xChainAddrs[i], seedAmount); err != nil {
 			return stacktrace.Propagate(err, "Failed to verify X Chain Balane for Client: %d", i)
 		}
-		utxoReply, err := genesisClient.XChainAPI().GetUTXOs([]string{xChainAddrs[i]}, 10, "", "")
+		utxosBytes, _, err := genesisClient.XChainAPI().GetUTXOs([]string{xChainAddrs[i]}, 10, "", "")
 		if err != nil {
 			return err
 		}
-		formattedUTXOs := utxoReply.UTXOs
-		utxos := make([]*avax.UTXO, len(formattedUTXOs))
-		for i, formattedUTXO := range formattedUTXOs {
-			utxoBytes := formattedUTXO.Bytes
+		utxos := make([]*avax.UTXO, len(utxosBytes))
+		for i, utxoBytes := range utxosBytes {
 			utxo := &avax.UTXO{}
 			err := codec.Unmarshal(utxoBytes, utxo)
 			if err != nil {
@@ -113,7 +111,6 @@ func (e *bombardExecutor) ExecuteTest() error {
 		}
 		utxoLists[i] = utxos
 		logrus.Infof("Decoded %d UTXOs", len(utxos))
-
 	}
 	logrus.Infof("Verified X Chain Balances and retrieved UTXOs.")
 
