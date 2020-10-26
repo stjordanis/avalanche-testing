@@ -3,8 +3,8 @@ script_dirpath="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 
 # ====================== CONSTANTS =======================================================
 SUITE_IMAGE="avaplatform/avalanche-testing"
-AVALANCHE_IMAGE="avaplatform/avalanchego:v1.0.0"
-BYZANTINE_IMAGE="avaplatform/avalanche-byzantine:v0.1.1"
+AVALANCHE_IMAGE="avaplatform/avalanchego:1.0.3"
+BYZANTINE_IMAGE="avaplatform/avalanche-byzantine:v0.1.3-rc.1"
 KURTOSIS_CORE_CHANNEL="master"
 INITIALIZER_IMAGE="kurtosistech/kurtosis-core_initializer:${KURTOSIS_CORE_CHANNEL}"
 API_IMAGE="kurtosistech/kurtosis-core_api:${KURTOSIS_CORE_CHANNEL}"
