@@ -5,20 +5,17 @@ PARALLELISM=4
 
 DOCKER_REPO="avaplatform"
 
-# login to AWS for byzantine images
-echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.1"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.3"
 # Use stable version of avalanche-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.1"
+BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.3-rc.1"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
 docker pull "${AVALANCHE_IMAGE}"
 
 # If Docker Credentials are not available skip the Byzantine Tests
-if [[ ${#DOCKER_USERNAME} == 0 ]]; then
+if [[ -z ${DOCKER_USERNAME} ]]; then
     echo "Skipping Byzantine Tests because Docker Credentials were not present."
     BYZANTINE_IMAGE=""
 else

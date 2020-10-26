@@ -46,7 +46,7 @@ func (c *Client) ExportKey(user api.UserPass, address string) (string, error) {
 
 // ImportKey imports the specified [privateKey] to [user]'s keystore
 func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error) {
-	res := &api.JsonAddress{}
+	res := &api.JSONAddress{}
 	err := c.requester.SendRequest("importKey", &platformvm.ImportKeyArgs{
 		UserPass:   user,
 		PrivateKey: privateKey,
@@ -57,7 +57,7 @@ func (c *Client) ImportKey(user api.UserPass, privateKey string) (string, error)
 // GetBalance returns the balance of [address] on the P Chain
 func (c *Client) GetBalance(address string) (*platformvm.GetBalanceResponse, error) {
 	res := &platformvm.GetBalanceResponse{}
-	err := c.requester.SendRequest("getBalance", &api.JsonAddress{
+	err := c.requester.SendRequest("getBalance", &api.JSONAddress{
 		Address: address,
 	}, res)
 	return res, err
@@ -65,32 +65,38 @@ func (c *Client) GetBalance(address string) (*platformvm.GetBalanceResponse, err
 
 // CreateAddress creates a new address for [user]
 func (c *Client) CreateAddress(user api.UserPass) (string, error) {
-	res := &api.JsonAddress{}
+	res := &api.JSONAddress{}
 	err := c.requester.SendRequest("createAddress", &user, res)
 	return res.Address, err
 }
 
 // ListAddresses returns an array of platform addresses controlled by [user]
 func (c *Client) ListAddresses(user api.UserPass) ([]string, error) {
-	res := &api.JsonAddresses{}
+	res := &api.JSONAddresses{}
 	err := c.requester.SendRequest("listAddresses", &user, res)
 	return res.Addresses, err
 }
 
 // GetUTXOs returns the byte representation of the UTXOs controlled by [addresses]
-func (c *Client) GetUTXOs(addresses []string) ([][]byte, error) {
+func (c *Client) GetUTXOs(addresses []string) ([][]byte, platformvm.Index, error) {
 	res := &platformvm.GetUTXOsResponse{}
 	err := c.requester.SendRequest("getUTXOs", &platformvm.GetUTXOsArgs{
 		Addresses: addresses,
+		Encoding:  formatting.HexEncoding,
 	}, res)
 	if err != nil {
-		return nil, err
+		return nil, platformvm.Index{}, err
 	}
+
+	formatter := formatting.Hex{}
 	utxos := make([][]byte, len(res.UTXOs))
 	for i, utxo := range res.UTXOs {
-		utxos[i] = utxo.Bytes
+		if err := formatter.FromString(utxo); err != nil {
+			return nil, platformvm.Index{}, err
+		}
+		utxos[i] = formatter.Bytes
 	}
-	return utxos, nil
+	return utxos, res.EndIndex, nil
 }
 
 // GetSubnets returns information about the specified subnets
@@ -132,10 +138,10 @@ func (c *Client) SampleValidators(subnetID ids.ID, sampleSize uint16) (*platform
 
 // AddValidator issues a transaction to add a validator to the primary network and returns the txID
 func (c *Client) AddValidator(user api.UserPass, rewardAddress, nodeID string, stakeAmount, startTime, endTime uint64, delegationFeeRate float32) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addValidator", &platformvm.AddValidatorArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass: user,
 		},
 		APIStaker: platformvm.APIStaker{
@@ -161,13 +167,13 @@ func (c *Client) AddDelegator(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addDelegator", &platformvm.AddDelegatorArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		}, APIStaker: platformvm.APIStaker{
 			NodeID:      nodeID,
 			StakeAmount: &jsonStakeAmount,
@@ -191,13 +197,13 @@ func (c *Client) AddSubnetValidator(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	jsonStakeAmount := cjson.Uint64(stakeAmount)
 	err := c.requester.SendRequest("addSubnetValidator", &platformvm.AddSubnetValidatorArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		APIStaker: platformvm.APIStaker{
 			NodeID:      nodeID,
@@ -217,12 +223,12 @@ func (c *Client) CreateSubnet(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("createSubnet", &platformvm.CreateSubnetArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		APISubnet: subnet,
 	}, res)
@@ -237,12 +243,12 @@ func (c *Client) ExportAVAX(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("exportAVAX", &platformvm.ExportAVAXArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		To:     to,
 		Amount: cjson.Uint64(amount),
@@ -258,12 +264,12 @@ func (c *Client) ImportAVAX(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("importAVAX", &platformvm.ImportAVAXArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		To:          to,
 		SourceChain: sourceChain,
@@ -282,18 +288,19 @@ func (c *Client) CreateBlockchain(
 	from []string,
 	changeAddr string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("createBlockchain", &platformvm.CreateBlockchainArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		SubnetID:    subnetID,
 		VMID:        vmID,
 		FxIDs:       fxIDs,
 		Name:        name,
-		GenesisData: formatting.CB58{Bytes: genesisData},
+		GenesisData: formatting.Hex{Bytes: genesisData}.String(),
+		Encoding:    formatting.HexEncoding,
 	}, res)
 	return res.TxID, err
 }
@@ -334,11 +341,20 @@ func (c *Client) GetBlockchains() ([]platformvm.APIBlockchain, error) {
 
 // GetTx returns the byte representation of the transaction corresponding to [txID]
 func (c *Client) GetTx(txID ids.ID) ([]byte, error) {
-	res := &platformvm.GetTxResponse{}
-	err := c.requester.SendRequest("getTx", &platformvm.GetTxArgs{
-		TxID: txID,
+	res := &api.FormattedTx{}
+	err := c.requester.SendRequest("getTx", &api.GetTxArgs{
+		TxID:     txID,
+		Encoding: formatting.HexEncoding,
 	}, res)
-	return res.Tx.Bytes, err
+	if err != nil {
+		return nil, err
+	}
+
+	formatter := formatting.Hex{}
+	if err := formatter.FromString(res.Tx); err != nil {
+		return nil, err
+	}
+	return formatter.Bytes, nil
 }
 
 // GetTxStatus returns the status of the transaction corresponding to [txID]

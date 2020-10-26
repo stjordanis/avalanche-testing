@@ -2,10 +2,11 @@ package services
 
 import (
 	"fmt"
-	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
 	"github.com/palantir/stacktrace"
@@ -13,8 +14,8 @@ import (
 )
 
 const (
-	httpPort             = 9650
-	stakingPort          = 9651
+	httpPort    = 9650
+	stakingPort = 9651
 
 	stakingTLSCertFileID = "staking-tls-cert"
 	stakingTLSKeyFileID  = "staking-tls-key"
@@ -168,7 +169,7 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 		fmt.Sprintf("--snow-quorum-size=%d", core.snowQuorumSize),
 		fmt.Sprintf("--staking-enabled=%v", core.stakingEnabled),
 		fmt.Sprintf("--tx-fee=%d", core.txFee),
-		fmt.Sprintf("--network-initial-timeout=%d", int64(core.networkInitialTimeout)),
+		fmt.Sprintf("--network-initial-timeout=%s", core.networkInitialTimeout),
 	}
 
 	if core.stakingEnabled {

@@ -1,6 +1,8 @@
 # TBD
 * Small bugfix in `build_and_run.sh`, so it won't silently error on missing an argument
 * Update CI to skip byzantine tests on untrusted PRs where Docker Credentials are not present
+* Update network initial timeout to use duration variable
+* Upgrade to avalanchego v1.0.3
 
 # 0.10.0
 * Upgraded to Kurtosis 1.0
