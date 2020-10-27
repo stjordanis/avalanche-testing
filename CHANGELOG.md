@@ -3,6 +3,7 @@
 * Update CI to skip byzantine tests on untrusted PRs where Docker Credentials are not present
 * Update network initial timeout to use duration variable
 * Upgrade to avalanchego v1.0.3
+* Change Kurtosis Core Channel from `master` to specific tag `1.0.3`
 
 # 0.10.0
 * Upgraded to Kurtosis 1.0
