@@ -27,12 +27,15 @@ import (
 )
 
 const (
-	networkID        = uint32(5)
-	txFee            = uint64(1000000)
-	pChainID         = "P"
-	bech32hrp        = "fuji"
-	fundedPrivateKey = "PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
+	networkID = uint32(1)
+	txFee     = uint64(1000000)
+	pChainID  = "P"
+	bech32hrp = "avax"
+	// fundedPrivateKey = "PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
 	// fundedPrivateKey = "PrivateKey-23tYfNBVmsvMeEekJhzwtduuzPbqBeJWacj9obeXhiFQVxcA5v"
+	// fundedPrivateKey = "PrivateKey-DVm6PGG2qnmuozQZZPwqMQrFh2a2EXEHMdE7QrP2VX6n23Z64"
+	fundedPrivateKey = "PrivateKey-PFCgJA9NSDqBWj13DihoyQKLabYVnX1BgDiDqa3izB2QZaWHP"
+	// fundedPrivateKey = "PrivateKey-tyvQ6wYWnx3kbXJUeSbs9nqZUwGrdQWsyueNHPhLMVtfr3STe"
 	uri            = "http://127.0.0.1:9650"
 	requestTimeout = 5 * time.Second
 )
@@ -47,8 +50,8 @@ var (
 
 func init() {
 	privateKey, _ = ConvertPrivateKey(fundedPrivateKey)
-	xChainID, _ = ids.FromString("2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm")
-	avaxAssetID, _ = ids.FromString("U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK")
+	xChainID, _ = ids.FromString("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM")
+	avaxAssetID, _ = ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
 }
 
 // ConvertPrivateKey ...
@@ -78,7 +81,7 @@ func ExportRequiredAVAX(avm *avm.Client, user api.UserPass, pAddress string, req
 	if err != nil {
 		return fmt.Errorf("Failed to ExportAVAX: %w", err)
 	}
-	logrus.Infof("Expoted AVAX to %s, TxID: %s", pAddress, txID)
+	logrus.Infof("Exported AVAX to %s, TxID: %s", pAddress, txID)
 
 	for {
 		time.Sleep(time.Second)
@@ -136,6 +139,11 @@ func CreateLockedOutputsFromCSV(fileName string) ([]*avax.TransferableOutput, ui
 		return nil, 0, err
 	}
 	reader := csv.NewReader(file)
+	// Assumes there is a header to the csv file
+	// _, err = reader.Read()
+	// if err != nil {
+	// 	return nil, 0, err
+	// }
 
 	outputs := make([]*avax.TransferableOutput, 0, 10) // Adjust estimate here to optimize memory allocation
 	for {
@@ -152,29 +160,27 @@ func CreateLockedOutputsFromCSV(fileName string) ([]*avax.TransferableOutput, ui
 
 		// TODO parse the bech32 address
 		// address := record[0]
-		chainID, hrp, b, err := formatting.ParseAddress(record[0])
+		_, hrp, b, err := formatting.ParseAddress(record[0])
 		if err != nil {
 			return nil, 0, err
 		}
-		if chainID != pChainID {
-			return nil, 0, fmt.Errorf("incorrect chainID: %s, expected: %s", chainID, pChainID)
-		}
+		// if chainID != pChainID {
+		// 	return nil, 0, fmt.Errorf("incorrect chainID: %s, expected: %s", chainID, pChainID)
+		// }
 		if hrp != bech32hrp {
 			return nil, 0, fmt.Errorf("incorrect hrp in address: %s, expected: %s", hrp, bech32hrp)
 		}
-		if len(b) != 20 {
-			return nil, 0, fmt.Errorf("incorrect length of address bytes: %d, expected 20", len(b))
+		address, err := ids.ToShortID(b)
+		if err != nil {
+			return nil, 0, err
 		}
-		addressBytes := [20]byte{}
-		copy(addressBytes[:], b)
-		address := ids.NewShortID(addressBytes)
 
-		amount, err := strconv.ParseUint(record[1], 10, 64)
+		amount, err := strconv.ParseUint(record[2], 10, 64)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to parse amount due to: %w", err)
 		}
 
-		locktime, err := strconv.ParseUint(record[2], 10, 64)
+		locktime, err := strconv.ParseUint(record[1], 10, 64)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to parse locktime due to: %w", err)
 		}
@@ -198,7 +204,7 @@ func BatchFundOutputs(avm *avm.Client, platformClient *platform.Client, user api
 	if err := ExportRequiredAVAX(avm, user, pAddress, totalAmount); err != nil {
 		return fmt.Errorf("failed to export the required AVAX: %w", err)
 	}
-	logrus.Infof("Exported AVAX to P Chain")
+	logrus.Infof("Exported %d AVAX to P Chain", totalAmount)
 
 	allUTXOBytes, err := platformClient.GetUTXOs([]string{pAddress}, "X")
 	if err != nil {
@@ -213,7 +219,7 @@ func BatchFundOutputs(avm *avm.Client, platformClient *platform.Client, user api
 		}
 		utxos[i] = utxo
 	}
-	logrus.Infof("Fetched UTXOs")
+	logrus.Infof("Fetched %d UTXOs", len(utxos))
 
 	// We need enough inputs to fund totalAmount
 	kc := secp256k1fx.NewKeychain()

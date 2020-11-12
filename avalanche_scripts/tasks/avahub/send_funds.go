@@ -44,14 +44,14 @@ func CreateOutputsFromCSV(fileName string) ([]avm.SendOutput, uint64, error) {
 		if err != nil {
 			return nil, 0, fmt.Errorf("Failed to read due to %s", err)
 		}
-		if len(record) != 3 {
+		if len(record) != 2 {
 			return nil, 0, fmt.Errorf("Expected to find record of length 3, but found length: %d", len(record))
 		}
 
-		address := record[1]
+		address := record[0]
 
 		// address := record[1]
-		nAVAX, err := strconv.ParseUint(record[2], 10, 64)
+		nAVAX, err := strconv.ParseUint(record[1], 10, 64)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -60,6 +60,7 @@ func CreateOutputsFromCSV(fileName string) ([]avm.SendOutput, uint64, error) {
 			Amount:  cjson.Uint64(nAVAX),
 			AssetID: "AVAX",
 		})
+		totalAmount += nAVAX
 	}
 
 	return outputs, totalAmount, nil

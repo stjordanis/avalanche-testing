@@ -369,9 +369,10 @@ func (c *Client) GetTxStatus(txID ids.ID) (platformvm.Status, error) {
 
 // IssueTx ...
 func (c *Client) IssueTx(txBytes []byte) (ids.ID, error) {
-	res := &platformvm.IssueTxResponse{}
-	err := c.requester.SendRequest("issueTx", &platformvm.IssueTxArgs{
-		Tx: formatting.CB58{Bytes: txBytes},
+	res := &api.JSONTxIDChangeAddr{}
+	err := c.requester.SendRequest("issueTx", &api.FormattedTx{
+		Tx:       formatting.Hex{Bytes: txBytes}.String(),
+		Encoding: formatting.HexEncoding,
 	}, res)
 	return res.TxID, err
 }

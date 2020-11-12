@@ -265,12 +265,12 @@ func (c *Client) SendMultiple(
 	outputs []avm.SendOutput,
 	memo string,
 ) (ids.ID, error) {
-	res := &api.JsonTxID{}
+	res := &api.JSONTxID{}
 	err := c.requester.SendRequest("sendMultiple", &avm.SendMultipleArgs{
-		JsonSpendHeader: api.JsonSpendHeader{
+		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
-			JsonFromAddrs:  api.JsonFromAddrs{From: from},
-			JsonChangeAddr: api.JsonChangeAddr{ChangeAddr: changeAddr},
+			JSONFromAddrs:  api.JSONFromAddrs{From: from},
+			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
 		Outputs: outputs,
 		Memo:    memo,
