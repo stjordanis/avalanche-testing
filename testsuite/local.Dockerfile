@@ -1,4 +1,4 @@
-FROM golang:1.13-alpine
+FROM golang:1.15-buster
 
 RUN mkdir -p /go/src/github.com/ava-labs
 
