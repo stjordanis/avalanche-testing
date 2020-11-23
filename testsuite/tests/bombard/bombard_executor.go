@@ -7,10 +7,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ava-labs/avalanchego/api/apiargs"
+
 	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
-	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/utils/crypto"
@@ -49,7 +50,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 	for i, client := range e.normalClients[1:] {
 		secondaryClients[i] = helpers.NewRPCWorkFlowRunner(
 			client,
-			api.UserPass{Username: createRandomString(), Password: createRandomString()},
+			apiargs.UserPass{Username: createRandomString(), Password: createRandomString()},
 			e.acceptanceTimeout,
 		)
 		xChainAddress, _, err := secondaryClients[i].CreateDefaultAddresses()
@@ -59,7 +60,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 		xChainAddrs[i] = xChainAddress
 	}
 
-	genesisUser := api.UserPass{Username: createRandomString(), Password: createRandomString()}
+	genesisUser := apiargs.UserPass{Username: createRandomString(), Password: createRandomString()}
 	highLevelGenesisClient := helpers.NewRPCWorkFlowRunner(
 		genesisClient,
 		genesisUser,
@@ -129,13 +130,13 @@ func (e *bombardExecutor) ExecuteTest() error {
 			return fmt.Errorf("private key missing %s prefix", constants.SecretKeyPrefix)
 		}
 		trimmedPrivateKey := strings.TrimPrefix(pkStr, constants.SecretKeyPrefix)
-		formattedPrivateKey := formatting.CB58{}
-		if err := formattedPrivateKey.FromString(trimmedPrivateKey); err != nil {
+		formattedPrivateKey, err := formatting.Decode(formatting.CB58, trimmedPrivateKey)
+		if err != nil {
 			return fmt.Errorf("problem parsing private key: %w", err)
 		}
 
 		factory := crypto.FactorySECP256K1R{}
-		skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
+		skIntf, err := factory.ToPrivateKey(formattedPrivateKey)
 		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
 		privateKeys[i] = sk
 
