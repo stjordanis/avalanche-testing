@@ -2,11 +2,12 @@ package services
 
 import (
 	"fmt"
-	"github.com/kurtosis-tech/kurtosis-go/lib/services"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis/info"
+	"github.com/kurtosis-tech/kurtosis-go/lib/services"
+
 	"github.com/ava-labs/avalanche-testing/utils/constants"
+	"github.com/ava-labs/avalanchego/api/info"
 )
 
 // NewAvalancheServiceAvailabilityChecker returns a new services.ServiceAvailabilityCheckerCore to

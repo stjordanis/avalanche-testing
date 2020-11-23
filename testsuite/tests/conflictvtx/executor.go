@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/utils/formatting"
@@ -13,12 +13,12 @@ import (
 )
 
 type executor struct {
-	virtuousClient  *apis.Client
-	byzantineClient *apis.Client
+	virtuousClient  *services.Client
+	byzantineClient *services.Client
 }
 
 // NewConflictingTxsVertexExecutor ...
-func NewConflictingTxsVertexExecutor(virtuousClient, byzantineClient *apis.Client) tester.AvalancheTester {
+func NewConflictingTxsVertexExecutor(virtuousClient, byzantineClient *services.Client) tester.AvalancheTester {
 	return &executor{
 		virtuousClient:  virtuousClient,
 		byzantineClient: byzantineClient,

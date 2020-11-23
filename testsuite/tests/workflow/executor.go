@@ -3,12 +3,12 @@ package workflow
 import (
 	"time"
 
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
-	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -26,12 +26,12 @@ const (
 )
 
 type executor struct {
-	stakerClient, delegatorClient *apis.Client
+	stakerClient, delegatorClient *services.Client
 	acceptanceTimeout             time.Duration
 }
 
 // NewRPCWorkflowTestExecutor ...
-func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *apis.Client, acceptanceTimeout time.Duration) tester.AvalancheTester {
+func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *services.Client, acceptanceTimeout time.Duration) tester.AvalancheTester {
 	return &executor{
 		stakerClient:      stakerClient,
 		delegatorClient:   delegatorClient,

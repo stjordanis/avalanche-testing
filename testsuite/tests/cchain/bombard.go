@@ -4,21 +4,21 @@ import (
 	"context"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/sirupsen/logrus"
 )
 
 type parallelBasicTxXputTest struct {
-	client   *apis.Client
+	client   *services.Client
 	numLists int
 	numTxs   int
 }
 
 // NewBasicTransactionThroughputTest returns a test executor that will run a small xput test of [numTxs] from each of [numLists] accounts
 // Note: all issued to the same node.
-func NewBasicTransactionThroughputTest(client *apis.Client, numLists int, numTxs int) avalanche.Tester {
+func NewBasicTransactionThroughputTest(client *services.Client, numLists int, numTxs int) avalanche.Tester {
 	return &parallelBasicTxXputTest{
 		client:   client,
 		numLists: numLists,

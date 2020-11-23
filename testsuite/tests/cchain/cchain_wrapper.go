@@ -8,14 +8,13 @@ import (
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
-// CChainTest runs a series of basic C-Chain tests on a network of
+// Test runs a series of basic C-Chain tests on a network of
 // virtuous nodes
-type CChainTest struct {
+type Test struct {
 	ImageName      string
 	NumTxs         int
 	NumTxLists     int
@@ -24,10 +23,10 @@ type CChainTest struct {
 }
 
 // Run implements the Kurtosis Test interface
-func (test CChainTest) Run(network networks.Network, context testsuite.TestContext) {
+func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
-	clients := make([]*apis.Client, 0, len(bootServiceIDs))
+	clients := make([]*avalancheService.Client, 0, len(bootServiceIDs))
 	for serviceID := range bootServiceIDs {
 		avalancheClient, err := castedNetwork.GetAvalancheClient(serviceID)
 		if err != nil {
@@ -63,7 +62,7 @@ func (test CChainTest) Run(network networks.Network, context testsuite.TestConte
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface
-func (test CChainTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+func (test Test) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Add config for a normal node, to add an additional node during the test
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
 	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
@@ -91,11 +90,11 @@ func (test CChainTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 }
 
 // GetExecutionTimeout implements the Kurtosis Test interface
-func (test CChainTest) GetExecutionTimeout() time.Duration {
+func (test Test) GetExecutionTimeout() time.Duration {
 	return 4 * time.Minute
 }
 
 // GetSetupBuffer implements the Kurtosis Test interface
-func (test CChainTest) GetSetupBuffer() time.Duration {
+func (test Test) GetSetupBuffer() time.Duration {
 	return 2 * time.Minute
 }

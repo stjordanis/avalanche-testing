@@ -3,7 +3,7 @@ package bombard
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/utils/codec"
 	"github.com/ava-labs/avalanchego/utils/crypto"
@@ -12,10 +12,6 @@ import (
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 	"github.com/ava-labs/avalanchego/vms/propertyfx"
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-)
-
-const (
-	networkID uint32 = 12345 // TODO move to constants package
 )
 
 func createXChainCodec() (codec.Codec, error) {
@@ -73,7 +69,7 @@ func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, addre
 	}}
 
 	tx := &avm.Tx{UnsignedTx: &avm.BaseTx{BaseTx: avax.BaseTx{
-		NetworkID:    networkID,
+		NetworkID:    constants.NetworkID,
 		BlockchainID: constants.XChainID,
 		Outs:         outs,
 		Ins:          ins,

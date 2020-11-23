@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	cjson "github.com/ava-labs/avalanchego/utils/json"
 	"github.com/ava-labs/avalanchego/vms/avm"
 	"github.com/ethereum/go-ethereum/common"
@@ -18,12 +18,12 @@ import (
 // AVAX (native coin) and ANTs (native tokens) between the
 // X and C Chains
 type atomicWorkflowTest struct {
-	client *apis.Client
+	client *services.Client
 	txFee  uint64
 }
 
 // CreateAtomicWorkflowTest returns a test of import/export transactions between X <-> C
-func CreateAtomicWorkflowTest(client *apis.Client, txFee uint64) avalanche.Tester {
+func CreateAtomicWorkflowTest(client *services.Client, txFee uint64) avalanche.Tester {
 	return &atomicWorkflowTest{
 		client: client,
 		txFee:  txFee,

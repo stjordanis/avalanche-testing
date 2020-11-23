@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -26,7 +26,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 	allServiceIDs map[networks.ServiceID]bool,
 	stakerServiceIDs map[networks.ServiceID]bool,
 	allNodeIDs map[networks.ServiceID]string,
-	allAvalalancheClients map[networks.ServiceID]*apis.Client,
+	allAvalalancheClients map[networks.ServiceID]*services.Client,
 ) error {
 	logrus.Tracef("All node IDs in network being verified: %v", allNodeIDs)
 	for serviceID := range allServiceIDs {
@@ -65,7 +65,7 @@ func (verifier NetworkStateVerifier) VerifyNetworkFullyConnected(
 // 		atLeast: If true, indicates that the number of peers must be AT LEAST the expected number of peers; if false, must be exact
 func (verifier NetworkStateVerifier) VerifyExpectedPeers(
 	serviceID networks.ServiceID,
-	client *apis.Client,
+	client *services.Client,
 	acceptableNodeIDs map[string]bool,
 	expectedNumPeers int,
 	atLeast bool) error {

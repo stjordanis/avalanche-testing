@@ -1,13 +1,13 @@
 package bombard
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
-	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -34,7 +34,7 @@ type StakingNetworkBombardTest struct {
 func (test StakingNetworkBombardTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
-	clients := make([]*apis.Client, 0, len(bootServiceIDs))
+	clients := make([]*avalancheService.Client, 0, len(bootServiceIDs))
 	for serviceID := range bootServiceIDs {
 		avalancheClient, err := castedNetwork.GetAvalancheClient(serviceID)
 		if err != nil {

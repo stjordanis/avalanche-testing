@@ -4,8 +4,8 @@ import (
 	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
@@ -31,7 +31,7 @@ const (
 // Note: RPCWorkFlowRunner does not store user credentials in a secure way. It is
 // only suitable for testing purposes.
 type RPCWorkFlowRunner struct {
-	client   *apis.Client
+	client   *services.Client
 	userPass api.UserPass
 
 	// This timeout represents the time the RPCWorkFlowRunner will wait for some state change to be accepted
@@ -41,7 +41,7 @@ type RPCWorkFlowRunner struct {
 
 // NewRPCWorkFlowRunner ...
 func NewRPCWorkFlowRunner(
-	client *apis.Client,
+	client *services.Client,
 	user api.UserPass,
 	networkAcceptanceTimeout time.Duration) *RPCWorkFlowRunner {
 	return &RPCWorkFlowRunner{

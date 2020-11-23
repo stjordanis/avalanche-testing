@@ -7,12 +7,16 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/utils/crypto"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/ava-labs/avalanchego/vms/avm"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/ava-labs/coreth/params"
+	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 )
@@ -27,7 +31,7 @@ var (
 	cChainID           = big.NewInt(43112)
 	signer             = types.NewEIP155Signer(cChainID)
 
-	ethAddr      common.Address
+	ethAddr common.Address
 )
 
 func init() {
@@ -59,17 +63,6 @@ func confirmTx(c *avm.Client, txID ids.ID) error {
 		logrus.Infof("Status of %s was %s", txID, status)
 		time.Sleep(time.Second)
 	}
-}
-
-// createClients returns an avmClient, cChain API client, and ethclient
-func createClients(ip string, port int, requestTimeout time.Duration) (*avm.Client, *evm.Client, *ethclient.Client, error) {
-	uri := fmt.Sprintf("http://%s:%d", ip, port)
-	avmClient := avm.NewClient(uri, "X", requestTimeout)
-	cChainClient := evm.NewClient(uri, "C", requestTimeout)
-
-	eth, err := ethclient.Dial(fmt.Sprintf("http://%s:%d/ext/bc/C/rpc", ip, port))
-
-	return avmClient, cChainClient, eth, err
 }
 
 // createConsecutiveBasicEthTransactions ...
