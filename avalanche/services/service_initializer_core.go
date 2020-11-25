@@ -27,6 +27,7 @@ const (
 // AvalancheLogLevel specifies the log level for an Avalanche client
 type AvalancheLogLevel string
 
+// Log levels
 const (
 	VERBOSE AvalancheLogLevel = "verbo"
 	DEBUG   AvalancheLogLevel = "debug"
@@ -200,7 +201,7 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 		socketStrs := make([]string, 0, len(avaDependencies))
 		for _, service := range avaDependencies {
 			socket := service.GetStakingSocket()
-			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIpAddr(), socket.GetPort()))
+			socketStrs = append(socketStrs, fmt.Sprintf("%s:%d", socket.GetIPAddr(), socket.GetPort()))
 		}
 		joinedSockets := strings.Join(socketStrs, ",")
 		commandList = append(commandList, "--bootstrap-ips="+joinedSockets)
@@ -216,9 +217,9 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 	return commandList, nil
 }
 
-// GetServiceFromIp implements services.ServiceInitializerCore function to take the IP address of the Docker container that Kurtosis
+// GetServiceFromIP implements services.ServiceInitializerCore function to take the IP address of the Docker container that Kurtosis
 // launches the Avalanche node inside and wrap it with our AvalancheService implementation of NodeService
-func (core AvalancheServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
+func (core AvalancheServiceInitializerCore) GetServiceFromIP(ipAddr string) services.Service {
 	return AvalancheService{
 		ipAddr:      ipAddr,
 		stakingPort: stakingPort,

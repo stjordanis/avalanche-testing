@@ -18,8 +18,8 @@ func NewServiceSocket(ipAddr string, port int) *ServiceSocket {
 	}
 }
 
-// GetIpAddr ...
-func (socket *ServiceSocket) GetIpAddr() string {
+// GetIPAddr ...
+func (socket *ServiceSocket) GetIPAddr() string {
 	return socket.ipAddr
 }
 
@@ -45,9 +45,9 @@ func (service AvalancheService) GetJSONRPCSocket() ServiceSocket {
 	return *NewServiceSocket(service.ipAddr, service.jsonRPCPort)
 }
 
-// NOTES: improved interface
 // NodeService implements the Kurtosis generic services.Service interface that represents the minimum interface for a
 // validator node
+// TODO: improve interface
 type NodeService interface {
 	services.Service
 

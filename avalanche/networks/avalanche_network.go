@@ -48,7 +48,7 @@ func (network TestAvalancheNetwork) GetAvalancheClient(serviceID networks.Servic
 	}
 	service := node.Service.(avalancheService.AvalancheService)
 	jsonRPCSocket := service.GetJSONRPCSocket()
-	return avalancheService.NewClient(jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort(), constants.DefaultRequestTimeout)
+	return avalancheService.NewClient(jsonRPCSocket.GetIPAddr(), jsonRPCSocket.GetPort(), constants.DefaultRequestTimeout)
 }
 
 // GetAllBootServiceIDs returns the service IDs of all the boot nodes in the network

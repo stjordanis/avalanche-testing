@@ -33,7 +33,7 @@ func (g AvalancheServiceAvailabilityCheckerCore) IsServiceUp(toCheck services.Se
 
 	castedService := toCheck.(AvalancheService)
 	jsonRPCSocket := castedService.GetJSONRPCSocket()
-	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort())
+	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIPAddr(), jsonRPCSocket.GetPort())
 	client := info.NewClient(uri, constants.DefaultRequestTimeout)
 
 	if !g.bootstrappedPChain {

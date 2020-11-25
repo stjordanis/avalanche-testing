@@ -15,6 +15,7 @@ import (
 	"github.com/ava-labs/coreth/plugin/evm"
 )
 
+// Chain names
 const (
 	XChain = "X"
 	CChain = "C"
