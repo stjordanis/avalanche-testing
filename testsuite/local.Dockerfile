@@ -1,4 +1,4 @@
-FROM golang:1.15-buster
+FROM golang:1.15-alpine
 RUN apk add --no-cache make gcc musl-dev linux-headers git ca-certificates
 
 RUN mkdir -p /go/src/github.com/ava-labs
