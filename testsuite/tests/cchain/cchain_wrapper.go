@@ -12,6 +12,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	normalNodeConfigID       networks.ConfigurationID = "normal-config"
+	additionalNode1ServiceID                          = "additional-node-1"
+	additionalNode2ServiceID                          = "additional-node-2"
+)
+
 // Test runs a series of basic C-Chain tests on a network of
 // virtuous nodes
 type Test struct {

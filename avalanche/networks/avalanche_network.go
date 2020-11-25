@@ -46,7 +46,8 @@ func (network TestAvalancheNetwork) GetAvalancheClient(serviceID networks.Servic
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceID)
 	}
-	avalancheService := node.Service.(avalancheService.AvalancheService)
+	service := node.Service.(avalancheService.AvalancheService)
+	jsonRPCSocket := service.GetJSONRPCSocket()
 	return avalancheService.NewClient(jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort(), constants.DefaultRequestTimeout)
 }
 

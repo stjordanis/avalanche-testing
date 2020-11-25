@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	cjson "github.com/ava-labs/avalanchego/utils/json"
 	"github.com/ava-labs/avalanchego/vms/avm"
 	"github.com/ethereum/go-ethereum/common"
@@ -23,7 +24,7 @@ type atomicWorkflowTest struct {
 }
 
 // CreateAtomicWorkflowTest returns a test of import/export transactions between X <-> C
-func CreateAtomicWorkflowTest(client *services.Client, txFee uint64) avalanche.Tester {
+func CreateAtomicWorkflowTest(client *services.Client, txFee uint64) tester.AvalancheTester {
 	return &atomicWorkflowTest{
 		client: client,
 		txFee:  txFee,

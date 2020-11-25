@@ -49,12 +49,16 @@ github.com/ava-labs/avalanchego v1.0.3 h1:0YJYmPkb1Qxc4OWIMjwpr+IDdUe8XetOkCi99j
 github.com/ava-labs/avalanchego v1.0.3/go.mod h1:ktaMgskNtDrXkjc6W4C9iOFmOipf09nHMmHa+Lhagu0=
 github.com/ava-labs/avalanchego v1.0.4-update-id-2 h1:C4Ss43XgWw1NdCm74mHiQbgsP02+I6QvTCfvIEgmkM0=
 github.com/ava-labs/avalanchego v1.0.4-update-id-2/go.mod h1:4GfedhY9S6k/SOUeMzDh6cuLoPAtnkFsL4R89xg5wf0=
+github.com/ava-labs/avalanchego v1.0.5-client h1:/tvPyl6T3Ujn8RHeQ83sezt944XZX6BMlKkp1J+I/ss=
+github.com/ava-labs/avalanchego v1.0.5-client/go.mod h1:Q/I7LaMv2EYL8plNVRbcpBJsDk2py2XISfov0KK1MgU=
 github.com/ava-labs/avalanchego v1.0.5 h1:zjBaM/9l2VjnL7j6SEwmqKjPie1W9NSEDLrd2ZotMCA=
 github.com/ava-labs/avalanchego v1.0.5/go.mod h1:4GfedhY9S6k/SOUeMzDh6cuLoPAtnkFsL4R89xg5wf0=
 github.com/ava-labs/coreth v0.3.14 h1:+WE3A+AlWZVf4+M312dYioF8vsM11uNuC1C8ds99hPU=
 github.com/ava-labs/coreth v0.3.14/go.mod h1:Yf3cKvh25FtM6fIi4O1kqBmY6zmFUIn+E0py3mldmRo=
 github.com/ava-labs/coreth v0.3.15-rc.1 h1:wMxBXJfyO5qggh6lETS2G59sgfB9UPjAq7ULaaeydBk=
 github.com/ava-labs/coreth v0.3.15-rc.1/go.mod h1:c0Mb7xU6gqXfrXnyNb2kkT3jWxW3za9t2dp669IlWiM=
+github.com/ava-labs/coreth v0.3.15-rc.2 h1:MGJECrlA1/clx4ceoGQ9ZKvSW9Glwn1tKVAaVCKTUAk=
+github.com/ava-labs/coreth v0.3.15-rc.2/go.mod h1:hAT5cycqQ02084XwfPCXKKYuOudpNjhXF+TlWZmeU3c=
 github.com/aws/aws-sdk-go v1.25.48/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
@@ -115,6 +119,7 @@ github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymF
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
+github.com/ethereum/go-ethereum v1.9.21 h1:8qRlhzrItnmUGdVlBzZLI2Tb46S0RdSNjFwICo781ws=
 github.com/ethereum/go-ethereum v1.9.21/go.mod h1:RXAVzbGrSGmDkDnHymruTAIEjUR3E4TX0EOpaj702sI=
 github.com/ethereum/go-ethereum v1.9.24 h1:6AK+ORt3EMDO+FTjzXy/AQwHMbu52J2nYHIjyQX9azQ=
 github.com/ethereum/go-ethereum v1.9.24/go.mod h1:JIfVb6esrqALTExdz9hRYvrP0xBDf6wCncIu1hNwHpM=

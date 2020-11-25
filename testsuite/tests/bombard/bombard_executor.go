@@ -103,7 +103,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 		utxos := make([]*avax.UTXO, len(utxosBytes))
 		for i, utxoBytes := range utxosBytes {
 			utxo := &avax.UTXO{}
-			err := codec.Unmarshal(utxoBytes, utxo)
+			_, err := codec.Unmarshal(utxoBytes, utxo)
 			if err != nil {
 				return stacktrace.Propagate(err, "Failed to unmarshal utxo bytes.")
 			}
@@ -129,13 +129,13 @@ func (e *bombardExecutor) ExecuteTest() error {
 			return fmt.Errorf("private key missing %s prefix", constants.SecretKeyPrefix)
 		}
 		trimmedPrivateKey := strings.TrimPrefix(pkStr, constants.SecretKeyPrefix)
-		formattedPrivateKey := formatting.CB58{}
-		if err := formattedPrivateKey.FromString(trimmedPrivateKey); err != nil {
+		pkBytes, err := formatting.Decode(formatting.CB58, trimmedPrivateKey)
+		if err != nil {
 			return fmt.Errorf("problem parsing private key: %w", err)
 		}
 
 		factory := crypto.FactorySECP256K1R{}
-		skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
+		skIntf, err := factory.ToPrivateKey(pkBytes)
 		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
 		privateKeys[i] = sk
 

@@ -7,20 +7,12 @@ import (
 	"math/big"
 
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
-	"github.com/ava-labs/avalanchego/utils/crypto"
-	"github.com/ava-labs/avalanchego/utils/formatting"
 	"github.com/ava-labs/coreth/ethclient"
-	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/sirupsen/logrus"
 
-	geth "github.com/ethereum/go-ethereum"
+	"github.com/ava-labs/coreth"
+	"github.com/ava-labs/coreth/core/types"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-)
-
-var (
-	key                = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
-	prefixedPrivateKey = fmt.Sprintf("PrivateKey-%s", key)
 )
 
 // NewEthAPIExecutor returns a new bombard test bombardExecutor
@@ -38,15 +30,8 @@ type ethAPIExecutor struct {
 func (e *ethAPIExecutor) ExecuteTest() error {
 	ctx := context.Background()
 
-	cb58 := formatting.CB58{}
-	factory := crypto.FactorySECP256K1R{}
-	_ = cb58.FromString(key)
-	pk, _ := factory.ToPrivateKey(cb58.Bytes)
-	secpKey := pk.(*crypto.PrivateKeySECP256K1R)
-	ethAddr := evm.GetEthAddress(secpKey)
-
 	logrus.Info("Conducting test on basic ethclient API calls")
-	if err := testBasicAPICalls(ctx, client, ethAddr); err != nil {
+	if err := testBasicAPICalls(ctx, e.client, ethAddr); err != nil {
 		return fmt.Errorf("Basic API Calls failed: %w", err)
 	}
 	logrus.Info("Basic API Call test was successful.")
@@ -91,7 +76,7 @@ func testSubscription(ctx context.Context, client *ethclient.Client) error {
 	logrus.Infof("Created subscription: %s", subscription)
 
 	logChan := make(chan types.Log)
-	query := geth.FilterQuery{
+	query := coreth.FilterQuery{
 		BlockHash: nil,
 		FromBlock: nil,
 		ToBlock:   nil,

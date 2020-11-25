@@ -116,13 +116,13 @@ func (runner RPCWorkFlowRunner) AddDelegatorToPrimaryNetwork(
 	endTime := uint64(delegatorStartTime.Add(DefaultDelegationPeriod).Unix())
 	addDelegatorTxID, err := client.PChainAPI().AddDelegator(
 		runner.userPass,
+		nil, // from addrs
+		"",  // change addr
 		pChainAddress,
 		delegateeNodeID,
 		stakeAmount,
 		startTime,
 		endTime,
-		nil, // from addrs
-		"",  // change addr
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to add delegator %s", pChainAddress)
@@ -150,6 +150,8 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 	endTime := uint64(stakingStartTime.Add(DefaultStakingPeriod).Unix())
 	addStakerTxID, err := client.PChainAPI().AddValidator(
 		runner.userPass,
+		nil,
+		"",
 		pchainAddress,
 		nodeID,
 		stakeAmount,
@@ -176,11 +178,12 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 	for _, address := range addresses {
 		txID, err := client.Send(
 			runner.userPass,
+			nil, // from addrs
+			"",  // change addr
 			amount,
 			AvaxAssetID,
 			address,
-			nil, // from addrs
-			"",  // change addr
+			"",
 		)
 		if err != nil {
 			return err
@@ -197,11 +200,12 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 func (runner RPCWorkFlowRunner) SendAVAX(to string, amount uint64) (ids.ID, error) {
 	return runner.client.XChainAPI().Send(
 		runner.userPass,
+		nil, // from addrs
+		"",  // change addr
 		amount,
 		AvaxAssetID,
 		to,
-		nil, // from addrs
-		"",  // change addr
+		"", // memo field
 	)
 }
 
@@ -230,11 +234,12 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 	for i := uint64(1); i < numTxs; i++ {
 		txID, err := client.Send(
 			runner.userPass,
+			nil, // from addrs
+			"",  // change addr
 			amount-txFee*uint64(i),
 			AvaxAssetID,
 			to,
-			nil, // from addrs
-			"",  // change addr
+			"", // memo field
 		)
 		if err != nil {
 			errs <- stacktrace.Propagate(err, "Failed to send transaction.")
@@ -253,10 +258,10 @@ func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, 
 	client := runner.client
 	txID, err := client.XChainAPI().ExportAVAX(
 		runner.userPass,
-		amount,
-		pChainAddress,
 		nil, // from addrs
 		"",  // change addr
+		amount,
+		pChainAddress,
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to pchainAddress %s", pChainAddress)
@@ -268,10 +273,10 @@ func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, 
 
 	importTxID, err := client.PChainAPI().ImportAVAX(
 		runner.userPass,
-		pChainAddress,
-		constants.XChainID.String(),
 		nil, // from addrs
 		"",  // change addr
+		pChainAddress,
+		constants.XChainID.String(),
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed import AVAX to pchainAddress %s", pChainAddress)
@@ -291,11 +296,11 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	client := runner.client
 
 	exportTxID, err := client.PChainAPI().ExportAVAX(
+		nil, // from addrs
+		"",  // change addr
 		runner.userPass,
 		xChainAddress,
 		amount,
-		nil, // from addrs
-		"",  // change addr
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", xChainAddress)
@@ -380,18 +385,18 @@ func (runner RPCWorkFlowRunner) waitForPChainTransactionAcceptance(txID ids.ID) 
 	pollStartTime := time.Now()
 
 	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout {
-		status, err := client.GetTxStatus(txID)
+		statusRes, err := client.GetTxStatus(txID, true)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status")
 		}
-		logrus.Tracef("Status for transaction: %s: %s", txID, status)
+		logrus.Tracef("Status for transaction: %s: %s", txID, statusRes.Status)
 
-		if status == platformvm.Committed {
+		if statusRes.Status == platformvm.Committed {
 			return nil
 		}
 
-		if status == platformvm.Dropped || status == platformvm.Aborted {
-			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s", txID, status)
+		if statusRes.Status == platformvm.Dropped || statusRes.Status == platformvm.Aborted {
+			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s. Reason: %s", txID, statusRes.Status, statusRes.Reason)
 		}
 		time.Sleep(time.Second)
 	}

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/sirupsen/logrus"
@@ -18,7 +19,7 @@ type parallelBasicTxXputTest struct {
 
 // NewBasicTransactionThroughputTest returns a test executor that will run a small xput test of [numTxs] from each of [numLists] accounts
 // Note: all issued to the same node.
-func NewBasicTransactionThroughputTest(client *services.Client, numLists int, numTxs int) avalanche.Tester {
+func NewBasicTransactionThroughputTest(client *services.Client, numLists int, numTxs int) tester.AvalancheTester {
 	return &parallelBasicTxXputTest{
 		client:   client,
 		numLists: numLists,
@@ -32,13 +33,13 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 	cClient := p.client.CChainAPI()
 	cEthClient := p.client.CChainEthAPI()
 
-	pks, addrs, err := fundRandomCChainAddresses(xClient, cClient, p.numLists, avaxAmount)
+	pks, addrs, err := fundRandomCChainAddresses(xClient, cClient, cEthClient, p.numLists, avaxAmount)
 	if err != nil {
 		return err
 	}
 
-	txLists := make([][]*types.Transaction, numLists)
-	for i := 0; i < numLists; i++ {
+	txLists := make([][]*types.Transaction, p.numLists)
+	for i := 0; i < p.numLists; i++ {
 		txs, err := createConsecutiveBasicEthTransactions(pks[i], addrs[i], 0, p.numTxs)
 		if err != nil {
 			return err
@@ -46,9 +47,9 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		txLists[i] = txs
 	}
 
-	errs := make(chan error, numLists)
+	errs := make(chan error, p.numLists)
 	launchIssueTxList := func(ctx context.Context, ethclient *ethclient.Client, txList []*types.Transaction) {
-		err := issueTxList(ctx, ethClient, txList)
+		err := issueTxList(ctx, cEthClient, txList)
 		errs <- err
 	}
 	launchedIssuers := time.Now()
@@ -58,7 +59,7 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers).Seconds())
 
-	for i := 0; i < numLists; i++ {
+	for i := 0; i < p.numLists; i++ {
 		err := <-errs
 		if err != nil {
 			panic(err)

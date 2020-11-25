@@ -50,7 +50,7 @@ func NewClient(ipAddr string, port int, requestTimeout time.Duration) (*Client, 
 		platform:  platformvm.NewClient(uri, requestTimeout),
 		cChain:    evm.NewCChainClient(uri, requestTimeout),
 		cChainEth: cClient,
-	}
+	}, nil
 }
 
 // PChainAPI ...

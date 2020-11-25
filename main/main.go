@@ -13,7 +13,11 @@ func main() {
 	port := 9650
 	requestTimeout := 3 * time.Second
 
-	client := services.NewClient(ipAddr, port, requestTimeout)
+	client, err := services.NewClient(ipAddr, port, requestTimeout)
+	if err != nil {
+		fmt.Printf("failed to create client: %s\n", err)
+		return
+	}
 
 	ethAPI := client.CChainEthAPI()
 	test1 := cchain.NewEthAPIExecutor(ethAPI)

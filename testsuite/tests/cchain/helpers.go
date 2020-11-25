@@ -18,6 +18,7 @@ import (
 	"github.com/ava-labs/coreth/params"
 	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,13 +36,12 @@ var (
 )
 
 func init() {
-	cb58 := formatting.CB58{}
-	factory := crypto.FactorySECP256K1R{}
-	err := cb58.FromString(key)
+	pkBytes, err := formatting.Decode(formatting.CB58, key)
 	if err != nil {
 		panic(err)
 	}
-	pk, err := factory.ToPrivateKey(cb58.Bytes)
+	factory := crypto.FactorySECP256K1R{}
+	pk, err := factory.ToPrivateKey(pkBytes)
 	if err != nil {
 		panic(err)
 	}
@@ -66,10 +66,10 @@ func confirmTx(c *avm.Client, txID ids.ID) error {
 }
 
 // createConsecutiveBasicEthTransactions ...
-func createConsecutiveBasicEthTransactions(pk *ecdsa.PrivateKey, addr common.Address, startingNonce uint64, numTxs uint64) ([]*types.Transaction, error) {
+func createConsecutiveBasicEthTransactions(pk *ecdsa.PrivateKey, addr common.Address, startingNonce uint64, numTxs int) ([]*types.Transaction, error) {
 	txs := make([]*types.Transaction, numTxs)
-	for i := startingNonce; i < numTxs; i++ {
-		nonce := i + startingNonce
+	for i := 0; i < numTxs; i++ {
+		nonce := uint64(i) + startingNonce
 		tx := types.NewTransaction(nonce, addr, big.NewInt(1), 21000, big.NewInt(470*params.GWei), nil)
 		signedTx, err := types.SignTx(tx, signer, pk)
 		if err != nil {
@@ -104,7 +104,7 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 }
 
 // fundCChainAddress ...
-func fundCChainAddress(avmClient *avm.Client, cChainClient *evm.Client, addr common.Address, avaxAmount uint64) error {
+func fundCChainAddress(avmClient *avm.Client, cChainClient *evm.Client, cEthClient *ethclient.Client, addr common.Address, avaxAmount uint64) error {
 	xAddr, err := avmClient.ImportKey(user, prefixedPrivateKey)
 	if err != nil {
 		panic(err)
@@ -132,7 +132,7 @@ func fundCChainAddress(avmClient *avm.Client, cChainClient *evm.Client, addr com
 
 	time.Sleep(2 * time.Second)
 
-	cBalance, err := ethClient.BalanceAt(ctx, addr, nil)
+	cBalance, err := cEthClient.BalanceAt(ctx, addr, nil)
 	if err != nil {
 		return fmt.Errorf("Failed to get balance of %s on C Chain: %w", addr, err)
 	}
@@ -148,7 +148,7 @@ func fundCChainAddress(avmClient *avm.Client, cChainClient *evm.Client, addr com
 
 // fundRandomCChainAddresses generates [num] private keys and imports [amount] AVAX (not nAVAX) to
 // each of the generated keys
-func fundRandomCChainAddresses(avmClient *avm.Client, cChainClient *evm.Client, num int, amount uint64) ([]*ecdsa.PrivateKey, []common.Address, error) {
+func fundRandomCChainAddresses(avmClient *avm.Client, cChainClient *evm.Client, cEthClient *ethclient.Client, num int, amount uint64) ([]*ecdsa.PrivateKey, []common.Address, error) {
 	pks := make([]*ecdsa.PrivateKey, num)
 	addrs := make([]common.Address, num)
 	for i := 0; i < num; i++ {
@@ -160,7 +160,7 @@ func fundRandomCChainAddresses(avmClient *avm.Client, cChainClient *evm.Client, 
 		pks[i] = pk
 		addrs[i] = ethAddr
 
-		if err := fundCChainAddress(avmClient, cChainClient, ethAddr, amount); err != nil {
+		if err := fundCChainAddress(avmClient, cChainClient, cEthClient, ethAddr, amount); err != nil {
 			return nil, nil, err
 		}
 	}
