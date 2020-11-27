@@ -2,12 +2,18 @@ package cchain
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"fmt"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
+	"github.com/ethereum/go-ethereum/common"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,12 +35,27 @@ func NewBasicTransactionThroughputTest(client *services.Client, numLists int, nu
 
 // ExecuteTest ...
 func (p *parallelBasicTxXputTest) ExecuteTest() error {
-	xClient := p.client.XChainAPI()
-	cClient := p.client.CChainAPI()
+	workflowRunner := helpers.NewRPCWorkFlowRunner(
+		p.client,
+		user,
+		3*time.Second,
+	)
 	cEthClient := p.client.CChainEthAPI()
 
-	pks, addrs, err := fundRandomCChainAddresses(xClient, cClient, cEthClient, p.numLists, avaxAmount)
-	if err != nil {
+	pks := make([]*ecdsa.PrivateKey, p.numLists)
+	addrs := make([]common.Address, p.numLists)
+	for i := 0; i < p.numLists; i++ {
+		pk, err := ethcrypto.GenerateKey()
+		if err != nil {
+			return fmt.Errorf("problem creating new private key: %w", err)
+		}
+		ethAddr := ethcrypto.PubkeyToAddress(pk.PublicKey)
+		pks[i] = pk
+		addrs[i] = ethAddr
+	}
+
+	logrus.Infof("Funding %d C Chain addresses.", len(addrs))
+	if err := workflowRunner.FundCChainAddresses(addrs, avaxAmount); err != nil {
 		return err
 	}
 

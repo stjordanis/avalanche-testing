@@ -41,9 +41,6 @@ func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 		clients = append(clients, avalancheClient)
 	}
 
-	// Construct test executors and execute them one by one
-	// TODO
-
 	logrus.Infof("C-Chain Tests completed successfully.")
 	logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")
 	// Add two additional nodes to ensure that they can successfully bootstrap the additional data

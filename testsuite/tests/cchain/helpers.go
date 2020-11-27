@@ -18,7 +18,6 @@ import (
 	"github.com/ava-labs/coreth/params"
 	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
-	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/sirupsen/logrus"
 )
 
@@ -101,69 +100,4 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 	}
 
 	return nil
-}
-
-// fundCChainAddress ...
-func fundCChainAddress(avmClient *avm.Client, cChainClient *evm.Client, cEthClient *ethclient.Client, addr common.Address, avaxAmount uint64) error {
-	xAddr, err := avmClient.ImportKey(user, prefixedPrivateKey)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = cChainClient.ImportKey(user, prefixedPrivateKey)
-	if err != nil {
-		panic(err)
-	}
-
-	ctx := context.Background()
-	cChainBech32 := fmt.Sprintf("C%s", xAddr[1:])
-	txID, err := avmClient.ExportAVAX(user, nil, "", avaxAmount, cChainBech32)
-	if err != nil {
-		return fmt.Errorf("Failed to export AVAX to C-Chain: %w", err)
-	}
-	logrus.Infof("Exported %d AVAX to %s. TxID: %s", avaxAmount, cChainBech32, txID)
-	confirmTx(avmClient, txID)
-
-	txID, err = cChainClient.Import(user, addr.Hex(), "X")
-	if err != nil {
-		return fmt.Errorf("Failed to import AVAX to C-Chain: %w", err)
-	}
-	logrus.Infof("Imported AVAX to %s. TxID: %s", addr.Hex(), txID)
-
-	time.Sleep(2 * time.Second)
-
-	cBalance, err := cEthClient.BalanceAt(ctx, addr, nil)
-	if err != nil {
-		return fmt.Errorf("Failed to get balance of %s on C Chain: %w", addr, err)
-	}
-	logrus.Infof("Found balance of %d", cBalance)
-
-	cAmount := new(big.Int).Mul(big.NewInt(int64(avaxAmount)), big.NewInt(int64(x2cConversion)))
-	if cAmount.Cmp(cBalance) != 0 {
-		return fmt.Errorf("Found unexpected balance: %d, expected %d", cBalance, cAmount)
-	}
-
-	return nil
-}
-
-// fundRandomCChainAddresses generates [num] private keys and imports [amount] AVAX (not nAVAX) to
-// each of the generated keys
-func fundRandomCChainAddresses(avmClient *avm.Client, cChainClient *evm.Client, cEthClient *ethclient.Client, num int, amount uint64) ([]*ecdsa.PrivateKey, []common.Address, error) {
-	pks := make([]*ecdsa.PrivateKey, num)
-	addrs := make([]common.Address, num)
-	for i := 0; i < num; i++ {
-		pk, err := ethcrypto.GenerateKey()
-		if err != nil {
-			return nil, nil, fmt.Errorf("problem creating new private key: %w", err)
-		}
-		ethAddr := ethcrypto.PubkeyToAddress(pk.PublicKey)
-		pks[i] = pk
-		addrs[i] = ethAddr
-
-		if err := fundCChainAddress(avmClient, cChainClient, cEthClient, ethAddr, amount); err != nil {
-			return nil, nil, err
-		}
-	}
-
-	return pks, addrs, nil
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	cjson "github.com/ava-labs/avalanchego/utils/json"
 	"github.com/ava-labs/avalanchego/vms/avm"
@@ -33,6 +34,11 @@ func CreateAtomicWorkflowTest(client *services.Client, txFee uint64) tester.Aval
 
 func (aw *atomicWorkflowTest) ExecuteTest() error {
 	logrus.Infof("Executing atomic workflow test")
+	workflowRunner := helpers.NewRPCWorkFlowRunner(
+		aw.client,
+		user,
+		3*time.Second,
+	)
 	_, _ = aw.client.KeystoreAPI().CreateUser(user)
 	xClient := aw.client.XChainAPI()
 	cClient := aw.client.CChainAPI()
@@ -69,7 +75,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to create asset: %w", err)
 	}
-	if err := confirmTx(xClient, assetID); err != nil {
+	if err := workflowRunner.AwaitXChainTransactionAcceptance(assetID); err != nil {
 		return err
 	}
 
@@ -81,7 +87,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to export AVAX: %w", err)
 	}
-	if err := confirmTx(xClient, txID); err != nil {
+	if err := workflowRunner.AwaitXChainTransactionAcceptance(txID); err != nil {
 		return err
 	}
 	expectedAVAXBalance -= (exportAVAXAmount + aw.txFee)
@@ -91,7 +97,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to export asset: %w", err)
 	}
-	if err := confirmTx(xClient, txID); err != nil {
+	if err := workflowRunner.AwaitXChainTransactionAcceptance(txID); err != nil {
 		return err
 	}
 	expectedAVAXBalance -= aw.txFee
@@ -102,8 +108,10 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to import from X-Chain: %w", err)
 	}
-	// TODO confirm the transaction instead of sleeping
-	time.Sleep(2 * time.Second)
+
+	if err := workflowRunner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
+		return fmt.Errorf("failed to confirm C-Chain import transaction: %w", err)
+	}
 	if _, err = cClient.Import(user, cAddr, "X"); err == nil {
 		return errors.New("importing a second time should have caused an error")
 	}
@@ -154,14 +162,18 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to export AVAX to X-Chain: %w", err)
 	}
-	// TODO confirm tx
-	time.Sleep(2 * time.Second)
+
+	if err := workflowRunner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
+		return fmt.Errorf("failed to confirm C-Chain export AVAX transaction: %w", err)
+	}
 	txID, err = cClient.Export(user, exportAssetAmount, xAddr, assetID.String())
 	if err != nil {
 		return fmt.Errorf("failed to export asset to X-Chain: %w", err)
 	}
-	// TODO confirm tx
-	time.Sleep(2 * time.Second)
+
+	if err := workflowRunner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
+		return fmt.Errorf("failed to confirm C-Chain export asset transaction: %w", err)
+	}
 
 	// Confirm C-Chain balances are set back to 0
 	logrus.Infof("Verifying C-Chain balances")
@@ -187,7 +199,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err != nil {
 		return fmt.Errorf("failed to import from X -> C: %w", err)
 	}
-	if err := confirmTx(xClient, txID); err != nil {
+	if err := workflowRunner.AwaitXChainTransactionAcceptance(txID); err != nil {
 		return err
 	}
 
