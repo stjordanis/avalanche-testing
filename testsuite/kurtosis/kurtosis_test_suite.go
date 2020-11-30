@@ -1,8 +1,9 @@
 package kurtosis
 
 import (
-	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 	"time"
+
+	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
@@ -30,7 +31,7 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
 	if a.ByzantineImageName != "" {
-		result["stakingNetworkChitSpammerTest"] = spamchits.StakingNetworkUnrequestedChitSpammerTest{
+		result["chitSpammerTest"] = spamchits.StakingNetworkUnrequestedChitSpammerTest{
 			ByzantineImageName: a.ByzantineImageName,
 			NormalImageName:    a.NormalImageName,
 		}
@@ -39,28 +40,29 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 			NormalImageName:    a.NormalImageName,
 		}
 	}
-	result["stakingNetworkBombardXChainTest"] = bombard.StakingNetworkBombardTest{
+	result["bombardXChainTest"] = bombard.StakingNetworkBombardTest{
 		ImageName:         a.NormalImageName,
 		NumTxs:            1000,
 		TxFee:             1000000,
 		AcceptanceTimeout: 10 * time.Second,
 	}
-	result["stakingNetworkFullyConnectedTest"] = connected.StakingNetworkFullyConnectedTest{
+	result["fullyConnectedNetworkTest"] = connected.StakingNetworkFullyConnectedTest{
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["stakingNetworkDuplicateNodeIDTest"] = duplicate.DuplicateNodeIDTest{
+	result["duplicateNodeIDTest"] = duplicate.DuplicateNodeIDTest{
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["StakingNetworkRPCWorkflowTest"] = workflow.StakingNetworkRPCWorkflowTest{
+	result["rpcWorkflowTest"] = workflow.StakingNetworkRPCWorkflowTest{
 		ImageName: a.NormalImageName,
 	}
 
 	return result
 }
 
+// GetNetworkWidthBits returns the number of bits used to store the number of services
+// the above comment on [networkWidthBits] explains this further
 func (a AvalancheTestSuite) GetNetworkWidthBits() uint32 {
 	return networkWidthBits
 }
-

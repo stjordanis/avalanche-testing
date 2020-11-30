@@ -1,4 +1,4 @@
-package bombard
+package cchain
 
 import (
 	"time"
@@ -16,22 +16,20 @@ const (
 	normalNodeConfigID       networks.ConfigurationID = "normal-config"
 	additionalNode1ServiceID                          = "additional-node-1"
 	additionalNode2ServiceID                          = "additional-node-2"
-	seedAmount                                        = int64(50000000000000)
-	stakeAmount                                       = int64(30000000000000)
 )
 
-// StakingNetworkBombardTest funds individual clients with a starting UTXO for each
-// and then creates a string of transactions to send to each one based off of the original UTXO.
-// Then it adds two nodes to ensure that they can bootstrap the new data on the X chain.
-type StakingNetworkBombardTest struct {
-	ImageName         string
-	NumTxs            uint64
-	TxFee             uint64
-	AcceptanceTimeout time.Duration
+// Test runs a series of basic C-Chain tests on a network of
+// virtuous nodes
+type Test struct {
+	ImageName      string
+	NumTxs         int
+	NumTxLists     int
+	TxFee          uint64
+	RequestTimeout time.Duration
 }
 
 // Run implements the Kurtosis Test interface
-func (test StakingNetworkBombardTest) Run(network networks.Network, context testsuite.TestContext) {
+func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)
 	bootServiceIDs := castedNetwork.GetAllBootServiceIDs()
 	clients := make([]*avalancheService.Client, 0, len(bootServiceIDs))
@@ -43,14 +41,7 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 		clients = append(clients, avalancheClient)
 	}
 
-	// Execute the bombard test to issue [NumTxs] to each node
-	executor := NewBombardExecutor(clients, test.NumTxs, test.TxFee, test.AcceptanceTimeout)
-	logrus.Infof("Executing bombard test...")
-	if err := executor.ExecuteTest(); err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Bombard Test Failed."))
-	}
-
-	logrus.Infof("Bombard test completed successfully.")
+	logrus.Infof("C-Chain Tests completed successfully.")
 	logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")
 	// Add two additional nodes to ensure that they can successfully bootstrap the additional data
 	availabilityChecker1, err := castedNetwork.AddService(normalNodeConfigID, additionalNode1ServiceID)
@@ -74,7 +65,7 @@ func (test StakingNetworkBombardTest) Run(network networks.Network, context test
 }
 
 // GetNetworkLoader implements the Kurtosis Test interface
-func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+func (test Test) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Add config for a normal node, to add an additional node during the test
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
 	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
@@ -102,11 +93,11 @@ func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader
 }
 
 // GetExecutionTimeout implements the Kurtosis Test interface
-func (test StakingNetworkBombardTest) GetExecutionTimeout() time.Duration {
-	return 10 * time.Minute
+func (test Test) GetExecutionTimeout() time.Duration {
+	return 4 * time.Minute
 }
 
 // GetSetupBuffer implements the Kurtosis Test interface
-func (test StakingNetworkBombardTest) GetSetupBuffer() time.Duration {
+func (test Test) GetSetupBuffer() time.Duration {
 	return 2 * time.Minute
 }

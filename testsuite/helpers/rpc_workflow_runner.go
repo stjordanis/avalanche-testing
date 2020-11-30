@@ -1,19 +1,22 @@
 package helpers
 
 import (
+	"fmt"
 	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/vms/platformvm"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
 
+// Basic Cnostants
 const (
 	AvaxAssetID                         = "AVAX"
 	DefaultStakingDelay                 = 20 * time.Second
@@ -31,7 +34,7 @@ const (
 // Note: RPCWorkFlowRunner does not store user credentials in a secure way. It is
 // only suitable for testing purposes.
 type RPCWorkFlowRunner struct {
-	client   *apis.Client
+	client   *services.Client
 	userPass api.UserPass
 
 	// This timeout represents the time the RPCWorkFlowRunner will wait for some state change to be accepted
@@ -41,7 +44,7 @@ type RPCWorkFlowRunner struct {
 
 // NewRPCWorkFlowRunner ...
 func NewRPCWorkFlowRunner(
-	client *apis.Client,
+	client *services.Client,
 	user api.UserPass,
 	networkAcceptanceTimeout time.Duration) *RPCWorkFlowRunner {
 	return &RPCWorkFlowRunner{
@@ -116,18 +119,18 @@ func (runner RPCWorkFlowRunner) AddDelegatorToPrimaryNetwork(
 	endTime := uint64(delegatorStartTime.Add(DefaultDelegationPeriod).Unix())
 	addDelegatorTxID, err := client.PChainAPI().AddDelegator(
 		runner.userPass,
+		nil, // from addrs
+		"",  // change addr
 		pChainAddress,
 		delegateeNodeID,
 		stakeAmount,
 		startTime,
 		endTime,
-		nil, // from addrs
-		"",  // change addr
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to add delegator %s", pChainAddress)
 	}
-	if err := runner.waitForPChainTransactionAcceptance(addDelegatorTxID); err != nil {
+	if err := runner.AwaitPChainTransactionAcceptance(addDelegatorTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to accept AddDelegator tx: %s", addDelegatorTxID)
 	}
 
@@ -150,6 +153,8 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 	endTime := uint64(stakingStartTime.Add(DefaultStakingPeriod).Unix())
 	addStakerTxID, err := client.PChainAPI().AddValidator(
 		runner.userPass,
+		nil,
+		"",
 		pchainAddress,
 		nodeID,
 		stakeAmount,
@@ -161,7 +166,7 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 		return stacktrace.Propagate(err, "Failed to add validator to primrary network %s", nodeID)
 	}
 
-	if err := runner.waitForPChainTransactionAcceptance(addStakerTxID); err != nil {
+	if err := runner.AwaitPChainTransactionAcceptance(addStakerTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to confirm AddValidator Tx: %s", addStakerTxID)
 	}
 
@@ -176,16 +181,17 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 	for _, address := range addresses {
 		txID, err := client.Send(
 			runner.userPass,
+			nil, // from addrs
+			"",  // change addr
 			amount,
 			AvaxAssetID,
 			address,
-			nil, // from addrs
-			"",  // change addr
+			"",
 		)
 		if err != nil {
 			return err
 		}
-		if err := runner.waitForXchainTransactionAcceptance(txID); err != nil {
+		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
 			return err
 		}
 	}
@@ -197,11 +203,12 @@ func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount u
 func (runner RPCWorkFlowRunner) SendAVAX(to string, amount uint64) (ids.ID, error) {
 	return runner.client.XChainAPI().Send(
 		runner.userPass,
+		nil, // from addrs
+		"",  // change addr
 		amount,
 		AvaxAssetID,
 		to,
-		nil, // from addrs
-		"",  // change addr
+		"", // memo field
 	)
 }
 
@@ -230,16 +237,17 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 	for i := uint64(1); i < numTxs; i++ {
 		txID, err := client.Send(
 			runner.userPass,
+			nil, // from addrs
+			"",  // change addr
 			amount-txFee*uint64(i),
 			AvaxAssetID,
 			to,
-			nil, // from addrs
-			"",  // change addr
+			"", // memo field
 		)
 		if err != nil {
 			errs <- stacktrace.Propagate(err, "Failed to send transaction.")
 		}
-		if err := runner.waitForXchainTransactionAcceptance(txID); err != nil {
+		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
 			errs <- stacktrace.Propagate(err, "Failed to await transaction acceptance.")
 		}
 		logrus.Infof("Confirmed Tx: %s", txID)
@@ -253,30 +261,30 @@ func (runner RPCWorkFlowRunner) TransferAvaXChainToPChain(pChainAddress string, 
 	client := runner.client
 	txID, err := client.XChainAPI().ExportAVAX(
 		runner.userPass,
-		amount,
-		pChainAddress,
 		nil, // from addrs
 		"",  // change addr
+		amount,
+		pChainAddress,
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to pchainAddress %s", pChainAddress)
 	}
-	err = runner.waitForXchainTransactionAcceptance(txID)
+	err = runner.AwaitXChainTransactionAcceptance(txID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
 
 	importTxID, err := client.PChainAPI().ImportAVAX(
 		runner.userPass,
-		pChainAddress,
-		constants.XChainID.String(),
 		nil, // from addrs
 		"",  // change addr
+		pChainAddress,
+		constants.XChainID.String(),
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed import AVAX to pchainAddress %s", pChainAddress)
 	}
-	if err := runner.waitForPChainTransactionAcceptance(importTxID); err != nil {
+	if err := runner.AwaitPChainTransactionAcceptance(importTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to Accept ImportTx: %s", importTxID)
 	}
 
@@ -291,21 +299,21 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	client := runner.client
 
 	exportTxID, err := client.PChainAPI().ExportAVAX(
+		nil, // from addrs
+		"",  // change addr
 		runner.userPass,
 		xChainAddress,
 		amount,
-		nil, // from addrs
-		"",  // change addr
 	)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", xChainAddress)
 	}
-	if err := runner.waitForPChainTransactionAcceptance(exportTxID); err != nil {
+	if err := runner.AwaitPChainTransactionAcceptance(exportTxID); err != nil {
 		return stacktrace.Propagate(err, "Failed to accept ExportTx: %s", exportTxID)
 	}
 
 	txID, err := client.XChainAPI().ImportAVAX(runner.userPass, xChainAddress, constants.PlatformChainID.String())
-	err = runner.waitForXchainTransactionAcceptance(txID)
+	err = runner.AwaitXChainTransactionAcceptance(txID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
 	}
@@ -327,9 +335,9 @@ func (runner RPCWorkFlowRunner) IssueTxList(
 	return nil
 }
 
-// waitForXChainTransactionAcceptance gets the status of [txID] and keeps querying until it
+// AwaitXChainTransactionAcceptance gets the status of [txID] and keeps querying until it
 // has been accepted
-func (runner RPCWorkFlowRunner) waitForXchainTransactionAcceptance(txID ids.ID) error {
+func (runner RPCWorkFlowRunner) AwaitXChainTransactionAcceptance(txID ids.ID) error {
 	client := runner.client.XChainAPI()
 
 	pollStartTime := time.Now()
@@ -354,7 +362,7 @@ func (runner RPCWorkFlowRunner) waitForXchainTransactionAcceptance(txID ids.ID) 
 // AwaitXChainTxs confirms each transaction and returns an error if any of them are not confirmed
 func (runner RPCWorkFlowRunner) AwaitXChainTxs(txIDs ...ids.ID) error {
 	for _, txID := range txIDs {
-		if err := runner.waitForXchainTransactionAcceptance(txID); err != nil {
+		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
 			return err
 		}
 	}
@@ -365,7 +373,7 @@ func (runner RPCWorkFlowRunner) AwaitXChainTxs(txIDs ...ids.ID) error {
 // AwaitPChainTxs confirms each transaction and returns an error if any of them are not confirmed
 func (runner RPCWorkFlowRunner) AwaitPChainTxs(txIDs ...ids.ID) error {
 	for _, txID := range txIDs {
-		if err := runner.waitForPChainTransactionAcceptance(txID); err != nil {
+		if err := runner.AwaitPChainTransactionAcceptance(txID); err != nil {
 			return err
 		}
 	}
@@ -373,30 +381,38 @@ func (runner RPCWorkFlowRunner) AwaitPChainTxs(txIDs ...ids.ID) error {
 	return nil
 }
 
-// waitForPChainTransactionAcceptance gets the status of [txID] and keeps querying until it
+// AwaitPChainTransactionAcceptance gets the status of [txID] and keeps querying until it
 // has been accepted
-func (runner RPCWorkFlowRunner) waitForPChainTransactionAcceptance(txID ids.ID) error {
+func (runner RPCWorkFlowRunner) AwaitPChainTransactionAcceptance(txID ids.ID) error {
 	client := runner.client.PChainAPI()
 	pollStartTime := time.Now()
 
 	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout {
-		status, err := client.GetTxStatus(txID)
+		statusRes, err := client.GetTxStatus(txID, true)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status")
 		}
-		logrus.Tracef("Status for transaction: %s: %s", txID, status)
+		logrus.Tracef("Status for transaction: %s: %s", txID, statusRes.Status)
 
-		if status == platformvm.Committed {
+		if statusRes.Status == platformvm.Committed {
 			return nil
 		}
 
-		if status == platformvm.Dropped || status == platformvm.Aborted {
-			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s", txID, status)
+		if statusRes.Status == platformvm.Dropped || statusRes.Status == platformvm.Aborted {
+			return stacktrace.NewError("Abandoned Tx: %s because it had status: %s. Reason: %s", txID, statusRes.Status, statusRes.Reason)
 		}
 		time.Sleep(time.Second)
 	}
 
 	return stacktrace.NewError("Timed out waiting for transaction %s to be accepted on the PChain.", txID)
+}
+
+// AwaitCChainAtomicTransactionAcceptance attempts to confirm [txID] on the C Chain and returns
+// an error if it is not confirmed after [networkAcceptanceTimeout]
+func (runner RPCWorkFlowRunner) AwaitCChainAtomicTransactionAcceptance(txID ids.ID) error {
+	// TODO replace when getTxStatus is added to the C Chain API
+	time.Sleep(runner.networkAcceptanceTimeout)
+	return nil
 }
 
 // VerifyPChainBalance verifies that the balance of P Chain Address: [address] is [expectedBalance]
@@ -424,6 +440,53 @@ func (runner RPCWorkFlowRunner) VerifyXChainAVABalance(address string, expectedB
 	actualBalance := uint64(balance.Balance)
 	if actualBalance != expectedBalance {
 		return stacktrace.NewError("Found unexpected X Chain Balance for address: %s. Expected: %v, found: %v", address, expectedBalance, actualBalance)
+	}
+
+	return nil
+}
+
+// FundCChainAddresses ...
+func (runner RPCWorkFlowRunner) FundCChainAddresses(addrs []common.Address, avaxAmount uint64) error {
+	avmClient := runner.client.XChainAPI()
+	cChainClient := runner.client.CChainAPI()
+	_, _ = runner.client.KeystoreAPI().CreateUser(runner.userPass)
+
+	xAddr, err := avmClient.ImportKey(
+		runner.userPass,
+		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = cChainClient.ImportKey(
+		runner.userPass,
+		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, addr := range addrs {
+		cChainBech32 := fmt.Sprintf("C%s", xAddr[1:])
+		txID, err := avmClient.ExportAVAX(runner.userPass, nil, "", avaxAmount, cChainBech32)
+		if err != nil {
+			return fmt.Errorf("Failed to export AVAX to C-Chain: %w", err)
+		}
+		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
+			return err
+		}
+
+		txID, err = cChainClient.Import(runner.userPass, addr.Hex(), "X")
+		if err != nil {
+			return fmt.Errorf("Failed to import AVAX to C-Chain: %w", err)
+		}
+
+		// TODO replace sleep with confirm C-Chain Atomic Tx when
+		// atomic tx getTxStatus is implemented.
+		if err := runner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
+			return err
+		}
 	}
 
 	return nil

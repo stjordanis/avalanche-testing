@@ -3,12 +3,12 @@ package workflow
 import (
 	"time"
 
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
+	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
+	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
-	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
-	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -26,12 +26,12 @@ const (
 )
 
 type executor struct {
-	stakerClient, delegatorClient *apis.Client
+	stakerClient, delegatorClient *services.Client
 	acceptanceTimeout             time.Duration
 }
 
 // NewRPCWorkflowTestExecutor ...
-func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *apis.Client, acceptanceTimeout time.Duration) tester.AvalancheTester {
+func NewRPCWorkflowTestExecutor(stakerClient, delegatorClient *services.Client, acceptanceTimeout time.Duration) tester.AvalancheTester {
 	return &executor{
 		stakerClient:      stakerClient,
 		delegatorClient:   delegatorClient,
@@ -112,7 +112,7 @@ func (e *executor) ExecuteTest() error {
 	logrus.Infof("Transferred funds from X Chain to P Chain and added a new staker.")
 
 	// ====================================== VERIFY NETWORK STATE ===============================
-	currentStakers, currentDelegators, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.PrimaryNetworkID)
+	currentStakers, err := e.stakerClient.PChainAPI().GetCurrentValidators(constants.PrimaryNetworkID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Could not get current stakers.")
 	}
@@ -121,12 +121,6 @@ func (e *executor) ExecuteTest() error {
 	expectedNumStakers := 6
 	if actualNumStakers != expectedNumStakers {
 		return stacktrace.NewError("Actual number of stakers, %v, != expected number of stakers, %v", actualNumStakers, expectedNumStakers)
-	}
-	actualNumDelegators := len(currentDelegators)
-	logrus.Debugf("Number of current delegators: %d", actualNumDelegators)
-	expectedNumDelegators := 0
-	if actualNumDelegators != expectedNumDelegators {
-		return stacktrace.NewError("Actual number of delegators, %v, != expected number of delegators, %v", actualNumDelegators, expectedNumDelegators)
 	}
 	expectedStakerBalance := seedAmount - stakeAmount
 	if err := highLevelStakerClient.VerifyPChainBalance(stakerPChainAddress, expectedStakerBalance); err != nil {

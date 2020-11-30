@@ -1,13 +1,13 @@
 package duplicate
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
-	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -218,8 +218,8 @@ func getNodeIDsAndClients(
 	testContext testsuite.TestContext,
 	network avalancheNetwork.TestAvalancheNetwork,
 	allServiceIDs map[networks.ServiceID]bool,
-) (allNodeIDs map[networks.ServiceID]string, allAvalancheClients map[networks.ServiceID]*apis.Client) {
-	allAvalancheClients = make(map[networks.ServiceID]*apis.Client)
+) (allNodeIDs map[networks.ServiceID]string, allAvalancheClients map[networks.ServiceID]*avalancheService.Client) {
+	allAvalancheClients = make(map[networks.ServiceID]*avalancheService.Client)
 	allNodeIDs = make(map[networks.ServiceID]string)
 	for serviceID := range allServiceIDs {
 		client, err := network.GetAvalancheClient(serviceID)

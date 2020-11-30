@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
+	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/testsuite/helpers"
 	"github.com/ava-labs/avalanche-testing/testsuite/tester"
 	"github.com/ava-labs/avalanchego/api"
@@ -21,7 +21,7 @@ import (
 )
 
 // NewBombardExecutor returns a new bombard test bombardExecutor
-func NewBombardExecutor(clients []*apis.Client, numTxs, txFee uint64, acceptanceTimeout time.Duration) tester.AvalancheTester {
+func NewBombardExecutor(clients []*services.Client, numTxs, txFee uint64, acceptanceTimeout time.Duration) tester.AvalancheTester {
 	return &bombardExecutor{
 		normalClients:     clients,
 		numTxs:            numTxs,
@@ -31,7 +31,7 @@ func NewBombardExecutor(clients []*apis.Client, numTxs, txFee uint64, acceptance
 }
 
 type bombardExecutor struct {
-	normalClients     []*apis.Client
+	normalClients     []*services.Client
 	acceptanceTimeout time.Duration
 	numTxs            uint64
 	txFee             uint64
@@ -103,7 +103,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 		utxos := make([]*avax.UTXO, len(utxosBytes))
 		for i, utxoBytes := range utxosBytes {
 			utxo := &avax.UTXO{}
-			err := codec.Unmarshal(utxoBytes, utxo)
+			_, err := codec.Unmarshal(utxoBytes, utxo)
 			if err != nil {
 				return stacktrace.Propagate(err, "Failed to unmarshal utxo bytes.")
 			}
@@ -129,13 +129,13 @@ func (e *bombardExecutor) ExecuteTest() error {
 			return fmt.Errorf("private key missing %s prefix", constants.SecretKeyPrefix)
 		}
 		trimmedPrivateKey := strings.TrimPrefix(pkStr, constants.SecretKeyPrefix)
-		formattedPrivateKey := formatting.CB58{}
-		if err := formattedPrivateKey.FromString(trimmedPrivateKey); err != nil {
+		pkBytes, err := formatting.Decode(formatting.CB58, trimmedPrivateKey)
+		if err != nil {
 			return fmt.Errorf("problem parsing private key: %w", err)
 		}
 
 		factory := crypto.FactorySECP256K1R{}
-		skIntf, err := factory.ToPrivateKey(formattedPrivateKey.Bytes)
+		skIntf, err := factory.ToPrivateKey(pkBytes)
 		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
 		privateKeys[i] = sk
 

@@ -1,4 +1,6 @@
-FROM golang:1.13-alpine
+FROM golang:1.15-alpine
+RUN apk add --no-cache make gcc musl-dev linux-headers git ca-certificates
+
 WORKDIR /build
 # Copy and download dependencies using go mod
 COPY go.mod .

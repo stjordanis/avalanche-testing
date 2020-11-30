@@ -2,17 +2,16 @@ package networks
 
 import (
 	"bytes"
-	"fmt"
+	"time"
+
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/kurtosis-tech/kurtosis-go/lib/services"
-	"time"
 
 	"strconv"
 	"strings"
 
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/avalanche/services/certs"
-	"github.com/ava-labs/avalanche-testing/avalanche_client/apis"
 	"github.com/ava-labs/avalanche-testing/utils/constants"
 
 	"github.com/palantir/stacktrace"
@@ -42,15 +41,14 @@ type TestAvalancheNetwork struct {
 }
 
 // GetAvalancheClient returns the API Client for the node with the given service ID
-func (network TestAvalancheNetwork) GetAvalancheClient(serviceID networks.ServiceID) (*apis.Client, error) {
+func (network TestAvalancheNetwork) GetAvalancheClient(serviceID networks.ServiceID) (*avalancheService.Client, error) {
 	node, err := network.svcNetwork.GetService(serviceID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "An error occurred retrieving service node with ID %v", serviceID)
 	}
-	avalancheService := node.Service.(avalancheService.AvalancheService)
-	jsonRPCSocket := avalancheService.GetJSONRPCSocket()
-	uri := fmt.Sprintf("http://%s:%d", jsonRPCSocket.GetIpAddr(), jsonRPCSocket.GetPort())
-	return apis.NewClient(uri, constants.DefaultRequestTimeout), nil
+	service := node.Service.(avalancheService.AvalancheService)
+	jsonRPCSocket := service.GetJSONRPCSocket()
+	return avalancheService.NewClient(jsonRPCSocket.GetIPAddr(), jsonRPCSocket.GetPort(), constants.DefaultRequestTimeout)
 }
 
 // GetAllBootServiceIDs returns the service IDs of all the boot nodes in the network

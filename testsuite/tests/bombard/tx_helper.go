@@ -3,7 +3,7 @@ package bombard
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanche-testing/avalanche_client/utils/constants"
+	"github.com/ava-labs/avalanche-testing/utils/constants"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/utils/codec"
 	"github.com/ava-labs/avalanchego/utils/crypto"
@@ -14,11 +14,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
-const (
-	networkID uint32 = 12345 // TODO move to constants package
-)
-
-func createXChainCodec() (codec.Codec, error) {
+func createXChainCodec() (codec.Manager, error) {
 	c := codec.NewDefault()
 	errs := wrappers.Errs{}
 	errs.Add(
@@ -41,11 +37,14 @@ func createXChainCodec() (codec.Codec, error) {
 		c.RegisterType(&propertyfx.Credential{}),
 	)
 
-	return c, errs.Err
+	codecManager := codec.NewDefaultManager()
+	codecManager.RegisterCodec(uint16(0), c)
+
+	return codecManager, errs.Err
 }
 
 // CreateSingleUTXOTx returns a transaction spending an individual utxo owned by [privateKey]
-func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, address ids.ShortID, privateKey *crypto.PrivateKeySECP256K1R, codec codec.Codec) (*avm.Tx, error) {
+func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, address ids.ShortID, privateKey *crypto.PrivateKeySECP256K1R, codec codec.Manager) (*avm.Tx, error) {
 	keys := [][]*crypto.PrivateKeySECP256K1R{{privateKey}}
 	outs := []*avax.TransferableOutput{&avax.TransferableOutput{
 		Asset: avax.Asset{ID: constants.AvaxAssetID},
@@ -73,7 +72,7 @@ func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, addre
 	}}
 
 	tx := &avm.Tx{UnsignedTx: &avm.BaseTx{BaseTx: avax.BaseTx{
-		NetworkID:    networkID,
+		NetworkID:    constants.NetworkID,
 		BlockchainID: constants.XChainID,
 		Outs:         outs,
 		Ins:          ins,
