@@ -28,6 +28,17 @@ type Test struct {
 	RequestTimeout time.Duration
 }
 
+// NewVirtuousCChainTest ...
+func NewVirtuousCChainTest(imageName string, numTxs int, numTxLists int, txFee uint64, requestTimeout time.Duration) testsuite.Test {
+	return &Test{
+		ImageName:      imageName,
+		NumTxs:         numTxs,
+		NumTxLists:     numTxLists,
+		TxFee:          txFee,
+		RequestTimeout: requestTimeout,
+	}
+}
+
 // Run implements the Kurtosis Test interface
 func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)

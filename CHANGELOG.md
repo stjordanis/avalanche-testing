@@ -5,7 +5,7 @@
 * Upgrade to avalanchego v1.0.3
 * Change Kurtosis Core Channel from `master` to specific tag `1.0.3`
 * Upgrade to avalanchego v1.0.5
-* Add C-Chain Atomic Workflow Test, Plain EVM Transaction test, and basic ethclient API test
+* Add C-Chain Atomic Workflow Test, Plain EVM Transaction test, and basic ethclient API test to testsuite
 
 # 0.10.0
 * Upgraded to Kurtosis 1.0
