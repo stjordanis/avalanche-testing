@@ -299,9 +299,9 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	client := runner.client
 
 	exportTxID, err := client.PChainAPI().ExportAVAX(
+		runner.userPass,
 		nil, // from addrs
 		"",  // change addr
-		runner.userPass,
 		xChainAddress,
 		amount,
 	)

@@ -94,7 +94,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 	for i, client := range secondaryClients {
 		// Each address should have [e.txFee] remaining after sending [numTxs] and paying the fixed fee each time
 		if err := client.VerifyXChainAVABalance(xChainAddrs[i], seedAmount); err != nil {
-			return stacktrace.Propagate(err, "Failed to verify X Chain Balane for Client: %d", i)
+			return stacktrace.Propagate(err, "Failed to verify X Chain Balance for Client: %d", i)
 		}
 		utxosBytes, _, err := genesisClient.XChainAPI().GetUTXOs([]string{xChainAddrs[i]}, 10, "", "")
 		if err != nil {
