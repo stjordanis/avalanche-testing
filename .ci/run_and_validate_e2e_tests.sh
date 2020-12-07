@@ -6,7 +6,7 @@ PARALLELISM=4
 DOCKER_REPO="avaplatform"
 
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.5-client"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:dev"
 # Use stable version of avalanche-byzantine based on everest for CI
 BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.4-rc.1"
 
