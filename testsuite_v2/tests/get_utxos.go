@@ -3,6 +3,8 @@ package tests
 import (
 	"time"
 
+	"github.com/ava-labs/avalanchego/ids"
+
 	"github.com/ava-labs/avalanche-testing/testsuite_v2/builder/chainhelper"
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/utils/units"
@@ -23,8 +25,9 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 	// sets up the network - uses a default setup network
 	testNetwork := scenarios.NewFiveNetworkStaking(avalancheImage).NewNetwork()
 
-	// test timeout
-	timeout := 3 * time.Minute
+	// test timeout - needs a few refactors to have a smaller timeout
+	// like less nodes or go routine calls with async-safe clients
+	timeout := 5 * time.Minute
 
 	// No idea what this is
 	timeoutBuffer := 5 * time.Minute
@@ -42,10 +45,11 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 		password := "MyNameIs!Jeff"
 		receivingNode := topology.Node("fifth")
 
+		var txsIDs []ids.ID
 		for _, nodeName := range sendingNodes {
 			for i := 0; i < 10; i++ {
 				// send AVAX
-				_, err := topology.Node(nodeName).GetClient().XChainAPI().Send(api.UserPass{
+				txID, err := topology.Node(nodeName).GetClient().XChainAPI().Send(api.UserPass{
 					Username: nodeName,
 					Password: password,
 				},
@@ -60,10 +64,16 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 				if err != nil {
 					logrus.Info(stacktrace.Propagate(err, "Failed to send fund from %s to %s on the XChain.", nodeName, receivingNode.NodeID))
 				}
+				txsIDs = append(txsIDs, txID)
 			}
 		}
 
-		time.Sleep(30 * time.Second)
+		for _, txID := range txsIDs {
+			err := chainhelper.XChain().AwaitTransactionAcceptance(receivingNode.GetClient(), txID, 5*time.Second)
+			if err != nil {
+				context.Fatal(stacktrace.Propagate(err, "Unable to check transaction status"))
+			}
+		}
 
 		err := chainhelper.XChain().CheckBalance(receivingNode.GetClient(), receivingNode.XAddress, "AVAX", (5+4)*units.KiloAvax)
 		if err != nil {
