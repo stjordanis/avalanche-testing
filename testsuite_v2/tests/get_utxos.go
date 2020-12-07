@@ -58,7 +58,7 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 				},
 					[]string{},
 					"",
-					1000*units.Avax,
+					100*units.Avax,
 					"AVAX",
 					receivingNode.XAddress,
 					"",
