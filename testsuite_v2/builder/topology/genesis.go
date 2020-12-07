@@ -61,9 +61,9 @@ func (g *Genesis) FundXChainAddresses(addresses []string, amount uint64) *Genesi
 	for _, address := range addresses {
 		txID, err := g.client.XChainAPI().Send(
 			g.userPass,
-			nil, // from addrs
-			"",  // change addr
-			amount,
+			nil,    // from addrs
+			"",     // change addr
+			amount, // deducted = ( amount + txFee)
 			"AVAX",
 			address,
 			"",
@@ -76,14 +76,14 @@ func (g *Genesis) FundXChainAddresses(addresses []string, amount uint64) *Genesi
 		// wait for the tx to go through
 		err = chainhelper.XChain().AwaitTransactionAcceptance(g.client, txID, 30*time.Second)
 		if err != nil {
-			g.context.Fatal(err)
+			g.context.Fatal(stacktrace.Propagate(err, ""))
 			return g
 		}
 
 		// verify the balance
 		err = chainhelper.XChain().CheckBalance(g.client, address, "AVAX", amount)
 		if err != nil {
-			g.context.Fatal(err)
+			g.context.Fatal(stacktrace.Propagate(err, ""))
 			return g
 		}
 

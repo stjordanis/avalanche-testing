@@ -87,7 +87,7 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 			)
 
 		// sets the nodes to validators and delegators
-		topology.Node("validator-node").BecomeValidator(totalAmount, seedAmount, stakeAmount)
+		topology.Node("validator-node").BecomeValidator(totalAmount, seedAmount, stakeAmount, 0)
 		topology.Node("delegator-node").BecomeDelegator(seedAmount, stakeAmount, topology.Node("validator-node").NodeID)
 
 		// after setup we want to test moving amounts from P to X Chain and back

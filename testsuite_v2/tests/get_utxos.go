@@ -45,6 +45,9 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 		password := "MyNameIs!Jeff"
 		receivingNode := topology.Node("fifth")
 
+		xBalance, _ := receivingNode.GetClient().XChainAPI().GetBalance(receivingNode.XAddress, "AVAX")
+		logrus.Infof("Receiving Node balance: %d", xBalance.Balance)
+
 		var txsIDs []ids.ID
 		for _, nodeName := range sendingNodes {
 			for i := 0; i < 10; i++ {
@@ -75,7 +78,8 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 			}
 		}
 
-		err := chainhelper.XChain().CheckBalance(receivingNode.GetClient(), receivingNode.XAddress, "AVAX", (5+4)*units.KiloAvax)
+		err := chainhelper.XChain().CheckBalance(receivingNode.GetClient(), receivingNode.XAddress, "AVAX",
+			(5*units.KiloAvax-1*units.Avax)+4*units.KiloAvax)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected balance."))
 		}

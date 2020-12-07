@@ -16,6 +16,7 @@ type Scenario struct {
 	image        string
 	nodes        []string
 	nodePassword string
+	txFee        uint64
 }
 
 // NewFiveNetworkStaking creates a new scenario with five nodes network
@@ -24,6 +25,7 @@ func NewFiveNetworkStaking(avalancheImage string) *Scenario {
 		image:        avalancheImage,
 		nodes:        []string{"first", "second", "third", "fourth", "fifth"},
 		nodePassword: "MyNameIs!Jeff",
+		txFee:        1 * units.Avax,
 	}
 }
 
@@ -32,12 +34,14 @@ func (s *Scenario) NewNetwork() *network.Network {
 	newNetwork := network.New().
 		IsStaking(true).
 		Image(s.image).
-		SnowSize(2, 2)
+		SnowSize(3, 3).
+		TxFee(s.txFee)
 
 	for _, nodeName := range s.nodes {
 		newNetwork.AddNode(network.NewNode(networks.ServiceID(nodeName)).
 			Image(s.image).
-			SnowConf(2, 2))
+			SnowConf(3, 3)).
+			TxFee(s.txFee)
 	}
 	return newNetwork
 }
@@ -59,11 +63,17 @@ func (s *Scenario) NewTopology(network networks.Network, context *testsuite.Test
 		Genesis().
 		FundXChainAddresses(
 			addresses,
-			10*units.KiloAvax,
+			10*units.KiloAvax+s.txFee,
 		)
 
 	for _, nodeName := range s.nodes {
-		top.Node(nodeName).BecomeValidator(10*units.KiloAvax, 5*units.KiloAvax, 3*units.KiloAvax)
+
+		top.Node(nodeName).BecomeValidator(
+			10*units.KiloAvax, // the total genesis'd amount
+			5*units.KiloAvax,  // Exported from X-> P + Imported P -> X (2x txfee)
+			3*units.KiloAvax,
+			s.txFee,
+		)
 	}
 
 	return top

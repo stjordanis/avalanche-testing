@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ava-labs/avalanchego/utils/units"
+
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
@@ -26,6 +28,10 @@ func New() *Network {
 	return &Network{
 		NodesNames: map[networks.ServiceID]int{},
 		Nodes:      map[networks.ConfigurationID]*Node{},
+		// assumes some defaults
+		snowSampleSize: 3,
+		snowQuorumSize: 3,
+		txFee:          1 * units.Avax,
 	}
 }
 

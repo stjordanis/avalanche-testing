@@ -77,14 +77,13 @@ func (n *Node) GetClient() *services.Client {
 // - adds nodeID as a validator - waits Tx acceptance in the PChain
 // - waits until the validation period begins
 //
-func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmount uint64) *Node {
-
+func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmount uint64, txFee uint64) *Node {
 	// exports AVAX from the X Chain
 	exportTxID, err := n.client.XChainAPI().ExportAVAX(
 		n.UserPass,
-		nil, // from addrs
-		"",  // change addr
-		seedAmount,
+		nil,                // from addrs
+		"",                 // change addr
+		seedAmount+1*txFee, // deducted (seedAmmount + txFee(ExportAVAX) ) Adding txFee(ImportAVAX) for the import
 		n.PAddress,
 	)
 	if err != nil {
@@ -100,7 +99,7 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	}
 
 	// imports the amount to the P Chain
-	importTxID, err := n.client.PChainAPI().ImportAVAX(
+	importTxID, err := n.client.PChainAPI().ImportAVAX( // receivedAmount = (sent - txFee)
 		n.UserPass,
 		nil, // from addrs
 		"",  // change addr
@@ -127,7 +126,7 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	}
 
 	// verify the XChain balance of (seedAmount - stakeAmount) the stake was moved to PChain
-	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-seedAmount)
+	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-(seedAmount+1*txFee))
 	if err != nil {
 		n.context.Fatal(stacktrace.Propagate(err, "expected balance of (seedAmount - stakeAmount) the stake was moved to PChain"))
 		return n
