@@ -32,6 +32,7 @@ func New() *Network {
 		snowSampleSize: 3,
 		snowQuorumSize: 3,
 		txFee:          1 * units.Avax,
+		image:          "avaplatform/avalanchego:latest",
 	}
 }
 
@@ -119,7 +120,7 @@ type Node struct {
 func NewNode(nodeServiceID networks.ServiceID) *Node {
 	return &Node{
 		serviceID:             nodeServiceID,
-		nodeConfigID:          "normal-config",
+		nodeConfigID:          networks.ConfigurationID(fmt.Sprintf("normal-config-%s", nodeServiceID)),
 		varyCerts:             true,
 		serviceLogLevel:       avalancheService.DEBUG,
 		imageName:             "avaplatform/avalanchego:latest",
