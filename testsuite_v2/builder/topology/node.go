@@ -81,9 +81,9 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	// exports AVAX from the X Chain
 	exportTxID, err := n.client.XChainAPI().ExportAVAX(
 		n.UserPass,
-		nil,                // from addrs
-		"",                 // change addr
-		seedAmount+1*txFee, // deducted (seedAmmount + txFee(ExportAVAX) ) Adding txFee(ImportAVAX) for the import
+		nil,              // from addrs
+		"",               // change addr
+		seedAmount+txFee, // deducted (seedAmmount + txFee(ExportAVAX) ) - 1xFee deducted from XChain + 1xFee to be deducted from PChain Tx
 		n.PAddress,
 	)
 	if err != nil {
@@ -126,7 +126,7 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	}
 
 	// verify the XChain balance of (seedAmount - stakeAmount) the stake was moved to PChain
-	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-(seedAmount+1*txFee))
+	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-seedAmount)
 	if err != nil {
 		n.context.Fatal(stacktrace.Propagate(err, "expected balance of (seedAmount - stakeAmount) the stake was moved to PChain"))
 		return n

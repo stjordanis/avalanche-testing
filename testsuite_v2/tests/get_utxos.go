@@ -58,7 +58,7 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 				},
 					[]string{},
 					"",
-					100*units.Avax,
+					1000*units.Avax,
 					"AVAX",
 					receivingNode.XAddress,
 					"",
@@ -78,8 +78,7 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 			}
 		}
 
-		err := chainhelper.XChain().CheckBalance(receivingNode.GetClient(), receivingNode.XAddress, "AVAX",
-			(5*units.KiloAvax-1*units.Avax)+4*units.KiloAvax)
+		err := chainhelper.XChain().CheckBalance(receivingNode.GetClient(), receivingNode.XAddress, "AVAX", (5+4)*units.KiloAvax)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected balance."))
 		}

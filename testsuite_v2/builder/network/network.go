@@ -32,7 +32,7 @@ func New() *Network {
 		snowSampleSize: 3,
 		snowQuorumSize: 3,
 		txFee:          1 * units.Avax,
-		image:          "avaplatform/avalanchego:latest",
+		image:          "avaplatform/avalanchego:dev",
 	}
 }
 
@@ -123,7 +123,7 @@ func NewNode(nodeServiceID networks.ServiceID) *Node {
 		nodeConfigID:          networks.ConfigurationID(fmt.Sprintf("normal-config-%s", nodeServiceID)),
 		varyCerts:             true,
 		serviceLogLevel:       avalancheService.DEBUG,
-		imageName:             "avaplatform/avalanchego:latest",
+		imageName:             "avaplatform/avalanchego:dev",
 		snowQuorumSize:        1,
 		snowSampleSize:        1,
 		networkInitialTimeout: 2 * time.Second,
