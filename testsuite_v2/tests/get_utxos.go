@@ -48,9 +48,10 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 		xBalance, _ := receivingNode.GetClient().XChainAPI().GetBalance(receivingNode.XAddress, "AVAX")
 		logrus.Infof("Receiving Node balance: %d", xBalance.Balance)
 
-		var txsIDs []ids.ID
-		for _, nodeName := range sendingNodes {
-			for i := 0; i < 10; i++ {
+		for i := 0; i < 10; i++ {
+			txsIDs := []ids.ID{}
+
+			for _, nodeName := range sendingNodes {
 				// send AVAX
 				txID, err := topology.Node(nodeName).GetClient().XChainAPI().Send(api.UserPass{
 					Username: nodeName,
@@ -58,23 +59,23 @@ func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 				},
 					[]string{},
 					"",
-					1000*units.Avax,
+					100*units.Avax,
 					"AVAX",
 					receivingNode.XAddress,
 					"",
 				)
 
 				if err != nil {
-					logrus.Info(stacktrace.Propagate(err, "Failed to send fund from %s to %s on the XChain.", nodeName, receivingNode.NodeID))
+					context.Fatal(stacktrace.Propagate(err, "Failed to send fund from %s to %s on the XChain.", nodeName, receivingNode.NodeID))
 				}
 				txsIDs = append(txsIDs, txID)
 			}
-		}
 
-		for _, txID := range txsIDs {
-			err := chainhelper.XChain().AwaitTransactionAcceptance(receivingNode.GetClient(), txID, 5*time.Second)
-			if err != nil {
-				context.Fatal(stacktrace.Propagate(err, "Unable to check transaction status"))
+			for _, txID := range txsIDs {
+				err := chainhelper.XChain().AwaitTransactionAcceptance(receivingNode.GetClient(), txID, 5*time.Second)
+				if err != nil {
+					context.Fatal(stacktrace.Propagate(err, "Unable to check transaction status"))
+				}
 			}
 		}
 
