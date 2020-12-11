@@ -41,14 +41,16 @@ else
     docker pull "${BYZANTINE_IMAGE}"
 fi
 
+echo "Build the image"
+#build the image
+AVALANCHE_TESTING_IMAGE=$TESTING_REPO
+docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . -f ${ROOT_DIRPATH}/testsuite/Dockerfile
+docker tag "$AVALANCHE_TESTING_IMAGE" "$BRANCH"
+echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
+
 echo "Starting build_and_run.sh"
 E2E_TEST_COMMAND="AVALANCHE_IMAGE=$AVALANCHE_IMAGE ${ROOT_DIRPATH}/scripts/build_and_run.sh"
 
-#build the image
-docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . 
-docker tag "$AVALANCHE_TESTING_IMAGE" "$BRANCH"
-echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
-    
 # following should push all tags
 docker push $AVALANCHE_TESTING_IMAGE
 
