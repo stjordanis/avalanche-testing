@@ -41,10 +41,11 @@ else
     docker pull "${BYZANTINE_IMAGE}"
 fi
 
-E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/build_and_run.sh"
+echo "Starting build_and_run.sh"
+E2E_TEST_COMMAND="AVALANCHE_IMAGE=$AVALANCHE_IMAGE ${ROOT_DIRPATH}/scripts/build_and_run.sh"
 
 #build the image
-$ROOT_DIRPATH/scripts/build_local_testsuite_image.sh
+docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . 
 docker tag "$AVALANCHE_TESTING_IMAGE" "$BRANCH"
 echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
     
