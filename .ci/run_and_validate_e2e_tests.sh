@@ -53,7 +53,7 @@ echo "pushing image"
 docker push $AVALANCHE_TESTING_IMAGE
 
 echo "Starting build_and_run.sh"
-E2E_TEST_COMMAND="AVALANCHE_IMAGE=$AVALANCHE_IMAGE ${SCRIPT_DIRPATH}/scripts/build_and_run.sh"
+E2E_TEST_COMMAND="AVALANCHE_IMAGE=$AVALANCHE_IMAGE ; ${ROOT_DIRPATH}/scripts/build_and_run.sh"
 
 # Docker only allows you to have spaces in the variable if you escape them or use a Docker env file
 CUSTOM_ENV_VARS_JSON_ARG="CUSTOM_ENV_VARS_JSON={\"AVALANCHE_IMAGE\":\"${AVALANCHE_IMAGE}\",\"BYZANTINE_IMAGE\":\"${BYZANTINE_IMAGE}\"}"
