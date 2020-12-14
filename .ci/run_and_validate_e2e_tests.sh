@@ -49,6 +49,7 @@ docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . -f ${ROOT_DIRPATH}/testsuite/
 echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
 
 # following should push all tags
+echo "pushing image"
 docker push $AVALANCHE_TESTING_IMAGE
 
 echo "Starting build_and_run.sh"
