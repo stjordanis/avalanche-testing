@@ -26,7 +26,7 @@ fi
 echo "Using $AVALANCHE_IMAGE for CI"
 
 # Use stable version of avalanche-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.4-rc.1"
+BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.5-rc.1"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
