@@ -15,7 +15,7 @@ type xChain struct {
 }
 
 // AwaitTransactionAcceptance waits for the [txID] to be accepted within [timeout]
-func (p *xChain) AwaitTransactionAcceptance(client *services.Client, txID ids.ID, timeout time.Duration) error {
+func (x *xChain) AwaitTransactionAcceptance(client *services.Client, txID ids.ID, timeout time.Duration) error {
 
 	for startTime := time.Now(); time.Since(startTime) < timeout; time.Sleep(time.Second) {
 		status, err := client.XChainAPI().GetTxStatus(txID)
@@ -34,7 +34,7 @@ func (p *xChain) AwaitTransactionAcceptance(client *services.Client, txID ids.ID
 }
 
 // CheckBalance validates the [address] balance is equal to [amount]
-func (p *xChain) CheckBalance(client *services.Client, address string, assetID string, expectedAmount uint64) error {
+func (x *xChain) CheckBalance(client *services.Client, address string, assetID string, expectedAmount uint64) error {
 	xBalance, err := client.XChainAPI().GetBalance(address, assetID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to retrieve X Chain balance.")

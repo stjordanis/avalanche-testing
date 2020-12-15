@@ -38,7 +38,7 @@ func (s *Scenario) NewNetwork() *network.Network {
 		TxFee(s.txFee)
 
 	for _, nodeName := range s.nodes {
-		newNetwork.AddNode(network.NewNode(networks.ServiceID(nodeName)).
+		newNetwork.AddNode(network.NewNode(nodeName).
 			Image(s.image).
 			SnowConf(3, 3)).
 			TxFee(s.txFee)

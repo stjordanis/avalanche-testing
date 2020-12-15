@@ -47,7 +47,7 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName:         a.NormalImageName,
 		NumTxs:            1000,
 		TxFee:             1000000,
-		AcceptanceTimeout: 15 * time.Second,
+		AcceptanceTimeout: 10 * time.Second,
 	}
 	result["fullyConnectedNetworkTest"] = connected.StakingNetworkFullyConnectedTest{
 		ImageName: a.NormalImageName,

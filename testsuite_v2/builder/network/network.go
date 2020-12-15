@@ -117,9 +117,9 @@ type Node struct {
 	additionalCLIArgs     map[string]string
 }
 
-func NewNode(nodeServiceID networks.ServiceID) *Node {
+func NewNode(nodeServiceID string) *Node {
 	return &Node{
-		serviceID:             nodeServiceID,
+		serviceID:             networks.ServiceID(nodeServiceID),
 		nodeConfigID:          networks.ConfigurationID(fmt.Sprintf("normal-config-%s", nodeServiceID)),
 		varyCerts:             true,
 		serviceLogLevel:       avalancheService.DEBUG,

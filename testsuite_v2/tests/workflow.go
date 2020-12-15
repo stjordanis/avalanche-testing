@@ -32,12 +32,11 @@ const (
 	totalAmount       = 10 * units.KiloAvax
 	seedAmount        = 5 * units.KiloAvax
 	stakeAmount       = 3 * units.KiloAvax
-	delegatorAmount   = 3 * units.KiloAvax
 )
 
 const (
-	regularNodeServiceID   networks.ServiceID = "validator-node"
-	delegatorNodeServiceID networks.ServiceID = "delegator-node"
+	validatorNodeName string = "validator-node"
+	delegatorNodeName string = "delegator-node"
 )
 
 // Workflow (it's disabled) demos the test of the workflow - copy of the ../testsuite/tests/workflow test
@@ -45,11 +44,11 @@ const (
 func Workflow(avalancheImage string) *testrunner.TestRunner {
 
 	// create the nodes
-	stakerNode := network.NewNode("validator-node").
+	stakerNode := network.NewNode(validatorNodeName).
 		Image(avalancheImage).
 		SnowConf(2, 2)
 
-	delegatorNode := network.NewNode("delegator-node").
+	delegatorNode := network.NewNode(delegatorNodeName).
 		Image(avalancheImage).
 		SnowConf(2, 2)
 
@@ -73,25 +72,25 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 		// builds the topology of the test
 		topology := top.New(network, &context)
 		topology.
-			AddNode("validator-node", stakerUsername, stakerPassword).
-			AddNode("delegator-node", delegatorUsername, delegatorPassword).
-			AddGenesis("validator-node", genesisUsername, genesisPassword)
+			AddNode(validatorNodeName, stakerUsername, stakerPassword).
+			AddNode(delegatorNodeName, delegatorUsername, delegatorPassword).
+			AddGenesis(validatorNodeName, genesisUsername, genesisPassword)
 
 		// creates a genesis and funds the X addresses of the nodes
 		topology.Genesis().
 			FundXChainAddresses([]string{
-				topology.Node("validator-node").XAddress,
-				topology.Node("delegator-node").XAddress,
+				topology.Node(validatorNodeName).XAddress,
+				topology.Node(delegatorNodeName).XAddress,
 			},
 				totalAmount,
 			)
 
 		// sets the nodes to validators and delegators
-		topology.Node("validator-node").BecomeValidator(totalAmount, seedAmount, stakeAmount, 0)
-		topology.Node("delegator-node").BecomeDelegator(seedAmount, stakeAmount, topology.Node("validator-node").NodeID)
+		topology.Node(validatorNodeName).BecomeValidator(totalAmount, seedAmount, stakeAmount, 0)
+		topology.Node(delegatorNodeName).BecomeDelegator(seedAmount, stakeAmount, topology.Node(validatorNodeName).NodeID)
 
 		// after setup we want to test moving amounts from P to X Chain and back
-		stakerNode := topology.Node("validator-node")
+		stakerNode := topology.Node(validatorNodeName)
 
 		exportTxID, err := stakerNode.GetClient().PChainAPI().ExportAVAX(
 			stakerNode.UserPass,

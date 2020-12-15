@@ -194,7 +194,7 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	return n
 }
 
-// BecomeValidator is a multi step methods that does the following
+// BecomeDelegator is a multi step methods that does the following
 // - exports AVAX from the XChain + waits for acceptance in the XChain
 // - imports the amount to the PChain + waits for acceptance in the PChain
 // - verifies the PChain balance + verifies the XChain balance
