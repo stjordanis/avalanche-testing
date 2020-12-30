@@ -64,7 +64,9 @@ func createXChainCodec() (codec.Manager, error) {
 		currentCodec.RegisterType(&avm.OperationTx{}),
 		currentCodec.RegisterType(&avm.ImportTx{}),
 		currentCodec.RegisterType(&avm.ExportTx{}),
-		currentCodec.RegisterType(&avm.CreateManagedAssetTx{}),
+	)
+	currentCodec.NextGroup()
+	errs.Add(
 		currentCodec.RegisterType(&secp256k1fx.TransferInput{}),
 		currentCodec.RegisterType(&secp256k1fx.MintOutput{}),
 		currentCodec.RegisterType(&secp256k1fx.TransferOutput{}),
@@ -72,11 +74,17 @@ func createXChainCodec() (codec.Manager, error) {
 		currentCodec.RegisterType(&secp256k1fx.Credential{}),
 		currentCodec.RegisterType(&secp256k1fx.ManagedAssetStatusOutput{}),
 		currentCodec.RegisterType(&secp256k1fx.UpdateManagedAssetOperation{}),
+	)
+	currentCodec.NextGroup()
+	errs.Add(
 		currentCodec.RegisterType(&nftfx.MintOutput{}),
 		currentCodec.RegisterType(&nftfx.TransferOutput{}),
 		currentCodec.RegisterType(&nftfx.MintOperation{}),
 		currentCodec.RegisterType(&nftfx.TransferOperation{}),
 		currentCodec.RegisterType(&nftfx.Credential{}),
+	)
+	currentCodec.NextGroup()
+	errs.Add(
 		currentCodec.RegisterType(&propertyfx.MintOutput{}),
 		currentCodec.RegisterType(&propertyfx.OwnedOutput{}),
 		currentCodec.RegisterType(&propertyfx.MintOperation{}),

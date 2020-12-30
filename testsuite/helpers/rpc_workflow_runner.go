@@ -299,9 +299,9 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	client := runner.client
 
 	exportTxID, err := client.PChainAPI().ExportAVAX(
+		runner.userPass,
 		nil, // from addrs
 		"",  // change addr
-		runner.userPass,
 		xChainAddress,
 		amount,
 	)
@@ -313,6 +313,9 @@ func (runner RPCWorkFlowRunner) TransferAvaPChainToXChain(
 	}
 
 	txID, err := client.XChainAPI().ImportAVAX(runner.userPass, xChainAddress, constants.PlatformChainID.String())
+	if err != nil {
+		return err
+	}
 	err = runner.AwaitXChainTransactionAcceptance(txID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to wait for acceptance of transaction on XChain.")
