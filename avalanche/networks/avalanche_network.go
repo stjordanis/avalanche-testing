@@ -133,7 +133,8 @@ func NewTestAvalancheNetworkServiceConfig(
 	snowQuorumSize int,
 	snowSampleSize int,
 	networkInitialTimeout time.Duration,
-	additionalCLIArgs map[string]string) *TestAvalancheNetworkServiceConfig {
+	additionalCLIArgs map[string]string,
+) *TestAvalancheNetworkServiceConfig {
 	return &TestAvalancheNetworkServiceConfig{
 		varyCerts:             varyCerts,
 		serviceLogLevel:       serviceLogLevel,
@@ -173,6 +174,9 @@ type TestAvalancheNetworkLoader struct {
 	// The Snow sample size that the bootstrapper nodes of the network will use
 	bootstrapperSnowSampleSize int
 
+	// Additional CLI args for bootstrapper nodes
+	bootstrapperAdditionalCLIs map[string]string
+
 	// The fixed transaction fee for the network
 	txFee uint64
 
@@ -198,6 +202,7 @@ func NewTestAvalancheNetworkLoader(
 	bootNodeLogLevel avalancheService.AvalancheLogLevel,
 	bootstrapperSnowQuorumSize int,
 	bootstrapperSnowSampleSize int,
+	bootstrapperAdditionalCLIs map[string]string,
 	txFee uint64,
 	networkInitialTimeout time.Duration,
 	serviceConfigs map[networks.ConfigurationID]TestAvalancheNetworkServiceConfig,
@@ -234,12 +239,13 @@ func NewTestAvalancheNetworkLoader(
 		desiredServiceConfig:       desiredServiceConfigsCopy,
 		bootstrapperSnowQuorumSize: bootstrapperSnowQuorumSize,
 		bootstrapperSnowSampleSize: bootstrapperSnowSampleSize,
+		bootstrapperAdditionalCLIs: bootstrapperAdditionalCLIs,
 		txFee:                      txFee,
 		networkInitialTimeout:      networkInitialTimeout,
 	}, nil
 }
 
-// ConfigureNetwork defines the netwrok's service configurations to be used
+// ConfigureNetwork defines the network's service configurations to be used
 func (loader TestAvalancheNetworkLoader) ConfigureNetwork(builder *networks.ServiceNetworkBuilder) error {
 	localNetGenesisStakers := DefaultLocalNetGenesisConfig.Stakers
 	bootNodeIDs := make([]string, 0, len(localNetGenesisStakers))
@@ -263,8 +269,8 @@ func (loader TestAvalancheNetworkLoader) ConfigureNetwork(builder *networks.Serv
 			loader.txFee,
 			loader.isStaking,
 			loader.networkInitialTimeout,
-			make(map[string]string), // No additional CLI args for the default network
-			bootNodeIDs[0:i],        // Only the node IDs of the already-started nodes
+			loader.bootstrapperAdditionalCLIs,
+			bootNodeIDs[0:i], // Only the node IDs of the already-started nodes
 			certs.NewStaticAvalancheCertProvider(*keyBytes, *certBytes),
 			loader.bootNodeLogLevel,
 		)

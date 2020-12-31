@@ -1,9 +1,10 @@
 package conflictvtx
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
-	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
@@ -109,6 +110,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 		avalancheService.DEBUG,
 		2,
 		2,
+		nil,
 		1000000,
 		2*time.Second,
 		serviceConfigs,

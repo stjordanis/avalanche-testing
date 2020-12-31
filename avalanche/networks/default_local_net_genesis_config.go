@@ -9,7 +9,7 @@ var DefaultLocalNetGenesisConfig = NetworkGenesisConfig{
 	Stakers: defaultStakers,
 	// hardcoded in avalanchego in "genesis/config.go". needed to distribute genesis funds in tests
 	FundedAddresses: FundedAddress{
-		"6Y3kysjF9jnHnYkdS9yGAuoHyae2eNmeV",
+		"X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 		/*
 			 	It's okay to have privateKey here because its a hardcoded value available in the avalanchego codebase.
 				It is necessary to have this privateKey in order to transfer funds to test accounts in the test net.

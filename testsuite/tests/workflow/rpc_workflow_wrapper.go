@@ -1,9 +1,10 @@
 package workflow
 
 import (
+	"time"
+
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
-	"time"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
@@ -73,6 +74,7 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		avalancheService.DEBUG,
 		2,
 		2,
+		nil,
 		0,
 		2*time.Second,
 		serviceConfigs,
