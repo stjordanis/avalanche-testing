@@ -71,7 +71,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 			Amount:  cjson.Uint64(assetAmount),
 			Address: xAddr,
 		},
-	}, nil)
+	}, nil, avm.Manager{})
 	if err != nil {
 		return fmt.Errorf("failed to create asset: %w", err)
 	}

@@ -94,6 +94,7 @@ func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader
 		avalancheService.DEBUG,
 		2,
 		2,
+		nil,
 		test.TxFee,
 		2*time.Second,
 		serviceConfigs,

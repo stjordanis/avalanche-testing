@@ -10,6 +10,7 @@ import (
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/duplicate"
+	"github.com/ava-labs/avalanche-testing/testsuite/tests/managedasset"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
@@ -59,6 +60,7 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName: a.NormalImageName,
 	}
 	result["virtuousCorethTest"] = cchain.NewVirtuousCChainTest(a.NormalImageName, 100, 3, 1000000, 3*time.Second)
+	result["managedAssetTest"] = managedasset.ManagedAssetTest{ImageName: a.NormalImageName}
 
 	return result
 }

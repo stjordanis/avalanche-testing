@@ -213,7 +213,7 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 		commandList = append(commandList, fmt.Sprintf("--%s=%s", param, argument))
 	}
 
-	logrus.Debugf("Command list: %+v", commandList)
+	logrus.Debugf("Command list: %s", commandList)
 	return commandList, nil
 }
 

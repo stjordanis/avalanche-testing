@@ -192,6 +192,7 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 		avalancheService.DEBUG,
 		2,
 		2,
+		nil,
 		0,
 		2*time.Second,
 		serviceConfigs,
