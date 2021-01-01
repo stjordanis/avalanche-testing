@@ -273,8 +273,8 @@ func (e Executor) Execute() error {
 			return stacktrace.Propagate(err, "send as manager tx not accepted")
 		}
 	}
-	// Wait until 2 epochs have passed and the
-	time.Sleep(2 * e..epochDuration)
+	// Wait until 2 epochs have passed and the freeze has gone into effect
+	time.Sleep(2 * e.epochDuration)
 
 	// Now e.clients[i+2] is the manager of managedAssetIDs[i]
 	// Try to send, which should fail due to asset being frozen
