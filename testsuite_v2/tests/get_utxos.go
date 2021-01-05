@@ -20,6 +20,7 @@ import (
 )
 
 // GetUTXOs tests sending utxos send from each nodes to one node
+// currently disabled - serves as an example to use scenarios
 func GetUTXOs(avalancheImage string) *testrunner.TestRunner {
 
 	// sets up the network - uses a default setup network

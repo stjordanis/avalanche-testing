@@ -6,7 +6,6 @@ import (
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/cchain"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/duplicate"
-	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 	"github.com/ava-labs/avalanche-testing/testsuite_v2/tests"
 
@@ -57,13 +56,11 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["rpcWorkflowTest"] = workflow.StakingNetworkRPCWorkflowTest{
-		ImageName: a.NormalImageName,
-	}
+
 	result["virtuousCorethTest"] = cchain.NewVirtuousCChainTest(a.NormalImageName, 100, 3, 1000000, 3*time.Second)
 
 	result["GetUTXOs"] = tests.GetUTXOs(a.NormalImageName)
-	//result["Workflow"] = tests.Workflow(a.NormalImageName)
+	result["Workflow"] = tests.Workflow(a.NormalImageName)
 
 	return result
 }

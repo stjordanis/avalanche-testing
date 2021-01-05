@@ -39,8 +39,8 @@ const (
 	delegatorNodeName string = "delegator-node"
 )
 
-// Workflow (it's disabled) demos the test of the workflow - copy of the ../testsuite/tests/workflow test
-// mostly useful for showing how to manually build the network and the topology
+// Workflow test the workflow of booting/setting up validator and delegator nodes
+// additionally it's useful for show casing the manual build the network and the topology
 func Workflow(avalancheImage string) *testrunner.TestRunner {
 
 	// create the nodes
