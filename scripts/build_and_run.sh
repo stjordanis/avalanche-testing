@@ -3,11 +3,14 @@ script_dirpath="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
 
 # ====================== CONSTANTS =======================================================
 SUITE_IMAGE="avaplatform/avalanche-testing"
-AVALANCHE_IMAGE="avaplatform/avalanchego:dev"
-BYZANTINE_IMAGE="avaplatform/avalanche-byzantine:v0.1.5-rc.1"
 KURTOSIS_CORE_CHANNEL="1.0.3"
 INITIALIZER_IMAGE="kurtosistech/kurtosis-core_initializer:${KURTOSIS_CORE_CHANNEL}"
 API_IMAGE="kurtosistech/kurtosis-core_api:${KURTOSIS_CORE_CHANNEL}"
+
+# Used the defined vars otherwise use the defaults
+AVALANCHE_IMAGE=${AVALANCHE_IMAGE:-"avaplatform/avalanchego:dev"}
+BYZANTINE_IMAGE=${BYZANTINE_IMAGE:-"avaplatform/avalanche-byzantine:v0.1.5-rc.1"}
+
 
 # As of 2020-09-16, if we run with higher parallelism then we start to get timeouts (maybe worth upping the timeouts??)
 PARALLELISM=2
@@ -16,6 +19,8 @@ BUILD_ACTION="build"
 RUN_ACTION="run"
 BOTH_ACTION="all"
 HELP_ACTION="help"
+
+
 
 # ====================== ARG PARSING =======================================================
 show_help() {
