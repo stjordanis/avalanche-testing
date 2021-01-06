@@ -41,17 +41,6 @@ else
     docker pull "${BYZANTINE_IMAGE}"
 fi
 
-echo "Build the image"
-#build the image
-AVALANCHE_TESTING_IMAGE=$TESTING_REPO
-docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . -f ${ROOT_DIRPATH}/testsuite/Dockerfile
-#docker tag "$AVALANCHE_TESTING_IMAGE" "$BRANCH"
-echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
-# following should push all tags
-echo "pushing image"
-docker push $AVALANCHE_TESTING_IMAGE
-
 echo "Starting build_and_run.sh"
 export AVALANCHE_IMAGE=$AVALANCHE_IMAGE
 E2E_TEST_COMMAND="${ROOT_DIRPATH}/scripts/build_and_run.sh"
@@ -65,6 +54,17 @@ if ! bash "${E2E_TEST_COMMAND}" all --env "${CUSTOM_ENV_VARS_JSON_ARG}" --env "P
     return_code=1
 else
     echo "Avalanche E2E tests succeeded"
+    echo "Building the image"
+    #build the image
+    AVALANCHE_TESTING_IMAGE=$TESTING_REPO
+    docker build -t $AVALANCHE_TESTING_IMAGE:$BRANCH . -f ${ROOT_DIRPATH}/testsuite/Dockerfile
+    #docker tag "$AVALANCHE_TESTING_IMAGE" "$BRANCH"
+    echo "$DOCKER_PASS" | docker login --username "$DOCKER_USERNAME" --password-stdin
+
+    # following should push all tags
+    echo "pushing image"
+    docker push $AVALANCHE_TESTING_IMAGE
+
     return_code=0
 fi
 
