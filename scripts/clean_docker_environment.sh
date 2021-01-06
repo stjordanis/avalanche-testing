@@ -14,3 +14,4 @@ else
 fi
 
 docker image rm $(docker images --quiet --filter "dangling=true")
+docker network prune -f

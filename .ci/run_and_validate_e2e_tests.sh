@@ -16,10 +16,10 @@ function docker_tag_exists() {
 }
 
 if docker_tag_exists $AVALANCHE_REPO $BRANCH; then
-    echo "$AVALANCHE_REPO $BRANCH exists; using this image" 
+    echo "$AVALANCHE_REPO $BRANCH exists; using this image"
     AVALANCHE_IMAGE="$AVALANCHE_REPO:$BRANCH"
 else
-    echo "$AVALANCHE_REPO $BRANCH does NOT exist; using the default image" 
+    echo "$AVALANCHE_REPO $BRANCH does NOT exist; using the default image"
     AVALANCHE_IMAGE=$DEFAULT_AVALANCHE_IMAGE
 fi
 

@@ -3,8 +3,8 @@ if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
 fi
 
 if ! git diff --name-only HEAD.."${TRAVIS_BRANCH}" | grep CHANGELOG.md; then
-  echo "No diff between HEAD and ${TRAVIS_BRANCH}"
-  echo "PR has no CHANGELOG entry. Please update the CHANGELOG!"
+  echo "[FAIL] No diff between HEAD and ${TRAVIS_BRANCH}"
+  echo "[FAIL] PR has no CHANGELOG entry. Please update the CHANGELOG!"
   exit 1
 fi
 
