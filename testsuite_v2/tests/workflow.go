@@ -32,6 +32,7 @@ const (
 	totalAmount       = 10 * units.KiloAvax
 	seedAmount        = 5 * units.KiloAvax
 	stakeAmount       = 3 * units.KiloAvax
+	txFee             = 1 * units.Avax
 )
 
 const (
@@ -86,18 +87,26 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 			)
 
 		// sets the nodes to validators and delegators
-		topology.Node(validatorNodeName).BecomeValidator(totalAmount, seedAmount, stakeAmount, 0)
-		topology.Node(delegatorNodeName).BecomeDelegator(seedAmount, stakeAmount, topology.Node(validatorNodeName).NodeID)
+		// validatorNodeName - will have available after this op :
+		// XChain - 10k - 5k - 2*txFee - 4998000000000
+		// PChain - 5k - 3k = 2k
+		topology.Node(validatorNodeName).BecomeValidator(totalAmount, seedAmount, stakeAmount, txFee)
+
+		// delegatorNodeName - will have available after this op :
+		// XChain - 10k - 5k - 2*txFee = 4998000000000
+		// PChain - 5k - 3k = 2k
+		topology.Node(delegatorNodeName).BecomeDelegator(totalAmount, seedAmount, stakeAmount, txFee, topology.Node(validatorNodeName).NodeID)
 
 		// after setup we want to test moving amounts from P to X Chain and back
 		stakerNode := topology.Node(validatorNodeName)
 
+		// Lets move whats in the PChain back to the XChain = 2k - txFee (to be burned)
 		exportTxID, err := stakerNode.GetClient().PChainAPI().ExportAVAX(
 			stakerNode.UserPass,
 			[]string{},
 			"", // change addr
 			stakerNode.XAddress,
-			seedAmount-stakeAmount,
+			seedAmount-stakeAmount-txFee,
 		)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", stakerNode.XAddress))
@@ -126,7 +135,10 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected P Chain Balance after P -> X Transfer."))
 		}
 
-		err = chainhelper.XChain().CheckBalance(stakerNode.GetClient(), stakerNode.XAddress, "AVAX", seedAmount-stakeAmount)
+		// Now we should have
+		// XChain: 10k - 5k - 2*txFee (1st op) = 4998000000000 + 3k - 2*txFee (2nd export)
+		err = chainhelper.XChain().CheckBalance(stakerNode.GetClient(), stakerNode.XAddress, "AVAX",
+			totalAmount-seedAmount-2*txFee+seedAmount-stakeAmount-2*txFee)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected X Chain Balance after P -> X Transfer."))
 		}
@@ -139,7 +151,7 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 			[]string{},
 			"", // change addr
 			delegatorNode.XAddress,
-			seedAmount-stakeAmount,
+			seedAmount-stakeAmount-txFee,
 		)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Failed to export AVAX to xChainAddress %s", delegatorNode.XAddress))
@@ -169,7 +181,8 @@ func Workflow(avalancheImage string) *testrunner.TestRunner {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected P Chain Balance after P -> X Transfer."))
 		}
 
-		err = chainhelper.XChain().CheckBalance(delegatorNode.GetClient(), delegatorNode.XAddress, "AVAX", seedAmount-stakeAmount)
+		err = chainhelper.XChain().CheckBalance(delegatorNode.GetClient(), delegatorNode.XAddress, "AVAX",
+			totalAmount-seedAmount-2*txFee+seedAmount-stakeAmount-2*txFee)
 		if err != nil {
 			context.Fatal(stacktrace.Propagate(err, "Unexpected X Chain Balance after P -> X Transfer."))
 		}

@@ -63,7 +63,7 @@ func (s *Scenario) NewTopology(network networks.Network, context *testsuite.Test
 		Genesis().
 		FundXChainAddresses(
 			addresses,
-			10*units.KiloAvax+2*s.txFee,
+			10*units.KiloAvax,
 		)
 
 	for _, nodeName := range s.nodes {

@@ -119,16 +119,16 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 	}
 
 	// verify the PChain balance of seedAmount on the PChain (which should have been at 0)
-	err = chainhelper.PChain().CheckBalance(n.client, n.PAddress, seedAmount)
+	err = chainhelper.PChain().CheckBalance(n.client, n.PAddress, seedAmount) // balance = seedAmount = transferred + txFee
 	if err != nil {
 		n.context.Fatal(stacktrace.Propagate(err, "expected balance of seedAmount the stakeAmount was moved to XChain"))
 		return n
 	}
 
-	// verify the XChain balance of (seedAmount - stakeAmount) the stake was moved to PChain
-	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-seedAmount)
+	// verify the XChain balance of (seedAmount - stakeAmount - 2*txFee) the stake was moved to PChain
+	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-seedAmount-2*txFee)
 	if err != nil {
-		n.context.Fatal(stacktrace.Propagate(err, "expected balance of (seedAmount - stakeAmount) the stake was moved to PChain"))
+		n.context.Fatal(stacktrace.Propagate(err, "expected balance of (seedAmount - stakeAmount - 2*txFee) the stake was moved to XChain"))
 		return n
 	}
 
@@ -201,14 +201,14 @@ func (n *Node) BecomeValidator(genesisAmount uint64, seedAmount uint64, stakeAmo
 // - adds nodeID as a delegator - waits Tx acceptance in the PChain
 // - waits until the validation period begins
 //
-func (n *Node) BecomeDelegator(seedAmount uint64, delegatorAmount uint64, stakerNodeID string) *Node {
+func (n *Node) BecomeDelegator(genesisAmount uint64, seedAmount uint64, delegatorAmount uint64, txFee uint64, stakerNodeID string) *Node {
 
 	// exports AVAX from the X Chain
 	exportTxID, err := n.client.XChainAPI().ExportAVAX(
 		n.UserPass,
 		nil, // from addrs
 		"",  // change addr
-		seedAmount,
+		seedAmount+txFee,
 		n.PAddress,
 	)
 	if err != nil {
@@ -243,17 +243,17 @@ func (n *Node) BecomeDelegator(seedAmount uint64, delegatorAmount uint64, staker
 		return n
 	}
 
-	// verify the PChain balance
+	// verify the PChain balance (seedAmount+txFee-txFee)
 	err = chainhelper.PChain().CheckBalance(n.client, n.PAddress, seedAmount)
 	if err != nil {
-		n.context.Fatal(err)
+		n.context.Fatal(stacktrace.Propagate(err, "expected balance of seedAmount exists in the PChain"))
 		return n
 	}
 
-	// verify the XChain balance of 0 - all moved to PChain
-	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", 0)
+	// verify the XChain balance of genesisAmount - seedAmount - txFee - txFee (import PChain)
+	err = chainhelper.XChain().CheckBalance(n.client, n.XAddress, "AVAX", genesisAmount-seedAmount-2*txFee)
 	if err != nil {
-		n.context.Fatal(err)
+		n.context.Fatal(stacktrace.Propagate(err, "expected balance XChain balance of genesisAmount-seedAmount-txFee"))
 		return n
 	}
 
