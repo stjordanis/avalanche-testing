@@ -3,7 +3,8 @@ SCRIPT_DIRPATH="$(cd "$(dirname "${0}")" && pwd)"
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 PARALLELISM=4
 
-BRANCH="${TRAVIS_BRANCH}"
+# https://github.com/travis-ci/travis-ci/issues/6652
+BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
 
 DOCKER_REPO="avaplatform"
 TESTING_REPO="$DOCKER_REPO/avalanche-testing"
