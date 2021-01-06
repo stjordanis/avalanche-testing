@@ -3,16 +3,16 @@ package kurtosis
 import (
 	"time"
 
-	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
-
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/bombard"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/cchain"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/duplicate"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
-	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
 	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
+	"github.com/ava-labs/avalanche-testing/testsuite_v2/tests"
+
+	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 )
 
 const (
@@ -55,10 +55,11 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 		ImageName: a.NormalImageName,
 		Verifier:  verifier.NetworkStateVerifier{},
 	}
-	result["rpcWorkflowTest"] = workflow.StakingNetworkRPCWorkflowTest{
-		ImageName: a.NormalImageName,
-	}
+
 	result["virtuousCorethTest"] = cchain.NewVirtuousCChainTest(a.NormalImageName, 100, 3, 1000000, 3*time.Second)
+
+	result["GetUTXOs"] = tests.GetUTXOs(a.NormalImageName)
+	result["Workflow"] = tests.Workflow(a.NormalImageName)
 
 	return result
 }

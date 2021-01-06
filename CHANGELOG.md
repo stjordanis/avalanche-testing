@@ -1,4 +1,7 @@
-# TBD
+# 0.11
+* Added testsuite_v2
+
+# 0.10.4
 * Small bugfix in `build_and_run.sh`, so it won't silently error on missing an argument
 * Update CI to skip byzantine tests on untrusted PRs where Docker Credentials are not present
 * Update network initial timeout to use duration variable

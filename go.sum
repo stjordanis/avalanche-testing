@@ -49,6 +49,10 @@ github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmV
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/ava-labs/avalanchego v1.0.5-client h1:/tvPyl6T3Ujn8RHeQ83sezt944XZX6BMlKkp1J+I/ss=
 github.com/ava-labs/avalanchego v1.0.5-client/go.mod h1:Q/I7LaMv2EYL8plNVRbcpBJsDk2py2XISfov0KK1MgU=
+github.com/ava-labs/avalanchego v1.0.7-0.20201202202250-7384ad7bdbe0 h1:LcqS26Kfd2EGdszNFa1x6VZTWQwdV1cdzJIA/jKN3bY=
+github.com/ava-labs/avalanchego v1.0.7-0.20201202202250-7384ad7bdbe0/go.mod h1:Q/I7LaMv2EYL8plNVRbcpBJsDk2py2XISfov0KK1MgU=
+github.com/ava-labs/avalanchego v1.0.7-0.20201203172948-7e3fec8f9dd9 h1:N8iVZDc26TbUmHQL2NndD/M6Is2r98rpjyFEQXqezh0=
+github.com/ava-labs/avalanchego v1.0.7-0.20201203172948-7e3fec8f9dd9/go.mod h1:Q/I7LaMv2EYL8plNVRbcpBJsDk2py2XISfov0KK1MgU=
 github.com/ava-labs/coreth v0.3.15-rc.2 h1:MGJECrlA1/clx4ceoGQ9ZKvSW9Glwn1tKVAaVCKTUAk=
 github.com/ava-labs/coreth v0.3.15-rc.2/go.mod h1:hAT5cycqQ02084XwfPCXKKYuOudpNjhXF+TlWZmeU3c=
 github.com/aws/aws-sdk-go v1.25.48/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
@@ -497,6 +501,7 @@ golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e h1:vcxGaoTs7kV8m5Np9uUNQin4BrLOthgV7252N8V+FwY=
 golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20180823144017-11551d06cbcc/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
