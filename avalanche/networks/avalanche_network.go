@@ -23,6 +23,8 @@ const (
 
 	// The prefix for boot node service IDs, with an integer appended to specify each one
 	bootNodeServiceIDPrefix string = "boot-node-"
+	// The byzantine behavior CLI parameter for configuring byzantine nodes
+	byzantineBehaviorKey = "byzantine-behavior"
 )
 
 // ========================================================================================================
@@ -111,6 +113,10 @@ type TestAvalancheNetworkServiceConfig struct {
 
 	networkInitialTimeout time.Duration
 
+	// TODO include these params
+	// epochFirstTransitionTime time.Time
+	// epochDuration            time.Duration
+
 	// TODO Make these named parameters, so we don't have an arbitrary bag of extra CLI args!
 	// A list of extra CLI args that should be passed to the Avalanche services started with this configuration
 	additionalCLIArgs map[string]string
@@ -146,6 +152,35 @@ func NewTestAvalancheNetworkServiceConfig(
 	}
 }
 
+// NewDefaultAvalancheNetworkServiceConfig returns a default service config
+// using [imageName]
+func NewDefaultAvalancheNetworkServiceConfig(imageName string) *TestAvalancheNetworkServiceConfig {
+	return &TestAvalancheNetworkServiceConfig{
+		varyCerts:             true,
+		serviceLogLevel:       avalancheService.DEBUG,
+		imageName:             imageName,
+		snowQuorumSize:        2,
+		snowSampleSize:        2,
+		networkInitialTimeout: 2 * time.Second,
+		additionalCLIArgs:     make(map[string]string),
+	}
+}
+
+// NewByzantineServiceConfig returns a service config
+// using [imageName] as the byzantine image and [byzantineBehavior]
+// as the byzantine behavior for the node
+func NewAvalancheByzantineServiceConfig(imageName, byzantineBehavior string) *TestAvalancheNetworkServiceConfig {
+	return &TestAvalancheNetworkServiceConfig{
+		varyCerts:             true,
+		serviceLogLevel:       avalancheService.DEBUG,
+		imageName:             imageName,
+		snowQuorumSize:        2,
+		snowSampleSize:        2,
+		networkInitialTimeout: 2 * time.Second,
+		additionalCLIArgs:     map[string]string{byzantineBehaviorKey: byzantineBehavior},
+	}
+}
+
 // ========================================================================================================
 //                                Avalanche Test Network Loader
 // ========================================================================================================
@@ -153,14 +188,11 @@ func NewTestAvalancheNetworkServiceConfig(
 // TestAvalancheNetworkLoader implements Kurtosis' NetworkLoader interface that's used for creating the test network
 // of Avalanche services
 type TestAvalancheNetworkLoader struct {
-	// The Docker image that should be used for the Avalanche boot nodes
-	bootNodeImage string
-
-	// The log level that the Avalanche boot nodes should use
-	bootNodeLogLevel avalancheService.AvalancheLogLevel
-
 	// Whether the nodes that get added to the network (boot node and otherwise) will have staking enabled
 	isStaking bool
+
+	// The fixed transaction fee for the network
+	txFee uint64
 
 	// A registry of the service configurations available for use in this network
 	serviceConfigs map[networks.ConfigurationID]TestAvalancheNetworkServiceConfig
@@ -168,20 +200,8 @@ type TestAvalancheNetworkLoader struct {
 	// A mapping of (service ID) -> (service config ID) for the services that the network will initialize with
 	desiredServiceConfig map[networks.ServiceID]networks.ConfigurationID
 
-	// The Snow quorum size that the bootstrapper nodes of the network will use
-	bootstrapperSnowQuorumSize int
-
-	// The Snow sample size that the bootstrapper nodes of the network will use
-	bootstrapperSnowSampleSize int
-
-	// Additional CLI args for bootstrapper nodes
-	bootstrapperAdditionalCLIs map[string]string
-
-	// The fixed transaction fee for the network
-	txFee uint64
-
-	// The initial timeout for the network
-	networkInitialTimeout time.Duration
+	// service config to be used for each of the bootstrap nodes
+	bootstrapperServiceConfig TestAvalancheNetworkServiceConfig
 }
 
 // NewTestAvalancheNetworkLoader creates a new loader to create a TestAvalancheNetwork with the specified parameters, transparently handling the creation
@@ -198,13 +218,8 @@ type TestAvalancheNetworkLoader struct {
 // 	desiredServiceConfigs: A map of service_id -> config_id, one per node, that this network will initialize with
 func NewTestAvalancheNetworkLoader(
 	isStaking bool,
-	bootNodeImage string,
-	bootNodeLogLevel avalancheService.AvalancheLogLevel,
-	bootstrapperSnowQuorumSize int,
-	bootstrapperSnowSampleSize int,
-	bootstrapperAdditionalCLIs map[string]string,
 	txFee uint64,
-	networkInitialTimeout time.Duration,
+	bootstrapNodeServiceConfig TestAvalancheNetworkServiceConfig,
 	serviceConfigs map[networks.ConfigurationID]TestAvalancheNetworkServiceConfig,
 	desiredServiceConfigs map[networks.ServiceID]networks.ConfigurationID) (*TestAvalancheNetworkLoader, error) {
 	// Defensive copy
@@ -232,16 +247,11 @@ func NewTestAvalancheNetworkLoader(
 	}
 
 	return &TestAvalancheNetworkLoader{
-		bootNodeImage:              bootNodeImage,
-		bootNodeLogLevel:           bootNodeLogLevel,
-		isStaking:                  isStaking,
-		serviceConfigs:             serviceConfigsCopy,
-		desiredServiceConfig:       desiredServiceConfigsCopy,
-		bootstrapperSnowQuorumSize: bootstrapperSnowQuorumSize,
-		bootstrapperSnowSampleSize: bootstrapperSnowSampleSize,
-		bootstrapperAdditionalCLIs: bootstrapperAdditionalCLIs,
-		txFee:                      txFee,
-		networkInitialTimeout:      networkInitialTimeout,
+		isStaking:                 isStaking,
+		serviceConfigs:            serviceConfigsCopy,
+		desiredServiceConfig:      desiredServiceConfigsCopy,
+		txFee:                     txFee,
+		bootstrapperServiceConfig: bootstrapNodeServiceConfig,
 	}, nil
 }
 
@@ -264,19 +274,19 @@ func (loader TestAvalancheNetworkLoader) ConfigureNetwork(builder *networks.Serv
 		keyBytes := bytes.NewBufferString(keyString)
 
 		initializerCore := avalancheService.NewAvalancheServiceInitializerCore(
-			loader.bootstrapperSnowSampleSize,
-			loader.bootstrapperSnowQuorumSize,
+			loader.bootstrapperServiceConfig.snowSampleSize,
+			loader.bootstrapperServiceConfig.snowQuorumSize,
 			loader.txFee,
 			loader.isStaking,
-			loader.networkInitialTimeout,
-			loader.bootstrapperAdditionalCLIs,
+			loader.bootstrapperServiceConfig.networkInitialTimeout,
+			loader.bootstrapperServiceConfig.additionalCLIArgs,
 			bootNodeIDs[0:i], // Only the node IDs of the already-started nodes
 			certs.NewStaticAvalancheCertProvider(*keyBytes, *certBytes),
-			loader.bootNodeLogLevel,
+			loader.bootstrapperServiceConfig.serviceLogLevel,
 		)
 		availabilityCheckerCore := avalancheService.AvalancheServiceAvailabilityCheckerCore{}
 
-		if err := builder.AddConfiguration(configID, loader.bootNodeImage, initializerCore, availabilityCheckerCore); err != nil {
+		if err := builder.AddConfiguration(configID, loader.bootstrapperServiceConfig.imageName, initializerCore, availabilityCheckerCore); err != nil {
 			return stacktrace.Propagate(err, "An error occurred adding bootstrapper node with config ID %v", configID)
 		}
 	}

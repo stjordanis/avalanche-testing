@@ -76,27 +76,15 @@ func (test StakingNetworkBombardTest) GetNetworkLoader() (networks.NetworkLoader
 	// Add config for a normal node, to add an additional node during the test
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
 	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
-	serviceConfigs[normalNodeConfigID] = *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-		true,
-		avalancheService.DEBUG,
-		test.ImageName,
-		2,
-		2,
-		2*time.Second,
-		make(map[string]string),
-	)
+	serviceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	serviceConfigs[normalNodeConfigID] = serviceConfig
 
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
-		true,
-		test.ImageName,
-		avalancheService.DEBUG,
-		2,
-		2,
-		nil,
-		test.TxFee,
-		2*time.Second,
-		serviceConfigs,
-		desiredServices,
+		true,            // Staking network
+		test.TxFee,      // Network wide transaction fee
+		serviceConfig,   // Config for the bootstrap nodes
+		serviceConfigs,  // Service Configurations
+		desiredServices, // Services to start on network configuration
 	)
 }
 

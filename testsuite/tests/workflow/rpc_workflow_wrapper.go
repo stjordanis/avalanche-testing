@@ -7,7 +7,6 @@ import (
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -51,16 +50,9 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
+	normalServiceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-			true,
-			avalancheService.DEBUG,
-			test.ImageName,
-			2,
-			2,
-			2*time.Second,
-			make(map[string]string),
-		),
+		normalNodeConfigID: normalServiceConfig,
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
@@ -70,13 +62,8 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 	// Return an Avalanche Test Network with this service:configuration mapping.
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
-		test.ImageName,
-		avalancheService.DEBUG,
-		2,
-		2,
-		nil,
 		0,
-		2*time.Second,
+		normalServiceConfig,
 		serviceConfigs,
 		desiredServices,
 	)

@@ -14,8 +14,8 @@ import (
 
 const (
 	normalNodeConfigID       networks.ConfigurationID = "normal-config"
-	additionalNode1ServiceID                          = "additional-node-1"
-	additionalNode2ServiceID                          = "additional-node-2"
+	additionalNode1ServiceID networks.ServiceID       = "additional-node-1"
+	additionalNode2ServiceID networks.ServiceID       = "additional-node-2"
 )
 
 type ManagedAssetTest struct {
@@ -77,7 +77,7 @@ func (test ManagedAssetTest) GetNetworkLoader() (networks.NetworkLoader, error) 
 	now := time.Now().Unix() - 1
 	nowStr := strconv.Itoa(int(now))
 
-	serviceConfigs[normalNodeConfigID] = *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
+	serviceConfig := *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 		true,                   // is staking
 		avalancheService.DEBUG, // log level
 		test.ImageName,         // image name
@@ -90,18 +90,12 @@ func (test ManagedAssetTest) GetNetworkLoader() (networks.NetworkLoader, error) 
 		}, // additional CLI args
 	)
 
+	serviceConfigs[normalNodeConfigID] = serviceConfig
+
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
-		test.ImageName,
-		avalancheService.DEBUG, // log level
-		2,                      // bootstrapper snow quorum size
-		3,                      // bootstrapper snow sample size
-		map[string]string{ // additional CLI args for bootstrap nodes
-			"snow-epoch-first-transition": nowStr,
-			"snow-epoch-duration":         "5s",
-		},
-		1,             // tx fee
-		2*time.Second, // network initial timeout
+		1, // tx fee
+		serviceConfig,
 		serviceConfigs,
 		desiredServices,
 	)

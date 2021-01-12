@@ -110,18 +110,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define normal node and byzantine node configurations
+	byzantineServiceConfig := *avalancheNetwork.NewAvalancheByzantineServiceConfig(test.ByzantineImageName, chitSpammerBehavior)
+	bootstrapServiceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.NormalImageName)
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
-		byzantineConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-			true,
-			avalancheService.DEBUG,
-			test.ByzantineImageName,
-			2,
-			2,
-			2*time.Second,
-			map[string]string{
-				byzantineBehavior: chitSpammerBehavior,
-			},
-		),
+		byzantineConfigID: byzantineServiceConfig,
 		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
 			true,
 			avalancheService.DEBUG,
@@ -143,13 +135,8 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
-		test.NormalImageName,
-		avalancheService.DEBUG,
-		2,
-		2,
-		nil,
 		0,
-		2*time.Second,
+		bootstrapServiceConfig,
 		serviceConfigs,
 		serviceIDConfigMap,
 	)

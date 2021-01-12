@@ -86,16 +86,9 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.NetworkLoader, error) {
+	normalServiceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-			true,
-			avalancheService.DEBUG,
-			test.ImageName,
-			2,
-			2,
-			2*time.Second,
-			make(map[string]string),
-		),
+		normalNodeConfigID: normalServiceConfig,
 	}
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		nonBootValidatorServiceID:    normalNodeConfigID,
@@ -103,13 +96,8 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 	}
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
-		test.ImageName,
-		avalancheService.DEBUG,
-		2,
-		2,
-		nil,
 		0,
-		2*time.Second,
+		normalServiceConfig,
 		serviceConfigs,
 		desiredServices,
 	)

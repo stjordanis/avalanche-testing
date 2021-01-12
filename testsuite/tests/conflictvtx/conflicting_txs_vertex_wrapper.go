@@ -7,7 +7,6 @@ import (
 	"github.com/kurtosis-tech/kurtosis-go/lib/testsuite"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
-	avalancheService "github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
 )
@@ -15,7 +14,6 @@ import (
 const (
 	normalNodeConfigID          networks.ConfigurationID = "normal-config"
 	byzantineConfigID           networks.ConfigurationID = "byzantine-config"
-	byzantineBehavior                                    = "byzantine-behavior"
 	conflictingTxVertexBehavior                          = "conflicting-txs-vertex"
 	byzantineNodeServiceID                               = "byzantine-node"
 	normalNodeServiceID                                  = "virtuous-node"
@@ -75,38 +73,19 @@ Args:
 	desiredServices: Mapping of service_id -> configuration_id for all services *in addition to the boot nodes* that the user wants
 */
 func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.ConfigurationID, byzantineImageName string, normalImageName string) (networks.NetworkLoader, error) {
+	normalServiceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(normalImageName)
+	byzantineServiceConfig := *avalancheNetwork.NewAvalancheByzantineServiceConfig(byzantineImageName, conflictingTxVertexBehavior)
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
-		normalNodeConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-			true,
-			avalancheService.DEBUG,
-			normalImageName,
-			2,
-			2,
-			2*time.Second,
-			make(map[string]string),
-		),
-		byzantineConfigID: *avalancheNetwork.NewTestAvalancheNetworkServiceConfig(
-			true,
-			avalancheService.DEBUG,
-			byzantineImageName,
-			2,
-			2,
-			2*time.Second,
-			map[string]string{byzantineBehavior: conflictingTxVertexBehavior},
-		),
+		normalNodeConfigID: normalServiceConfig,
+		byzantineConfigID:  byzantineServiceConfig,
 	}
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", normalImageName)
 
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
-		normalImageName,
-		avalancheService.DEBUG,
-		2,
-		2,
-		nil,
 		1000000,
-		2*time.Second,
+		normalServiceConfig,
 		serviceConfigs,
 		desiredServices,
 	)

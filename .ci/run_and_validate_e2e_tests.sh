@@ -6,9 +6,9 @@ PARALLELISM=4
 DOCKER_REPO="avaplatform"
 
 # Use stable version of Everest for CI
-AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:v1.0.5-client"
+AVALANCHE_IMAGE="$DOCKER_REPO/avalanchego:apricot"
 # Use stable version of avalanche-byzantine based on everest for CI
-BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:v0.1.4-rc.1"
+BYZANTINE_IMAGE="$DOCKER_REPO/avalanche-byzantine:apricot"
 
 # Kurtosis will try to pull Docker images, but as of 2020-08-09 it doesn't currently support pulling from Docker repos that require authentication
 # so we have to do the pull here
