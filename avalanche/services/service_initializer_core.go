@@ -91,9 +91,7 @@ func NewAvalancheServiceInitializerCore(
 	logLevel AvalancheLogLevel) *AvalancheServiceInitializerCore {
 	// Defensive copy
 	bootstrapperIDsCopy := make([]string, 0, len(bootstrapperNodeIDs))
-	for _, nodeID := range bootstrapperNodeIDs {
-		bootstrapperIDsCopy = append(bootstrapperIDsCopy, nodeID)
-	}
+	bootstrapperIDsCopy = append(bootstrapperIDsCopy, bootstrapperNodeIDs...)
 
 	return &AvalancheServiceInitializerCore{
 		snowSampleSize:        snowSampleSize,

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/vms/avm"
+
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
 	"github.com/ava-labs/avalanche-testing/utils/constants"
@@ -54,6 +57,10 @@ func NewRPCWorkFlowRunner(
 	}
 }
 
+func (runner RPCWorkFlowRunner) Client() *services.Client {
+	return runner.client
+}
+
 // User returns the user credentials for this worker
 func (runner RPCWorkFlowRunner) User() api.UserPass {
 	return runner.userPass
@@ -63,18 +70,15 @@ func (runner RPCWorkFlowRunner) User() api.UserPass {
 func (runner RPCWorkFlowRunner) ImportGenesisFunds() (string, error) {
 	client := runner.client
 	keystore := client.KeystoreAPI()
-	if _, err := keystore.CreateUser(runner.userPass); err != nil {
-		return "", err
-	}
+	_, _ = keystore.CreateUser(runner.userPass)
 
-	genesisAccountAddress, err := client.XChainAPI().ImportKey(
+	genesisAddress, err := client.XChainAPI().ImportKey(
 		runner.userPass,
 		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
-	logrus.Debugf("Genesis Address: %s.", genesisAccountAddress)
-	return genesisAccountAddress, nil
+	return genesisAddress, nil
 }
 
 // ImportGenesisFundsAndStartValidating attempts to import genesis funds and add this node as a validator
@@ -178,25 +182,19 @@ func (runner RPCWorkFlowRunner) AddValidatorToPrimaryNetwork(
 // FundXChainAddresses sends [amount] AVAX to each address in [addresses] and returns the created txIDs
 func (runner RPCWorkFlowRunner) FundXChainAddresses(addresses []string, amount uint64) error {
 	client := runner.client.XChainAPI()
+	outputs := make([]avm.SendOutput, 0, len(addresses))
 	for _, address := range addresses {
-		txID, err := client.Send(
-			runner.userPass,
-			nil, // from addrs
-			"",  // change addr
-			amount,
-			AvaxAssetID,
-			address,
-			"",
-		)
-		if err != nil {
-			return err
-		}
-		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
-			return err
-		}
+		outputs = append(outputs, avm.SendOutput{
+			Amount:  json.Uint64(amount),
+			AssetID: AvaxAssetID,
+			To:      address,
+		})
 	}
-
-	return nil
+	txID, err := client.SendMultiple(runner.userPass, nil, "", outputs, "fund from genesis")
+	if err != nil {
+		return err
+	}
+	return runner.AwaitXChainTransactionAcceptance(txID)
 }
 
 // SendAVAX attempts to send [amount] AVAX to address [to] using [runner]'s userPass
@@ -354,7 +352,7 @@ func (runner RPCWorkFlowRunner) AwaitXChainTransactionAcceptance(txID ids.ID) er
 			return nil
 		}
 		if status == choices.Rejected {
-			return stacktrace.NewError("Transaciton %s was rejected", txID)
+			return stacktrace.NewError("Transaction %s was rejected", txID)
 		}
 		time.Sleep(time.Second)
 	}
@@ -363,7 +361,7 @@ func (runner RPCWorkFlowRunner) AwaitXChainTransactionAcceptance(txID ids.ID) er
 }
 
 // AwaitXChainTxs confirms each transaction and returns an error if any of them are not confirmed
-func (runner RPCWorkFlowRunner) AwaitXChainTxs(txIDs ...ids.ID) error {
+func (runner RPCWorkFlowRunner) AwaitXChainTxs(txIDs []ids.ID) error {
 	for _, txID := range txIDs {
 		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
 			return err

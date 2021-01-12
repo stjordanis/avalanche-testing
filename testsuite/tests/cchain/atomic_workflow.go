@@ -79,7 +79,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 		return err
 	}
 
-	expectedAVAXBalance = expectedAVAXBalance - aw.txFee
+	expectedAVAXBalance -= aw.txFee
 
 	logrus.Infof("Exporting AVAX")
 	bech32CAddr := fmt.Sprintf("C%s", xAddr[1:])

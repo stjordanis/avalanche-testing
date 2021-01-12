@@ -161,8 +161,8 @@ func CreateConsecutiveTransactions(utxo *avax.UTXO, numTxs, amount, txFee uint64
 		txBytes[i] = tx.Bytes()
 		txIDs[i] = tx.ID()
 		utxo = tx.UTXOs()[0]
-		inputAmount = inputAmount - txFee
-		outputAmount = outputAmount - txFee
+		inputAmount -= txFee
+		outputAmount -= txFee
 	}
 
 	return txBytes, txIDs, nil

@@ -89,6 +89,6 @@ func (test StakingNetworkRPCWorkflowTest) GetExecutionTimeout() time.Duration {
 
 // GetSetupBuffer implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) GetSetupBuffer() time.Duration {
-	// TODO drop this down when the availability checker doesn't have a sleep (becuase we spin up a bunch of nodes before the test starts executing)
+	// TODO drop this down when the availability checker doesn't have a sleep (because we spin up a bunch of nodes before the test starts executing)
 	return 6 * time.Minute
 }

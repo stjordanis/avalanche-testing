@@ -43,10 +43,9 @@ func createRandomString() string {
 
 // ExecuteTest implements the AvalancheTester interface
 func (e *bombardExecutor) ExecuteTest() error {
-	genesisClient := e.normalClients[0]
-	secondaryClients := make([]*helpers.RPCWorkFlowRunner, len(e.normalClients)-1)
-	xChainAddrs := make([]string, len(e.normalClients)-1)
-	for i, client := range e.normalClients[1:] {
+	secondaryClients := make([]*helpers.RPCWorkFlowRunner, len(e.normalClients))
+	xChainAddrs := make([]string, len(e.normalClients))
+	for i, client := range e.normalClients {
 		secondaryClients[i] = helpers.NewRPCWorkFlowRunner(
 			client,
 			api.UserPass{Username: createRandomString(), Password: createRandomString()},
@@ -59,24 +58,16 @@ func (e *bombardExecutor) ExecuteTest() error {
 		xChainAddrs[i] = xChainAddress
 	}
 
-	genesisUser := api.UserPass{Username: createRandomString(), Password: createRandomString()}
+	genesisClient := e.normalClients[0]
 	highLevelGenesisClient := helpers.NewRPCWorkFlowRunner(
 		genesisClient,
-		genesisUser,
+		api.UserPass{Username: createRandomString(), Password: createRandomString()},
 		e.acceptanceTimeout,
 	)
-
-	if _, err := highLevelGenesisClient.ImportGenesisFunds(); err != nil {
+	genesisAddress, err := highLevelGenesisClient.ImportGenesisFunds()
+	if err != nil {
 		return stacktrace.Propagate(err, "Failed to fund genesis client.")
 	}
-	addrs, err := genesisClient.XChainAPI().ListAddresses(genesisUser)
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to get genesis client's addresses")
-	}
-	if len(addrs) != 1 {
-		return stacktrace.NewError("Found unexecpted number of addresses for genesis client: %d", len(addrs))
-	}
-	genesisAddress := addrs[0]
 	logrus.Infof("Imported genesis funds at address: %s", genesisAddress)
 
 	// Fund X Chain Addresses enough to issue [numTxs]
@@ -118,7 +109,7 @@ func (e *bombardExecutor) ExecuteTest() error {
 	privateKeys := make([]*crypto.PrivateKeySECP256K1R, len(secondaryClients))
 	txLists := make([][][]byte, len(secondaryClients))
 	txIDLists := make([][]ids.ID, len(secondaryClients))
-	for i, client := range e.normalClients[1:] {
+	for i, client := range e.normalClients {
 		utxo := utxoLists[i][0]
 		pkStr, err := client.XChainAPI().ExportKey(secondaryClients[i].User(), xChainAddrs[i])
 		if err != nil {
@@ -136,6 +127,9 @@ func (e *bombardExecutor) ExecuteTest() error {
 
 		factory := crypto.FactorySECP256K1R{}
 		skIntf, err := factory.ToPrivateKey(pkBytes)
+		if err != nil {
+			return stacktrace.Propagate(err, "Failed to convert pk bytes to private key")
+		}
 		sk := skIntf.(*crypto.PrivateKeySECP256K1R)
 		privateKeys[i] = sk
 
@@ -150,10 +144,11 @@ func (e *bombardExecutor) ExecuteTest() error {
 
 	wg := sync.WaitGroup{}
 	issueTxsAsync := func(runner *helpers.RPCWorkFlowRunner, txList [][]byte) {
+		defer wg.Done()
+
 		if err := runner.IssueTxList(txList); err != nil {
 			panic(err)
 		}
-		wg.Done()
 	}
 
 	startTime := time.Now()
@@ -166,13 +161,24 @@ func (e *bombardExecutor) ExecuteTest() error {
 
 	duration := time.Since(startTime)
 	logrus.Infof("Finished issuing transaction lists in %v seconds.", duration.Seconds())
+
+	allTxIDs := make([]ids.ID, 0)
 	for _, txIDs := range txIDLists {
-		if err := highLevelGenesisClient.AwaitXChainTxs(txIDs...); err != nil {
-			stacktrace.Propagate(err, "Failed to confirm transactions.")
-		}
+		allTxIDs = append(allTxIDs, txIDs...)
+	}
+	txIDsSet := ids.Set{}
+	txIDsSet.Add(allTxIDs...)
+	if txIDsSet.Len() != len(allTxIDs) {
+		return fmt.Errorf("expected set of txIDs to have the same size as the issued transactions list, but was %d. Expected %d", txIDsSet.Len(), len(allTxIDs))
 	}
 
-	logrus.Infof("Confirmed all issued transactions.")
+	for i, client := range secondaryClients {
+		logrus.Infof("Confirming %d txs on client %d", len(allTxIDs), i)
+		if err := client.AwaitXChainTxs(allTxIDs); err != nil {
+			return stacktrace.Propagate(err, "Failed to confirm transactions for client %d.", i)
+		}
+	}
+	logrus.Infof("Confirmed all issued transactions on every client.")
 
 	return nil
 }

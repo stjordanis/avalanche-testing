@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+
 	testsuite "github.com/ava-labs/avalanche-testing/testsuite/kurtosis"
 	"github.com/kurtosis-tech/kurtosis-go/lib/client"
 	"github.com/sirupsen/logrus"
-	"os"
 )
 
 func main() {
@@ -24,7 +25,7 @@ func main() {
 		"test",
 		"",
 		"The name of the test to run")
-	kurtosisApiIpArg := flag.String(
+	kurtosisApiIPArg := flag.String(
 		"kurtosis-api-ip",
 		"",
 		"IP address of the Kurtosis API endpoint")
@@ -62,6 +63,6 @@ func main() {
 		ByzantineImageName: *byzantineGoImageArg,
 		NormalImageName:    *avalancheGoImageArg,
 	}
-	exitCode := client.Run(testSuite, *metadataFilepath, *servicesDirpathArg, *testArg, *kurtosisApiIpArg)
+	exitCode := client.Run(testSuite, *metadataFilepath, *servicesDirpathArg, *testArg, *kurtosisApiIPArg)
 	os.Exit(exitCode)
 }

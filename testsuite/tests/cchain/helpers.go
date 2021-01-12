@@ -25,7 +25,6 @@ var (
 	user               = api.UserPass{Username: "Jameson", Password: "Javier23r79h"}
 	key                = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
 	prefixedPrivateKey = fmt.Sprintf("PrivateKey-%s", key)
-	requestTimeout     = 3 * time.Second
 	avaxAmount         = uint64(10000000000000000)
 	x2cConversion      = uint64(1000000000)
 	cChainID           = big.NewInt(43112)

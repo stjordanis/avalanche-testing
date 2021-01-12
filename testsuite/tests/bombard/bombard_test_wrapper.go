@@ -14,10 +14,8 @@ import (
 
 const (
 	normalNodeConfigID       networks.ConfigurationID = "normal-config"
-	additionalNode1ServiceID                          = "additional-node-1"
-	additionalNode2ServiceID                          = "additional-node-2"
-	seedAmount                                        = int64(50000000000000)
-	stakeAmount                                       = int64(30000000000000)
+	additionalNode1ServiceID networks.ServiceID       = "additional-node-1"
+	additionalNode2ServiceID networks.ServiceID       = "additional-node-2"
 )
 
 // StakingNetworkBombardTest funds individual clients with a starting UTXO for each
