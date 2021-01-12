@@ -133,11 +133,9 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 			if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(originalServiceIDs)-1, true); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
-		} else {
+		} else if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
 			// The original non-boot node should have exactly the boot nodes
-			if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
-				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
-			}
+			context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 		}
 	}
 	logrus.Info("Verified that original nodes are still connected to each other")
