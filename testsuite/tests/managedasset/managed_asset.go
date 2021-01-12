@@ -18,8 +18,17 @@ const (
 	additionalNode2ServiceID networks.ServiceID       = "additional-node-2"
 )
 
+// ManagedAssetTest implements the testsuite.Test interface and tests the
+// functionality of managed assets
 type ManagedAssetTest struct {
 	ImageName string
+}
+
+// NewManagedAssetTest returns a new Kurtosis Test
+func NewManagedAssetTest(imageName string) testsuite.Test {
+	return &ManagedAssetTest{
+		ImageName: imageName,
+	}
 }
 
 // Run implements the Kurtosis Test interface

@@ -32,7 +32,13 @@ const (
 type StakingNetworkFullyConnectedTest struct {
 	ImageName           string
 	FullyConnectedDelay time.Duration
-	Verifier            verifier.NetworkStateVerifier
+}
+
+func NewFullyConnectedTest(imageName string, fullyConnectedDelay time.Duration) testsuite.Test {
+	return &StakingNetworkFullyConnectedTest{
+		ImageName:           imageName,
+		FullyConnectedDelay: fullyConnectedDelay,
+	}
 }
 
 // Run implements the Kurtosis Test interface
@@ -49,9 +55,10 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 	allServiceIDs[nonBootValidatorServiceID] = true
 	allServiceIDs[nonBootNonValidatorServiceID] = true
 
+	networkVerifier := verifier.NetworkStateVerifier{}
 	allNodeIDs, allAvalancheClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
 	logrus.Infof("Verifying that the network is fully connected...")
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
+	if err := networkVerifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("Network is fully connected.")
@@ -68,7 +75,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 
 	logrus.Infof("Sleeping %v seconds before verifying that the network has fully connected to the new staker...", test.FullyConnectedDelay.Seconds())
 	// Give time for the new validator to propagate via gossip
-	time.Sleep(70 * time.Second)
+	time.Sleep(test.FullyConnectedDelay)
 
 	logrus.Infof("Verifying that the network is fully connected...")
 	stakerIDs[nonBootValidatorServiceID] = true
@@ -78,7 +85,7 @@ func (test StakingNetworkFullyConnectedTest) Run(network networks.Network, conte
 		2) The validators will have ALL other nodes in the network (propagated via gossip)
 		3) The non-validators will have all the validators in the network (propagated via gossip)
 	*/
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
+	if err := networkVerifier.VerifyNetworkFullyConnected(allServiceIDs, stakerIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying that the network is fully connected after gossip"))
 	}
 	logrus.Infof("The network is fully connected.")

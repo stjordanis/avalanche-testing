@@ -23,8 +23,16 @@ const (
 // vertex. It then checks to ensure that the byzantine node has accepted these transactions, while the virtuous nodes
 // drop the vertex.
 type StakingNetworkConflictingTxsVertexTest struct {
-	ByzantineImageName string
 	NormalImageName    string
+	ByzantineImageName string
+}
+
+// NewConflictingTxsVertexTest returns a new Kurtosis Test
+func NewConflictingTxsVertexTest(normalImageName, byzantineImageName string) testsuite.Test {
+	return &StakingNetworkConflictingTxsVertexTest{
+		NormalImageName:    normalImageName,
+		ByzantineImageName: byzantineImageName,
+	}
 }
 
 // Run implements the Kurtosis Test interface

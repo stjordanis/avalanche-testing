@@ -13,7 +13,6 @@ import (
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/managedasset"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
-	"github.com/ava-labs/avalanche-testing/testsuite/verifier"
 )
 
 const (
@@ -33,34 +32,20 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 	result := make(map[string]testsuite.Test)
 
 	if a.ByzantineImageName != "" {
-		result["chitSpammerTest"] = spamchits.StakingNetworkUnrequestedChitSpammerTest{
-			ByzantineImageName: a.ByzantineImageName,
-			NormalImageName:    a.NormalImageName,
-		}
-		result["conflictingTxsVertexTest"] = conflictvtx.StakingNetworkConflictingTxsVertexTest{
-			ByzantineImageName: a.ByzantineImageName,
-			NormalImageName:    a.NormalImageName,
-		}
+		result["chitSpammerTest"] = spamchits.NewChitSpammerTest(a.NormalImageName, a.ByzantineImageName)
+		result["conflictingTxsVertexTest"] = conflictvtx.NewConflictingTxsVertexTest(a.NormalImageName, a.ByzantineImageName)
 	}
-	result["bombardXChainTest"] = bombard.StakingNetworkBombardTest{
-		ImageName:         a.NormalImageName,
-		NumTxs:            1000,
-		TxFee:             1000000,
-		AcceptanceTimeout: 10 * time.Second,
-	}
-	result["fullyConnectedNetworkTest"] = connected.StakingNetworkFullyConnectedTest{
-		ImageName: a.NormalImageName,
-		Verifier:  verifier.NetworkStateVerifier{},
-	}
-	result["duplicateNodeIDTest"] = duplicate.DuplicateNodeIDTest{
-		ImageName: a.NormalImageName,
-		Verifier:  verifier.NetworkStateVerifier{},
-	}
-	result["rpcWorkflowTest"] = workflow.StakingNetworkRPCWorkflowTest{
-		ImageName: a.NormalImageName,
-	}
+	result["bombardXChainTest"] = bombard.NewBombardXChainTest(
+		a.NormalImageName,
+		1000,
+		1000000,
+		10*time.Second,
+	)
+	result["fullyConnectedNetworkTest"] = connected.NewFullyConnectedTest(a.NormalImageName, 70*time.Second)
+	result["duplicateNodeIDTest"] = duplicate.NewDuplicateNodeIDTest(a.NormalImageName, nil)
+	result["rpcWorkflowTest"] = workflow.NewRPCWorkflowTest(a.NormalImageName, nil)
 	result["virtuousCorethTest"] = cchain.NewVirtuousCChainTest(a.NormalImageName, 100, 3, 1000000, 3*time.Second)
-	result["managedAssetTest"] = managedasset.ManagedAssetTest{ImageName: a.NormalImageName}
+	result["managedAssetTest"] = managedasset.NewManagedAssetTest(a.NormalImageName)
 
 	return result
 }

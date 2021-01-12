@@ -30,15 +30,21 @@ const (
 	stakeAmount                                     = uint64(30000000000000)
 
 	networkAcceptanceTimeoutRatio = 0.3
-	byzantineBehavior             = "byzantine-behavior"
 	chitSpammerBehavior           = "chit-spammer"
 )
 
 // StakingNetworkUnrequestedChitSpammerTest tests that a node is able to continue to work normally
 // while the network is spammed with chit messages from byzantine peers
 type StakingNetworkUnrequestedChitSpammerTest struct {
-	ByzantineImageName string
 	NormalImageName    string
+	ByzantineImageName string
+}
+
+func NewChitSpammerTest(normalImageName, byzantineImageName string) testsuite.Test {
+	return &StakingNetworkUnrequestedChitSpammerTest{
+		NormalImageName:    normalImageName,
+		ByzantineImageName: byzantineImageName,
+	}
 }
 
 // Run implements the Kurtosis Test interface

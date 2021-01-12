@@ -28,6 +28,15 @@ type StakingNetworkBombardTest struct {
 	AcceptanceTimeout time.Duration
 }
 
+func NewBombardXChainTest(imageName string, numTxs, txFee uint64, acceptanceTimeout time.Duration) testsuite.Test {
+	return &StakingNetworkBombardTest{
+		ImageName:         imageName,
+		NumTxs:            numTxs,
+		TxFee:             txFee,
+		AcceptanceTimeout: acceptanceTimeout,
+	}
+}
+
 // Run implements the Kurtosis Test interface
 func (test StakingNetworkBombardTest) Run(network networks.Network, context testsuite.TestContext) {
 	castedNetwork := network.(avalancheNetwork.TestAvalancheNetwork)

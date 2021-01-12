@@ -2,6 +2,7 @@ package networks
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
@@ -178,6 +179,15 @@ func NewAvalancheByzantineServiceConfig(imageName, byzantineBehavior string) *Te
 		snowSampleSize:        2,
 		networkInitialTimeout: 2 * time.Second,
 		additionalCLIArgs:     map[string]string{byzantineBehaviorKey: byzantineBehavior},
+	}
+}
+
+func (config *TestAvalancheNetworkServiceConfig) SetExtraCLIArgs(extraArgs map[string]string) {
+	for param, value := range extraArgs {
+		if originalValue, ok := config.additionalCLIArgs[param]; ok {
+			panic(fmt.Sprintf("CLI arg %s already set to %s", param, originalValue))
+		}
+		config.additionalCLIArgs[param] = value
 	}
 }
 

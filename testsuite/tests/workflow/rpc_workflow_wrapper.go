@@ -21,7 +21,15 @@ const (
 
 // StakingNetworkRPCWorkflowTest ...
 type StakingNetworkRPCWorkflowTest struct {
-	ImageName string
+	ImageName         string
+	AdditionalCLIArgs map[string]string
+}
+
+func NewRPCWorkflowTest(imageName string, additionaCLIArgs map[string]string) testsuite.Test {
+	return &StakingNetworkRPCWorkflowTest{
+		ImageName:         imageName,
+		AdditionalCLIArgs: additionaCLIArgs,
+	}
 }
 
 // Run implements the Kurtosis Test interface
@@ -50,9 +58,11 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 // GetNetworkLoader implements the Kurtosis Test interface
 func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
-	normalServiceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	normalServiceConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	normalServiceConfig.SetExtraCLIArgs(test.AdditionalCLIArgs)
+
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
-		normalNodeConfigID: normalServiceConfig,
+		normalNodeConfigID: *normalServiceConfig,
 	}
 	// Define which services use which configurations.
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
@@ -63,7 +73,7 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 	return avalancheNetwork.NewTestAvalancheNetworkLoader(
 		true,
 		0,
-		normalServiceConfig,
+		*normalServiceConfig,
 		serviceConfigs,
 		desiredServices,
 	)

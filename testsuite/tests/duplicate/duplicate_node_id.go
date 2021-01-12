@@ -25,8 +25,16 @@ const (
 // DuplicateNodeIDTest adds a node with a duplicate nodeID and ensures that the network handles the duplicate
 // appropriately and settles on the remaining node when the duplicate is removed.
 type DuplicateNodeIDTest struct {
-	ImageName string
-	Verifier  verifier.NetworkStateVerifier
+	ImageName         string
+	AdditionalCLIArgs map[string]string
+}
+
+// NewDuplicateNodeIDTest returns a new Kurtosis Test
+func NewDuplicateNodeIDTest(imageName string, additionaCLIArgs map[string]string) testsuite.Test {
+	return &DuplicateNodeIDTest{
+		ImageName:         imageName,
+		AdditionalCLIArgs: additionaCLIArgs,
+	}
 }
 
 // Run implements the Kurtosis Test interface
@@ -42,7 +50,8 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	allServiceIDs[vanillaNodeServiceID] = true
 
 	allNodeIDs, allAvalancheClients := getNodeIDsAndClients(context, castedNetwork, allServiceIDs)
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
+	networkVerifier := verifier.NetworkStateVerifier{}
+	if err := networkVerifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 
@@ -82,7 +91,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 
 	// Verify that the new node got accepted by everyone
 	logrus.Infof("Verifying that the new node with service ID %v was accepted by all bootstrappers...", badServiceID1)
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
+	if err := networkVerifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Infof("New node with service ID %v was accepted by all bootstrappers", badServiceID1)
@@ -130,10 +139,10 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 			acceptableNodeIDs[allNodeIDs[vanillaNodeServiceID]] = true
 			acceptableNodeIDs[badServiceNodeID1] = true
 			acceptableNodeIDs[badServiceNodeID2] = true
-			if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(originalServiceIDs)-1, true); err != nil {
+			if err := networkVerifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(originalServiceIDs)-1, true); err != nil {
 				context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 			}
-		} else if err := test.Verifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
+		} else if err := networkVerifier.VerifyExpectedPeers(serviceID, allAvalancheClients[serviceID], acceptableNodeIDs, len(bootServiceIDs), false); err != nil {
 			// The original non-boot node should have exactly the boot nodes
 			context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 		}
@@ -153,7 +162,7 @@ func (test DuplicateNodeIDTest) Run(network networks.Network, context testsuite.
 	// Now that the first duped node is gone, verify that the original node is still connected to just boot nodes and
 	//  the second duped-ID node is now accepted by the boot nodes
 	logrus.Info("Verifying that the network has connected to the second node with a previously-duplicated node ID...")
-	if err := test.Verifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
+	if err := networkVerifier.VerifyNetworkFullyConnected(allServiceIDs, bootServiceIDs, allNodeIDs, allAvalancheClients); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "An error occurred verifying the network's state"))
 	}
 	logrus.Info("Verified that the network has settled on the second node with previously-duplicated ID")
