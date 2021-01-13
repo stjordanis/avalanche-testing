@@ -102,7 +102,7 @@ func NewCustomBootstrapsAvalancheNetworkLoader(
 	if len(bootstrapNodeServiceConfigs) != 5 {
 		return nil, fmt.Errorf("custom bootstraps avalanche network loader requires 5 configs, but received %d", len(bootstrapNodeServiceConfigs))
 	}
-	bootstrapConfigs := make([]TestAvalancheNetworkServiceConfig, 0, 5)
+	bootstrapConfigs := make([]TestAvalancheNetworkServiceConfig, 5)
 	copy(bootstrapConfigs, bootstrapNodeServiceConfigs)
 
 	// Defensive copy
