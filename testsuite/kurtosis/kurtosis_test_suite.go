@@ -35,8 +35,16 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 		result["chitSpammerTest"] = spamchits.NewChitSpammerTest(a.NormalImageName, a.ByzantineImageName)
 		result["conflictingTxsVertexTest"] = conflictvtx.NewConflictingTxsVertexTest(a.NormalImageName, a.ByzantineImageName)
 	}
+	result["bombardXChainIndependentTxsTest"] = bombard.NewBombardXChainWithIndependentTxsTest(
+		a.NormalImageName,
+		10*time.Minute,
+		1000,
+		1000000,
+		10*time.Second,
+	)
 	result["bombardXChainTest"] = bombard.NewBombardXChainTest(
 		a.NormalImageName,
+		10*time.Minute,
 		1000,
 		1000000,
 		10*time.Second,

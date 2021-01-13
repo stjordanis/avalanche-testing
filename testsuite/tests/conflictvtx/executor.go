@@ -69,7 +69,7 @@ func (e *executor) ExecuteTest() error {
 	// Note: The byzantine behavior is to batch the pending transactions into a vertex as soon as it detects a conflict.
 	// It should try to accept each transaction before PushQuery-ing the vertex to other nodes to signal to this test
 	// controller that the vertex was successfully issued
-	status, err := byzantineXChainAPI.GetTxStatus(nonConflictID)
+	status, _, err := byzantineXChainAPI.GetTxStatus(nonConflictID)
 	if err != nil {
 		return stacktrace.Propagate(err, fmt.Sprintf("Failed to get status of Transaction: %s", nonConflictID))
 	}
@@ -79,14 +79,14 @@ func (e *executor) ExecuteTest() error {
 
 	logrus.Infof("Status of non-conflict transactions on byzantine node is: %s", status)
 
-	conflictStatus1, err := byzantineXChainAPI.GetTxStatus(conflictID1)
+	conflictStatus1, _, err := byzantineXChainAPI.GetTxStatus(conflictID1)
 	if err != nil {
 		return stacktrace.Propagate(err, fmt.Sprintf("Failed to get status of Transaction: %s", conflictID1))
 	}
 
 	logrus.Infof("Status of conflict tx1: %s on byzantine node is: %s", conflictID1, conflictStatus1)
 
-	conflictStatus2, err := byzantineXChainAPI.GetTxStatus(conflictID2)
+	conflictStatus2, _, err := byzantineXChainAPI.GetTxStatus(conflictID2)
 	if err != nil {
 		return stacktrace.Propagate(err, fmt.Sprintf("Failed to get status of Transaction: %s", conflictID2))
 	}
@@ -120,7 +120,7 @@ func (e *executor) ExecuteTest() error {
 	}
 
 	for {
-		status, err := virtuousXChainAPI.GetTxStatus(virtuousTxID)
+		status, _, err := virtuousXChainAPI.GetTxStatus(virtuousTxID)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get virtuous transactions status from virtuous node")
 		}
@@ -135,7 +135,7 @@ func (e *executor) ExecuteTest() error {
 
 	// Once the virtuous transaction was accepted, check to see if the non-conflicting transaction
 	// in an illegal vertex was accepted
-	status, err = virtuousXChainAPI.GetTxStatus(nonConflictID)
+	status, _, err = virtuousXChainAPI.GetTxStatus(nonConflictID)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to get transaction status for non-conflicting transaction.")
 	}

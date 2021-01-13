@@ -115,7 +115,7 @@ func checkHeaderAndBlocks(ctx context.Context, client *ethclient.Client, i int, 
 	originalHash := header1.Hash()
 	originalBlockNumber := header1.Number
 	if i >= 0 && int(originalBlockNumber.Int64()) != i {
-		return fmt.Errorf("Requested block number %d, but found block number %d", i, originalBlockNumber)
+		return fmt.Errorf("requested block number %d, but found block number %d", i, originalBlockNumber)
 	}
 
 	header2, err := client.HeaderByHash(ctx, header1.Hash())
@@ -124,8 +124,12 @@ func checkHeaderAndBlocks(ctx context.Context, client *ethclient.Client, i int, 
 	}
 	logrus.Infof("HeaderByNumber (Block Number: %d, Block Hash: %s)", header2.Number, header2.Hash().Hex())
 
-	if originalHash.Hex() != header2.Hash().Hex() || originalBlockNumber != header2.Number {
-		return fmt.Errorf("Expected (Number, Hash) = (%s, %d), found (%s, %d)", originalHash.Hex(), originalBlockNumber, header2.Hash().Hex(), header2.Number)
+	if originalHash.Hex() != header2.Hash().Hex() {
+		return fmt.Errorf("expected HeaderByNumber to return block with hash %s, but found %s", originalHash.Hex(), header2.Hash().Hex())
+	}
+
+	if originalBlockNumber.Cmp(header2.Number) != 0 {
+		return fmt.Errorf("expected HeaderByNumber to return block with number %d, but found %d", originalBlockNumber, header2.Number)
 	}
 
 	block1, err := client.BlockByNumber(ctx, big.NewInt(int64(i)))
@@ -134,8 +138,13 @@ func checkHeaderAndBlocks(ctx context.Context, client *ethclient.Client, i int, 
 	}
 	header3 := block1.Header()
 	logrus.Infof("BlockByNumber (Block Number: %d, Block Hash: %s)", header3.Number, header3.Hash().Hex())
-	if originalHash.Hex() != header3.Hash().Hex() || originalBlockNumber != header3.Number {
-		return fmt.Errorf("Expected (Number, Hash) = (%s, %d), found (%s, %d)", originalHash.Hex(), originalBlockNumber, header3.Hash().Hex(), header3.Number)
+
+	if originalHash.Hex() != header3.Hash().Hex() {
+		return fmt.Errorf("expected BlockByNumber to return block with hash %s, but found %s", originalHash.Hex(), header3.Hash().Hex())
+	}
+
+	if originalBlockNumber.Cmp(header3.Number) != 0 {
+		return fmt.Errorf("expected BlockByNumber to return block with number %d, but found %d", originalBlockNumber, header3.Number)
 	}
 
 	block2, err := client.BlockByHash(ctx, header1.Hash())
@@ -144,8 +153,13 @@ func checkHeaderAndBlocks(ctx context.Context, client *ethclient.Client, i int, 
 	}
 	header4 := block2.Header()
 	logrus.Infof("BlockByHash (Block Number: %d, Block Hash: %s)", header4.Number, header4.Hash().Hex())
-	if originalHash.Hex() != header4.Hash().Hex() || originalBlockNumber != header4.Number {
-		return fmt.Errorf("Expected (Number, Hash) = (%s, %d), found (%s, %d)", originalHash.Hex(), originalBlockNumber, header4.Hash().Hex(), header4.Number)
+
+	if originalHash.Hex() != header4.Hash().Hex() {
+		return fmt.Errorf("expected BlockByHash to return block with hash %s, but found %s", originalHash.Hex(), header4.Hash().Hex())
+	}
+
+	if originalBlockNumber.Cmp(header4.Number) != 0 {
+		return fmt.Errorf("expected BlockByHash to return block with number %d, but found %d", originalBlockNumber, header4.Number)
 	}
 
 	balance, err := client.BalanceAt(ctx, ethAddr, big.NewInt(int64(i)))

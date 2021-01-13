@@ -65,7 +65,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	expectedAssetBalance := assetAmount
 	logrus.Infof("Created clients and retrieved initial balance of %d", expectedAVAXBalance)
 
-	logrus.Infof("Creating new asset")
+	logrus.Infof("Creating new asset on the X-Chain")
 	assetID, err := xClient.CreateAsset(user, nil, "", "TestToken", "TEST", 1, []*avm.Holder{
 		{
 			Amount:  cjson.Uint64(assetAmount),
@@ -81,8 +81,9 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 
 	expectedAVAXBalance -= aw.txFee
 
-	logrus.Infof("Exporting AVAX")
-	bech32CAddr := fmt.Sprintf("C%s", xAddr[1:])
+	logrus.Infof("Exporting AVAX X -> C")
+	// Format the C-Chain Bech32 Address using the same address with the C- prefix
+	bech32CAddr := fmt.Sprintf("C-%s", xAddr[2:])
 	txID, err := xClient.ExportAVAX(user, nil, "", exportAVAXAmount, bech32CAddr)
 	if err != nil {
 		return fmt.Errorf("failed to export AVAX: %w", err)
@@ -92,7 +93,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	}
 	expectedAVAXBalance -= (exportAVAXAmount + aw.txFee)
 
-	logrus.Infof("Exporting asset")
+	logrus.Infof("Exporting asset X -> C")
 	txID, err = xClient.Export(user, nil, "", exportAssetAmount, bech32CAddr, assetID.String())
 	if err != nil {
 		return fmt.Errorf("failed to export asset: %w", err)
@@ -103,7 +104,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	expectedAVAXBalance -= aw.txFee
 	expectedAssetBalance -= exportAssetAmount
 
-	logrus.Infof("Importing to C Chain")
+	logrus.Infof("Importing AVAX and asset to C-Chain")
 	txID, err = cClient.Import(user, cAddr, "X")
 	if err != nil {
 		return fmt.Errorf("failed to import from X-Chain: %w", err)
@@ -112,11 +113,12 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	if err := workflowRunner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
 		return fmt.Errorf("failed to confirm C-Chain import transaction: %w", err)
 	}
+	logrus.Infof("Confirming that there are no remaining atomic UTXOs to import...")
 	if _, err = cClient.Import(user, cAddr, "X"); err == nil {
 		return errors.New("importing a second time should have caused an error")
 	}
 
-	logrus.Infof("Verifying balances on X-Chain")
+	logrus.Infof("Verifying X-Chain balances...")
 	// Confirm expected balance of AVAX and [assetID]
 	balanceReply, err = xClient.GetBalance(xAddr, "AVAX")
 	if err != nil {
@@ -157,8 +159,12 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 		return fmt.Errorf("found unexpected balance for asset: %d, expected %d", cAssetBalance, expectedAssetBalance)
 	}
 
+	// Subtract the transaction fee twice to cover the exportAVAX and export asset transactions
+	// on the C-Chain
+	exportAVAXBackAmount := exportAVAXAmount - 2*aw.txFee
 	logrus.Infof("Exporting back to X-Chain")
-	txID, err = cClient.ExportAVAX(user, exportAVAXAmount, xAddr)
+	// Leave enough AVAX to cover the transaction costs
+	txID, err = cClient.ExportAVAX(user, exportAVAXBackAmount, xAddr)
 	if err != nil {
 		return fmt.Errorf("failed to export AVAX to X-Chain: %w", err)
 	}
@@ -204,6 +210,7 @@ func (aw *atomicWorkflowTest) ExecuteTest() error {
 	}
 
 	expectedAVAXBalance -= aw.txFee
+	expectedAVAXBalance += exportAVAXBackAmount // Add the AVAX that gets exported back to the X-Chain
 	expectedAssetBalance = assetAmount
 
 	// Confirm Balances on X-Chain

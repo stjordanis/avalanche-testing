@@ -343,7 +343,7 @@ func (runner RPCWorkFlowRunner) AwaitXChainTransactionAcceptance(txID ids.ID) er
 
 	pollStartTime := time.Now()
 	for time.Since(pollStartTime) < runner.networkAcceptanceTimeout {
-		status, err := client.GetTxStatus(txID)
+		status, _, err := client.GetTxStatus(txID)
 		if err != nil {
 			return stacktrace.Propagate(err, "Failed to get status.")
 		}

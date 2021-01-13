@@ -203,7 +203,7 @@ func (e Executor) Execute() error {
 			return stacktrace.Propagate(err, "update managed asset tx not accepted")
 		}
 
-		status, err := client.XChainAPI().GetTxStatus(txID)
+		status, _, err := client.XChainAPI().GetTxStatus(txID)
 		if err != nil {
 			return stacktrace.Propagate(err, "couldn't get tx status")
 		} else if status != choices.Accepted {

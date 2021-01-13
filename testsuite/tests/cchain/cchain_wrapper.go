@@ -14,8 +14,8 @@ import (
 
 const (
 	normalNodeConfigID       networks.ConfigurationID = "normal-config"
-	additionalNode1ServiceID                          = "additional-node-1"
-	additionalNode2ServiceID                          = "additional-node-2"
+	additionalNode1ServiceID networks.ServiceID       = "additional-node-1"
+	additionalNode2ServiceID networks.ServiceID       = "additional-node-2"
 )
 
 // Test runs a series of basic C-Chain tests on a network of
@@ -51,6 +51,24 @@ func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 		}
 		clients = append(clients, avalancheClient)
 	}
+
+	logrus.Infof("Executing basic consecutive transactions test.")
+	if err := NewBasicTransactionThroughputTest(clients[0], 5, 1000).ExecuteTest(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Basic transaction test failed"))
+	}
+	logrus.Infof("Basic transaction test completed successfully.")
+
+	logrus.Infof("Executing basic ETH API test.")
+	if err := NewEthAPIExecutor(clients[0].CChainEthAPI()).ExecuteTest(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Basic API test failed"))
+	}
+	logrus.Infof("Basic ETH API test completed successfully.")
+
+	logrus.Infof("Executing C-Chain Atomic Workflow Test.")
+	if err := CreateAtomicWorkflowTest(clients[0], test.TxFee).ExecuteTest(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "C-Chain Atomic Workflow Test Failed."))
+	}
+	logrus.Infof("C-Chain Atomic Workflow Test completed successfully.")
 
 	logrus.Infof("C-Chain Tests completed successfully.")
 	logrus.Infof("Adding two additional nodes and waiting for them to bootstrap...")

@@ -5,14 +5,10 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/vms/avm"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/ava-labs/coreth/params"
@@ -45,22 +41,6 @@ func init() {
 	}
 	secpKey := pk.(*crypto.PrivateKeySECP256K1R)
 	ethAddr = evm.GetEthAddress(secpKey)
-}
-
-func confirmTx(c *avm.Client, txID ids.ID) error {
-	for {
-		status, err := c.GetTxStatus(txID)
-		if err != nil {
-			return err
-		}
-
-		if status == choices.Accepted {
-			return nil
-		}
-
-		logrus.Infof("Status of %s was %s", txID, status)
-		time.Sleep(time.Second)
-	}
 }
 
 // createConsecutiveBasicEthTransactions ...

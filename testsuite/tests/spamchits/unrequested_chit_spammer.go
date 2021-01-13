@@ -55,9 +55,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	// ============= ADD SET OF BYZANTINE NODES AS VALIDATORS ON THE NETWORK ===================
 	logrus.Infof("Adding byzantine chit spammer nodes as stakers...")
 	for i := 0; i < numberOfByzantineNodes; i++ {
+		logrus.Infof("Adding byzantine chit spammer node %d", i)
 		byzClient, err := castedNetwork.GetAvalancheClient(networks.ServiceID(byzantineNodePrefix + strconv.Itoa(i)))
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client."))
+			context.Fatal(stacktrace.Propagate(err, "Failed to get byzantine client %d.", i))
 		}
 		highLevelByzClient := helpers.NewRPCWorkFlowRunner(
 			byzClient,
@@ -65,17 +66,17 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 			networkAcceptanceTimeout)
 		_, err = highLevelByzClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Failed add client as a validator."))
+			context.Fatal(stacktrace.Propagate(err, "Failed add byzantine client %d as a validator.", i))
 		}
 		currentStakers, err := byzClient.PChainAPI().GetCurrentValidators(ids.Empty)
 		if err != nil {
-			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers."))
+			context.Fatal(stacktrace.Propagate(err, "Could not get current stakers from byzantine client %d.", i))
 		}
-		logrus.Infof("Current Stakers: %d", len(currentStakers))
+		logrus.Infof("Found %d current stakers from byzantine client %d", len(currentStakers), i)
 	}
 
 	// =================== ADD NORMAL NODE AS A VALIDATOR ON THE NETWORK =======================
-	logrus.Infof("Adding normal node as a staker...")
+	logrus.Infof("Adding additional virtuous node as a validator...")
 	availabilityChecker, err := castedNetwork.AddService(normalNodeConfigID, normalNodeServiceID)
 	if err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Failed to add normal node with high quorum and sample to network."))
@@ -85,7 +86,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 	}
 	normalClient, err := castedNetwork.GetAvalancheClient(normalNodeServiceID)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to get staker client."))
+		context.Fatal(stacktrace.Propagate(err, "Failed to get client for added virtuous node."))
 	}
 	highLevelNormalClient := helpers.NewRPCWorkFlowRunner(
 		normalClient,
@@ -93,10 +94,10 @@ func (test StakingNetworkUnrequestedChitSpammerTest) Run(network networks.Networ
 		networkAcceptanceTimeout)
 	_, err = highLevelNormalClient.ImportGenesisFundsAndStartValidating(seedAmount, stakeAmount)
 	if err != nil {
-		context.Fatal(stacktrace.Propagate(err, "Failed to add client as a validator."))
+		context.Fatal(stacktrace.Propagate(err, "Failed to add additional virtuous node as a validator."))
 	}
 
-	logrus.Infof("Added normal node as a staker. Sleeping an additional 10 seconds to ensure it joins current validators...")
+	logrus.Infof("Added virtuous node as a validator. Sleeping an additional 10 seconds to ensure it joins current validators...")
 	time.Sleep(10 * time.Second)
 
 	// ============= VALIDATE NETWORK STATE DESPITE BYZANTINE BEHAVIOR =========================
