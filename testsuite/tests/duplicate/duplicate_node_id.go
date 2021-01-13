@@ -186,7 +186,7 @@ func (test DuplicateNodeIDTest) GetNetworkLoader() (networks.NetworkLoader, erro
 	desiredServices := map[networks.ServiceID]networks.ConfigurationID{
 		vanillaNodeServiceID: normalNodeConfigID,
 	}
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		0,
 		normalServiceConfig,

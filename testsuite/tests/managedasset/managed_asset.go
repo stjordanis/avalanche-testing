@@ -101,7 +101,7 @@ func (test ManagedAssetTest) GetNetworkLoader() (networks.NetworkLoader, error) 
 
 	serviceConfigs[normalNodeConfigID] = serviceConfig
 
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		1, // tx fee
 		serviceConfig,

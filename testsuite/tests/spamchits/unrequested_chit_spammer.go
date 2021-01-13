@@ -140,7 +140,7 @@ func (test StakingNetworkUnrequestedChitSpammerTest) GetNetworkLoader() (network
 	logrus.Debugf("Byzantine Image Name: %s", test.ByzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", test.NormalImageName)
 
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		0,
 		bootstrapServiceConfig,

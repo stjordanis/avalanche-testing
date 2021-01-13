@@ -59,7 +59,7 @@ func (test StakingNetworkRPCWorkflowTest) Run(network networks.Network, context 
 func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLoader, error) {
 	// Define possible service configurations.
 	normalServiceConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
-	normalServiceConfig.SetExtraCLIArgs(test.AdditionalCLIArgs)
+	normalServiceConfig.SetCLIArgs(test.AdditionalCLIArgs)
 
 	serviceConfigs := map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig{
 		normalNodeConfigID: *normalServiceConfig,
@@ -70,7 +70,7 @@ func (test StakingNetworkRPCWorkflowTest) GetNetworkLoader() (networks.NetworkLo
 		delegatorNodeServiceID: normalNodeConfigID,
 	}
 	// Return an Avalanche Test Network with this service:configuration mapping.
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		0,
 		*normalServiceConfig,

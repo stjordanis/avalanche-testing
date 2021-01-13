@@ -101,7 +101,7 @@ func (test Test) GetNetworkLoader() (networks.NetworkLoader, error) {
 	serviceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
 	serviceConfigs[normalNodeConfigID] = serviceConfig
 
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,            // Staking network
 		test.TxFee,      // Network wide transaction fee
 		serviceConfig,   // Config for the bootstrap nodes

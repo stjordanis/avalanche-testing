@@ -90,7 +90,7 @@ func getByzantineNetworkLoader(desiredServices map[networks.ServiceID]networks.C
 	logrus.Debugf("Byzantine Image Name: %s", byzantineImageName)
 	logrus.Debugf("Normal Image Name: %s", normalImageName)
 
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		1000000,
 		normalServiceConfig,

@@ -101,7 +101,7 @@ func (test StakingNetworkFullyConnectedTest) GetNetworkLoader() (networks.Networ
 		nonBootValidatorServiceID:    normalNodeConfigID,
 		nonBootNonValidatorServiceID: normalNodeConfigID,
 	}
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
 		true,
 		0,
 		normalServiceConfig,

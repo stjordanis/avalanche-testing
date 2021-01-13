@@ -1,6 +1,7 @@
 package bombard
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
@@ -26,6 +27,7 @@ type StakingNetworkRunAndBootstrapTest struct {
 	ImageName        string
 	TxFee            uint64
 	ExecutionTimeout time.Duration
+	ShortEpochs      bool
 
 	testExecutor tester.AvalancheConfigurableTester
 }
@@ -101,15 +103,20 @@ func (test StakingNetworkRunAndBootstrapTest) GetNetworkLoader() (networks.Netwo
 	// Add config for a normal node, to add an additional node during the test
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
 	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
-	serviceConfig := *avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
-	serviceConfigs[normalNodeConfigID] = serviceConfig
+	normalServiceConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	apricotTime := time.Now()
+	normalServiceConfig.SetCLIArgs(map[string]string{
+		"snow-epoch-duration":              "15s",
+		"snow-epoch-first-transition-time": fmt.Sprintf("%d", apricotTime.Unix()),
+	})
+	serviceConfigs[normalNodeConfigID] = *normalServiceConfig
 
-	return avalancheNetwork.NewTestAvalancheNetworkLoader(
-		true,            // Staking network
-		test.TxFee,      // Network wide transaction fee
-		serviceConfig,   // Config for the bootstrap nodes
-		serviceConfigs,  // Service Configurations
-		desiredServices, // Services to start on network configuration
+	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
+		true,                 // Staking network
+		test.TxFee,           // Network wide transaction fee
+		*normalServiceConfig, // Config for the bootstrap nodes
+		serviceConfigs,       // Service Configurations
+		desiredServices,      // Services to start on network configuration
 	)
 }
 
