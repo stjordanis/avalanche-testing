@@ -1,7 +1,7 @@
 package bombard
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/kurtosis-tech/kurtosis-go/lib/networks"
@@ -33,21 +33,23 @@ type StakingNetworkRunAndBootstrapTest struct {
 }
 
 // NewBombardXChainTest returns a Kurtosis Test that bombards each of five clients on the network with [numTxs]
-func NewBombardXChainTest(imageName string, executionTimeout time.Duration, numTxs, txFee uint64, acceptanceTimeout time.Duration) testsuite.Test {
+func NewBombardXChainTest(imageName string, executionTimeout time.Duration, numTxs, txFee uint64, acceptanceTimeout time.Duration, shortEpochs bool) testsuite.Test {
 	return &StakingNetworkRunAndBootstrapTest{
 		ImageName:        imageName,
 		ExecutionTimeout: executionTimeout,
 		TxFee:            txFee,
+		ShortEpochs:      shortEpochs,
 		testExecutor:     NewBombardExecutor(numTxs, txFee, acceptanceTimeout),
 	}
 }
 
 // NewBombardXChainWithIndependentTxsTest returns a Kurtosis Test that bombards each of five clients on the network with [numTxs] that are not interdependent
-func NewBombardXChainWithIndependentTxsTest(imageName string, executionTimeout time.Duration, numTxs, txFee uint64, acceptanceTimeout time.Duration) testsuite.Test {
+func NewBombardXChainWithIndependentTxsTest(imageName string, executionTimeout time.Duration, numTxs, txFee uint64, acceptanceTimeout time.Duration, shortEpochs bool) testsuite.Test {
 	return &StakingNetworkRunAndBootstrapTest{
 		ImageName:        imageName,
 		ExecutionTimeout: executionTimeout,
 		TxFee:            txFee,
+		ShortEpochs:      shortEpochs,
 		testExecutor:     NewBombardIndependentTxsExecutor(numTxs, txFee, acceptanceTimeout),
 	}
 }
@@ -104,19 +106,54 @@ func (test StakingNetworkRunAndBootstrapTest) GetNetworkLoader() (networks.Netwo
 	desiredServices := make(map[networks.ServiceID]networks.ConfigurationID)
 	serviceConfigs := make(map[networks.ConfigurationID]avalancheNetwork.TestAvalancheNetworkServiceConfig)
 	normalServiceConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
-	apricotTime := time.Now()
-	normalServiceConfig.SetCLIArgs(map[string]string{
-		"snow-epoch-duration":              "15s",
-		"snow-epoch-first-transition-time": fmt.Sprintf("%d", apricotTime.Unix()),
-	})
-	serviceConfigs[normalNodeConfigID] = *normalServiceConfig
 
-	return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
-		true,                 // Staking network
-		test.TxFee,           // Network wide transaction fee
-		*normalServiceConfig, // Config for the bootstrap nodes
-		serviceConfigs,       // Service Configurations
-		desiredServices,      // Services to start on network configuration
+	if !test.ShortEpochs {
+		serviceConfigs[normalNodeConfigID] = *normalServiceConfig
+		return avalancheNetwork.NewDefaultAvalancheNetworkLoader(
+			true,                 // Staking network
+			test.TxFee,           // Network wide transaction fee
+			*normalServiceConfig, // Config for the bootstrap nodes
+			serviceConfigs,       // Service Configurations
+			desiredServices,      // Services to start on network configuration
+		)
+	}
+
+	normalEpochStartTime := time.Now().Unix() - 100
+	laggingEpochStartTime := normalEpochStartTime + 3
+	aheadEpochStartTime := normalEpochStartTime - 3
+
+	normalServiceConfig.SetCLIArgs(map[string]string{
+		"snow-epoch-first-transition": strconv.Itoa(int(normalEpochStartTime)),
+		"snow-epoch-duration":         "10s",
+	})
+	middleConfig := normalServiceConfig
+
+	laggingConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	laggingConfig.SetCLIArgs(map[string]string{
+		"snow-epoch-first-transition": strconv.Itoa(int(laggingEpochStartTime)),
+		"snow-epoch-duration":         "10s",
+	})
+
+	aheadConfig := avalancheNetwork.NewDefaultAvalancheNetworkServiceConfig(test.ImageName)
+	aheadConfig.SetCLIArgs(map[string]string{
+		"snow-epoch-first-transition": strconv.Itoa(int(aheadEpochStartTime)),
+		"snow-epoch-duration":         "10s",
+	})
+
+	serviceConfigs[normalNodeConfigID] = *middleConfig
+
+	return avalancheNetwork.NewCustomBootstrapsAvalancheNetworkLoader(
+		true,
+		test.TxFee,
+		[]avalancheNetwork.TestAvalancheNetworkServiceConfig{
+			*middleConfig,
+			*middleConfig,
+			*middleConfig,
+			*laggingConfig,
+			*aheadConfig,
+		},
+		serviceConfigs,
+		desiredServices,
 	)
 }
 
