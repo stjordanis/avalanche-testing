@@ -48,6 +48,7 @@ type RandomAvalancheCertProvider struct {
 // 	varyCerts: True to produce a different cert on each call to GetCertAndKey, or false to yield the same
 // 		randomly-generated cert each time
 func NewRandomAvalancheCertProvider(varyCerts bool) *RandomAvalancheCertProvider {
+	// #nosec G404
 	return &RandomAvalancheCertProvider{
 		nextSerialNumber: mathrand.Int63(),
 		varyCerts:        varyCerts,
@@ -62,7 +63,7 @@ func NewRandomAvalancheCertProvider(varyCerts bool) *RandomAvalancheCertProvider
 func (r *RandomAvalancheCertProvider) GetCertAndKey() (certPemBytes bytes.Buffer, keyPemBytes bytes.Buffer, err error) {
 	serialNum := r.nextSerialNumber
 	if r.varyCerts {
-		r.nextSerialNumber = mathrand.Int63()
+		r.nextSerialNumber = mathrand.Int63() // #nosec G404
 	}
 	serviceCert := getServiceCert(serialNum)
 

@@ -12,7 +12,7 @@ import (
 
 // CreateRandomString ...
 func CreateRandomString() string {
-	return fmt.Sprintf("rand:%d", rand.Int())
+	return fmt.Sprintf("rand:%d", rand.Int()) // #nosec G404
 }
 
 // ConvertFormattedPrivateKey into secp256k1r private key type

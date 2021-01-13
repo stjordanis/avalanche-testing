@@ -15,17 +15,19 @@ import (
 // CreateSingleUTXOTx returns a transaction spending an individual utxo owned by [privateKey]
 func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, address ids.ShortID, privateKey *crypto.PrivateKeySECP256K1R, codec codec.Manager) (*avm.Tx, error) {
 	keys := [][]*crypto.PrivateKeySECP256K1R{{privateKey}}
-	outs := []*avax.TransferableOutput{&avax.TransferableOutput{
-		Asset: avax.Asset{ID: constants.AvaxAssetID},
-		Out: &secp256k1fx.TransferOutput{
-			Amt: outputAmount,
-			OutputOwners: secp256k1fx.OutputOwners{
-				Locktime:  0,
-				Threshold: 1,
-				Addrs:     []ids.ShortID{address},
+	outs := []*avax.TransferableOutput{
+		{
+			Asset: avax.Asset{ID: constants.AvaxAssetID},
+			Out: &secp256k1fx.TransferOutput{
+				Amt: outputAmount,
+				OutputOwners: secp256k1fx.OutputOwners{
+					Locktime:  0,
+					Threshold: 1,
+					Addrs:     []ids.ShortID{address},
+				},
 			},
 		},
-	}}
+	}
 
 	transferableIn := interface{}(&secp256k1fx.TransferInput{
 		Amt: inputAmount,
@@ -34,11 +36,13 @@ func CreateSingleUTXOTx(utxo *avax.UTXO, inputAmount, outputAmount uint64, addre
 		},
 	})
 
-	ins := []*avax.TransferableInput{&avax.TransferableInput{
-		UTXOID: utxo.UTXOID,
-		Asset:  avax.Asset{ID: constants.AvaxAssetID},
-		In:     transferableIn.(avax.TransferableIn),
-	}}
+	ins := []*avax.TransferableInput{
+		{
+			UTXOID: utxo.UTXOID,
+			Asset:  avax.Asset{ID: constants.AvaxAssetID},
+			In:     transferableIn.(avax.TransferableIn),
+		},
+	}
 
 	tx := &avm.Tx{UnsignedTx: &avm.BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    constants.NetworkID,

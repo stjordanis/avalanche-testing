@@ -25,7 +25,7 @@ func main() {
 		"test",
 		"",
 		"The name of the test to run")
-	kurtosisApiIPArg := flag.String(
+	kurtosisAPIIPArg := flag.String(
 		"kurtosis-api-ip",
 		"",
 		"IP address of the Kurtosis API endpoint")
@@ -63,6 +63,6 @@ func main() {
 		ByzantineImageName: *byzantineGoImageArg,
 		NormalImageName:    *avalancheGoImageArg,
 	}
-	exitCode := client.Run(testSuite, *metadataFilepath, *servicesDirpathArg, *testArg, *kurtosisApiIPArg)
+	exitCode := client.Run(testSuite, *metadataFilepath, *servicesDirpathArg, *testArg, *kurtosisAPIIPArg)
 	os.Exit(exitCode)
 }

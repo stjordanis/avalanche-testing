@@ -237,7 +237,7 @@ func (runner RPCWorkFlowRunner) SendAVAXBackAndForth(to string, amount, txFee, n
 			runner.userPass,
 			nil, // from addrs
 			"",  // change addr
-			amount-txFee*uint64(i),
+			amount-txFee*i,
 			AvaxAssetID,
 			to,
 			"", // memo field

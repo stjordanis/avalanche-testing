@@ -217,7 +217,7 @@ func (core AvalancheServiceInitializerCore) GetStartCommand(mountedFileFilepaths
 
 // GetServiceFromIp implements services.ServiceInitializerCore function to take the IP address of the Docker container that Kurtosis
 // launches the Avalanche node inside and wrap it with our AvalancheService implementation of NodeService
-func (core AvalancheServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service {
+func (core AvalancheServiceInitializerCore) GetServiceFromIp(ipAddr string) services.Service { // nolint
 	return AvalancheService{
 		ipAddr:      ipAddr,
 		stakingPort: stakingPort,

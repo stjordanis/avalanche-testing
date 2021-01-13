@@ -18,7 +18,7 @@ import (
 
 const (
 	username = "username"
-	password = "sjh;lqlfhja;lkajw'd;dwdadw!?!?!?"
+	password = "sjh;lqlfhja;lkajw'd;dwdadw!?!?!?" // #nosec G101
 )
 
 var (
@@ -88,7 +88,7 @@ func (e Executor) Execute() error {
 			nil,        // from addrs
 			fundedAddr, // change addr
 			"yeet",     // name
-			"YEET",     //symbol
+			"YEET",     // symbol
 			10,         // denomination
 			[]*avm.Holder{
 				{ // One initial holder: this node's address

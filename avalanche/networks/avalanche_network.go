@@ -69,7 +69,7 @@ func (network TestAvalancheNetwork) GetAllBootServiceIDs() map[networks.ServiceI
 // 		configurationID: The ID of the configuration to use for the service being added
 // 		serviceID: The ID to give the service being added
 // Returns:
-// 		An availability checker that will return true when teh newly-added service is available
+// 		An availability checker that will return true when the newly-added service is available
 func (network TestAvalancheNetwork) AddService(configurationID networks.ConfigurationID, serviceID networks.ServiceID) (*services.ServiceAvailabilityChecker, error) {
 	availabilityChecker, err := network.svcNetwork.AddService(configurationID, serviceID, network.GetAllBootServiceIDs())
 	if err != nil {
