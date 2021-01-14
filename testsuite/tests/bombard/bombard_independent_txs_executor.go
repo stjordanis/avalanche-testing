@@ -131,10 +131,19 @@ func (e *bombardIndependentTxsExecutor) ExecuteTest() error {
 			return stacktrace.NewError("Failed to confirm create UTXOs via SendMultiple transaction %s for client %d. Status: %s.", txID, i, status)
 		}
 
-		utxosBytes, _, err := xChainClient.GetUTXOs([]string{xChainAddrs[i]}, 0, "", "")
-		if err != nil {
-			return err
+		utxosBytes := make([][]byte, 0, e.numTxs)
+		utxoBytesIter, index, err := xChainClient.GetUTXOs([]string{xChainAddrs[i]}, 0, "", "")
+		for {
+			if err != nil {
+				return stacktrace.Propagate(err, "Failed to get UTXOs")
+			}
+			if len(utxoBytesIter) == 0 {
+				break
+			}
+			utxosBytes = append(utxosBytes, utxoBytesIter...)
+			utxoBytesIter, index, err = xChainClient.GetUTXOs([]string{xChainAddrs[i]}, 0, index.Address, index.UTXO)
 		}
+
 		if len(utxosBytes) != int(e.numTxs) {
 			return stacktrace.NewError("Found unexpected number of UTXOs %d. Expected to find %d", len(utxosBytes), e.numTxs)
 		}
