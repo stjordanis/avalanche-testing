@@ -10,7 +10,6 @@ import (
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/conflictvtx"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/connected"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/duplicate"
-	"github.com/ava-labs/avalanche-testing/testsuite/tests/managedasset"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/spamchits"
 	"github.com/ava-labs/avalanche-testing/testsuite/tests/workflow"
 )
@@ -63,7 +62,7 @@ func (a AvalancheTestSuite) GetTests() map[string]testsuite.Test {
 	result["duplicateNodeIDTest"] = duplicate.NewDuplicateNodeIDTest(a.NormalImageName, nil)
 	result["rpcWorkflowTest"] = workflow.NewRPCWorkflowTest(a.NormalImageName, nil)
 	result["virtuousCorethTest"] = cchain.NewVirtuousCChainTest(a.NormalImageName, 100, 3, 1000000, 3*time.Second)
-	result["managedAssetTest"] = managedasset.NewManagedAssetTest(a.NormalImageName)
+	// result["managedAssetTest"] = managedasset.NewManagedAssetTest(a.NormalImageName)
 
 	return result
 }
