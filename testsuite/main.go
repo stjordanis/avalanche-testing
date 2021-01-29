@@ -6,6 +6,8 @@ import (
 	"os"
 
 	testsuite "github.com/ava-labs/avalanche-testing/testsuite/kurtosis"
+	"github.com/ethereum/go-ethereum/log"
+	ethLog "github.com/ethereum/go-ethereum/log"
 	"github.com/kurtosis-tech/kurtosis-go/lib/client"
 	"github.com/sirupsen/logrus"
 )
@@ -29,6 +31,9 @@ func main() {
 		"kurtosis-api-ip",
 		"",
 		"IP address of the Kurtosis API endpoint")
+	// Note: this log level is used for both logrus and the Ethereum logger. Most of the potential arguments overlap,
+	// but this may cause some arguments valid for one logger but not both to trigger an error.
+	// Valid arguments are any of the following: "error", "warn", "info", "debug", or "trace"
 	logLevelArg := flag.String(
 		"log-level",
 		"",
@@ -53,10 +58,17 @@ func main() {
 
 	level, err := logrus.ParseLevel(*logLevelArg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "An error occurred parsing the log level string: %v\n", err)
+		fmt.Fprintf(os.Stderr, "An error occurred parsing the logrus log level string: %v\n", err)
 		os.Exit(1)
 	}
 	logrus.SetLevel(level)
+
+	ethLogLevel, err := ethLog.LvlFromString(*logLevelArg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "An error occurred parsing the ethLog log level string: %v\n", err)
+		os.Exit(1)
+	}
+	ethLog.Root().SetHandler(ethLog.LvlFilterHandler(ethLogLevel, ethLog.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 
 	logrus.Debugf("Byzantine image name: %s", *byzantineGoImageArg)
 	testSuite := testsuite.AvalancheTestSuite{

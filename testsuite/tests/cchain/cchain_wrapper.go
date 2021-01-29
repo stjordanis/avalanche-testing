@@ -112,7 +112,7 @@ func (test Test) GetNetworkLoader() (networks.NetworkLoader, error) {
 
 // GetExecutionTimeout implements the Kurtosis Test interface
 func (test Test) GetExecutionTimeout() time.Duration {
-	return 4 * time.Minute
+	return 5 * time.Minute
 }
 
 // GetSetupBuffer implements the Kurtosis Test interface
