@@ -115,3 +115,33 @@ func confirmBlocks(ctx context.Context, clients []*ethclient.Client) error {
 		i++
 	}
 }
+
+func waitForStableTip(ctx context.Context, clients []*ethclient.Client) error {
+	for {
+		var (
+			reportedHeight uint64
+			foundDiff      bool
+		)
+
+		for _, c := range clients {
+			height, err := c.BlockNumber(ctx)
+			if err != nil {
+				return err
+			}
+
+			if reportedHeight == 0 {
+				reportedHeight = height
+				continue
+			}
+
+			if reportedHeight != height {
+				foundDiff = true
+				break
+			}
+		}
+
+		if !foundDiff {
+			return nil
+		}
+	}
+}

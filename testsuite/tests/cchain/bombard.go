@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
@@ -84,28 +85,52 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 	chosenClient := 0
 	for _, txList := range txLists {
 		go launchIssueTxList(context.Background(), ethClients[chosenClient], txList)
+
 		chosenClient++
-		if chosenClient > 4 {
+		if chosenClient >= len(ethClients) {
 			chosenClient = 0
 		}
 	}
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers).Seconds())
 
-	for i := 0; i < p.numLists; i++ {
-		err := <-errs
-		if err != nil {
-			panic(err)
+	// Track how long it takes for blocks to stabilize
+	var (
+		wg       sync.WaitGroup
+		groupErr error
+	)
+	wg.Add(2)
+	go func() {
+		if err := waitForStableTip(context.Background(), ethClients); err != nil {
+			groupErr = err
 		}
+		wg.Done()
+	}()
+
+	go func() {
+		for i := 0; i < p.numLists; i++ {
+			err := <-errs
+			if err != nil {
+				groupErr = err
+			}
+		}
+		finishedIssuing := time.Now()
+		logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers).Seconds())
+		wg.Done()
+	}()
+
+	wg.Wait()
+	if groupErr != nil {
+		return groupErr
 	}
-	finishedIssuing := time.Now()
-	logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers).Seconds())
+	stableTip := time.Now()
+	logrus.Infof("Took %v to reach stable tip", stableTip.Sub(launchedIssuers).Seconds())
 
 	if err := confirmBlocks(context.Background(), ethClients); err != nil {
 		return err
 	}
 	finishedVerifying := time.Now()
-	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(finishedIssuing).Seconds())
+	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(stableTip).Seconds())
 
 	for _, txList := range txLists {
 		cEthClient := funder.CChainEthAPI()
