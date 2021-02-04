@@ -92,18 +92,22 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		}
 	}
 	startedGoRoutines := time.Now()
-	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers).Seconds())
+	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers))
 
 	// Track how long it takes for blocks to stabilize
 	var (
 		wg       sync.WaitGroup
 		groupErr error
+
+		finalizedHeight uint64
 	)
 	wg.Add(2)
 	go func() {
-		if err := waitForStableTip(context.Background(), ethClients); err != nil {
+		height, err := waitForStableTip(context.Background(), ethClients)
+		if err != nil {
 			groupErr = err
 		}
+		finalizedHeight = height
 		wg.Done()
 	}()
 
@@ -115,7 +119,7 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 			}
 		}
 		finishedIssuing := time.Now()
-		logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers).Seconds())
+		logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers))
 		wg.Done()
 	}()
 
@@ -124,13 +128,14 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		return groupErr
 	}
 	stableTip := time.Now()
-	logrus.Infof("Took %v to reach stable tip", stableTip.Sub(launchedIssuers).Seconds())
+	stableTipDuration := stableTip.Sub(launchedIssuers)
+	logrus.Infof("Took %v to reach stable tip", stableTipDuration)
 
-	if err := confirmBlocks(context.Background(), ethClients); err != nil {
+	if err := confirmBlocks(context.Background(), finalizedHeight, ethClients); err != nil {
 		return err
 	}
 	finishedVerifying := time.Now()
-	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(stableTip).Seconds())
+	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(stableTip))
 
 	for _, txList := range txLists {
 		cEthClient := funder.CChainEthAPI()
@@ -140,7 +145,11 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 	}
 
 	finishedConfirming := time.Now()
-	logrus.Infof("Finished confirming after %v seconds. Total time start to finish: %v", finishedConfirming.Sub(finishedVerifying).Seconds(), finishedConfirming.Sub(launchedIssuers).Seconds())
+	logrus.Infof("Took %v to confirm txs", finishedConfirming.Sub(finishedVerifying))
+
+	totalTxs := p.numLists * p.numTxs
+	tps := float64(totalTxs) / stableTipDuration.Seconds()
+	logrus.Infof("Finalized %d transactions in %v (%f TPS). Checking time start to finish: %v", totalTxs, stableTipDuration, tps, finishedConfirming.Sub(launchedIssuers))
 
 	return nil
 }

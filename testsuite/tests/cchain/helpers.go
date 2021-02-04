@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/utils/crypto"
@@ -15,6 +16,10 @@ import (
 	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	consecutiveHeights = 5
 )
 
 var (
@@ -81,42 +86,34 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 	return nil
 }
 
-func confirmBlocks(ctx context.Context, clients []*ethclient.Client) error {
-	i := uint64(0)
-	marker := clients[0]
-	for {
-		height, err := marker.BlockNumber(ctx)
-		if err != nil {
-			return err
-		}
-
-		if i >= height {
-			return nil
-		}
-		logrus.Infof("Checking Block: %d", height)
-
+func confirmBlocks(ctx context.Context, maxHeight uint64, clients []*ethclient.Client) error {
+	for i := uint64(0); i <= maxHeight; i++ {
 		var hash string
+
 		for j, c := range clients {
 			b, err := c.BlockByNumber(ctx, big.NewInt(int64(i)))
 			if err != nil {
 				return err
 			}
 
+			blockHash := b.Hash().Hex()
 			if len(hash) == 0 {
-				hash = b.Hash().Hex()
+				hash = blockHash
 				continue
 			}
 
-			if hash != b.Hash().Hex() {
-				return fmt.Errorf("node %d got hash %s but expected %s for height %d", j, b.Hash().Hex(), hash, i)
+			if hash != blockHash {
+				return fmt.Errorf("node %d got hash %s but expected %s for height %d", j, blockHash, hash, i)
 			}
 		}
-
-		i++
 	}
+
+	return nil
 }
 
-func waitForStableTip(ctx context.Context, clients []*ethclient.Client) error {
+func waitForStableTip(ctx context.Context, clients []*ethclient.Client) (uint64, error) {
+	var consecutive int
+
 	for {
 		var (
 			reportedHeight uint64
@@ -126,7 +123,7 @@ func waitForStableTip(ctx context.Context, clients []*ethclient.Client) error {
 		for _, c := range clients {
 			height, err := c.BlockNumber(ctx)
 			if err != nil {
-				return err
+				return 0, err
 			}
 
 			if reportedHeight == 0 {
@@ -141,7 +138,15 @@ func waitForStableTip(ctx context.Context, clients []*ethclient.Client) error {
 		}
 
 		if !foundDiff {
-			return nil
+			consecutive++
+		} else {
+			consecutive = 0
 		}
+
+		if consecutive > consecutiveHeights {
+			return reportedHeight, nil
+		}
+
+		time.Sleep(100 * time.Millisecond)
 	}
 }
