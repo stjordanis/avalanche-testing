@@ -80,3 +80,38 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 
 	return nil
 }
+
+func confirmBlocks(ctx context.Context, clients []*ethclient.Client) error {
+	i := uint64(0)
+	marker := clients[0]
+	for {
+		height, err := marker.BlockNumber(ctx)
+		if err != nil {
+			return err
+		}
+
+		if i >= height {
+			return nil
+		}
+		logrus.Infof("Checking Block: %d", height)
+
+		var hash string
+		for j, c := range clients {
+			b, err := c.BlockByNumber(ctx, big.NewInt(int64(i)))
+			if err != nil {
+				return err
+			}
+
+			if len(hash) == 0 {
+				hash = b.Hash().Hex()
+				continue
+			}
+
+			if hash != b.Hash().Hex() {
+				return fmt.Errorf("node %d got hash %s but expected %s for height %d", j, b.Hash().Hex(), hash, i)
+			}
+		}
+
+		i++
+	}
+}

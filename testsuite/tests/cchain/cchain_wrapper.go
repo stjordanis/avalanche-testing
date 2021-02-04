@@ -53,7 +53,7 @@ func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	}
 
 	logrus.Infof("Executing basic consecutive transactions test.")
-	if err := NewBasicTransactionThroughputTest(clients[0], 5, 1000).ExecuteTest(); err != nil {
+	if err := NewBasicTransactionThroughputTest(clients, 5, 1000).ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Basic transaction test failed"))
 	}
 	logrus.Infof("Basic transaction test completed successfully.")

@@ -18,14 +18,14 @@ import (
 )
 
 type parallelBasicTxXputTest struct {
-	client   *services.Client
+	client   []*services.Client
 	numLists int
 	numTxs   int
 }
 
 // NewBasicTransactionThroughputTest returns a test executor that will run a small xput test of [numTxs] from each of [numLists] accounts
 // Note: all issued to the same node.
-func NewBasicTransactionThroughputTest(client *services.Client, numLists int, numTxs int) tester.AvalancheTester {
+func NewBasicTransactionThroughputTest(client []*services.Client, numLists int, numTxs int) tester.AvalancheTester {
 	return &parallelBasicTxXputTest{
 		client:   client,
 		numLists: numLists,
@@ -35,12 +35,19 @@ func NewBasicTransactionThroughputTest(client *services.Client, numLists int, nu
 
 // ExecuteTest ...
 func (p *parallelBasicTxXputTest) ExecuteTest() error {
+	// create first client that funds rest of clients
+	// import funds to all addresses at start of test
+	funder := p.client[0]
 	workflowRunner := helpers.NewRPCWorkFlowRunner(
-		p.client,
+		funder,
 		user,
 		3*time.Second,
 	)
-	cEthClient := p.client.CChainEthAPI()
+
+	ethClients := make([]*ethclient.Client, len(p.client))
+	for i, c := range p.client {
+		ethClients[i] = c.CChainEthAPI()
+	}
 
 	pks := make([]*ecdsa.PrivateKey, p.numLists)
 	addrs := make([]common.Address, p.numLists)
@@ -70,12 +77,17 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 
 	errs := make(chan error, p.numLists)
 	launchIssueTxList := func(ctx context.Context, ethclient *ethclient.Client, txList []*types.Transaction) {
-		err := issueTxList(ctx, cEthClient, txList)
+		err := issueTxList(ctx, ethclient, txList)
 		errs <- err
 	}
 	launchedIssuers := time.Now()
+	chosenClient := 0
 	for _, txList := range txLists {
-		go launchIssueTxList(context.Background(), cEthClient, txList)
+		go launchIssueTxList(context.Background(), ethClients[chosenClient], txList)
+		chosenClient++
+		if chosenClient > 4 {
+			chosenClient = 0
+		}
 	}
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers).Seconds())
@@ -87,16 +99,23 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		}
 	}
 	finishedIssuing := time.Now()
-	logrus.Infof("Took %v to finish issuing after launching issuers", finishedIssuing.Sub(launchedIssuers).Seconds())
+	logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers).Seconds())
 
-	time.Sleep(3 * time.Second)
+	if err := confirmBlocks(context.Background(), ethClients); err != nil {
+		return err
+	}
+	finishedVerifying := time.Now()
+	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(finishedIssuing).Seconds())
+
 	for _, txList := range txLists {
+		cEthClient := funder.CChainEthAPI()
 		if err := confirmTxList(context.Background(), cEthClient, txList); err != nil {
 			return err
 		}
 	}
+
 	finishedConfirming := time.Now()
-	logrus.Infof("Finished confirming after %v seconds. Total time start to finish: %v", finishedConfirming.Sub(finishedIssuing).Seconds(), finishedConfirming.Sub(launchedIssuers).Seconds())
+	logrus.Infof("Finished confirming after %v seconds. Total time start to finish: %v", finishedConfirming.Sub(finishedVerifying).Seconds(), finishedConfirming.Sub(launchedIssuers).Seconds())
 
 	return nil
 }
