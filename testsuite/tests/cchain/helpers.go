@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"reflect"
 	"time"
 
 	"github.com/ava-labs/avalanchego/api"
@@ -19,7 +20,8 @@ import (
 )
 
 const (
-	consecutiveHeights = 5
+	consecutiveHeights = 90
+	waitForTipSleep    = time.Duration(1 * time.Second)
 )
 
 var (
@@ -80,12 +82,15 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 		if err != nil {
 			return err
 		}
+
 		logrus.Infof("Transaction was in block: (%s, %d)", receipt.BlockHash.Hex(), receipt.BlockNumber)
 	}
 
 	return nil
 }
 
+// confirmBlocks ensures all *ethclient.Clients return the same blocks for
+// a given height.
 func confirmBlocks(ctx context.Context, maxHeight uint64, clients []*ethclient.Client) error {
 	for i := uint64(0); i <= maxHeight; i++ {
 		var hash string
@@ -111,42 +116,59 @@ func confirmBlocks(ctx context.Context, maxHeight uint64, clients []*ethclient.C
 	return nil
 }
 
-func waitForStableTip(ctx context.Context, clients []*ethclient.Client) (uint64, error) {
-	var consecutive int
+// waitForStableTip ensures an array of *ethclient.Clients all report the same
+// height before returning. If the clients return the same unequal heights for
+// consecutiveHeights * waitForTipSleep, it is assumed that syncing is stalled
+// and an error is returned.
+func waitForStableTip(ctx context.Context, clients []*ethclient.Client) (uint64, time.Duration, error) {
+	var (
+		consecutiveSame int
+
+		consecutiveDifferent int
+		previousHeights      []uint64
+	)
 
 	for {
 		var (
-			reportedHeight uint64
-			foundDiff      bool
+			heights   = make([]uint64, len(clients))
+			foundDiff bool
 		)
 
-		for _, c := range clients {
+		for i, c := range clients {
 			height, err := c.BlockNumber(ctx)
 			if err != nil {
-				return 0, err
+				return 0, 0, err
 			}
 
-			if reportedHeight == 0 {
-				reportedHeight = height
-				continue
-			}
-
-			if reportedHeight != height {
+			heights[i] = height
+			if i != 0 && heights[0] != height {
 				foundDiff = true
-				break
 			}
 		}
 
 		if !foundDiff {
-			consecutive++
+			consecutiveDifferent = 0
+			previousHeights = nil
+
+			consecutiveSame++
 		} else {
-			consecutive = 0
+			consecutiveSame = 0
+
+			if len(previousHeights) > 0 && reflect.DeepEqual(previousHeights, heights) {
+				consecutiveDifferent++
+			} else {
+				consecutiveDifferent = 1
+				previousHeights = heights
+			}
 		}
 
-		if consecutive > consecutiveHeights {
-			return reportedHeight, nil
+		if consecutiveSame >= consecutiveHeights {
+			return heights[0], time.Duration(consecutiveSame) * waitForTipSleep, nil
+		}
+		if consecutiveDifferent >= consecutiveHeights {
+			return 0, 0, fmt.Errorf("block production is stuck at %v", heights)
 		}
 
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(waitForTipSleep)
 	}
 }

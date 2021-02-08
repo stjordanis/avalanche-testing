@@ -82,32 +82,38 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		errs <- err
 	}
 	launchedIssuers := time.Now()
-	chosenClient := 0
+	launchClient := 0
 	for _, txList := range txLists {
-		go launchIssueTxList(context.Background(), ethClients[chosenClient], txList)
+		go launchIssueTxList(context.Background(), ethClients[launchClient], txList)
 
-		chosenClient++
-		if chosenClient >= len(ethClients) {
-			chosenClient = 0
+		launchClient++
+		if launchClient >= len(ethClients) {
+			launchClient = 0
 		}
 	}
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers))
 
-	// Track how long it takes for blocks to stabilize
 	var (
 		wg       sync.WaitGroup
 		groupErr error
 
-		finalizedHeight uint64
+		finalizedHeight   uint64
+		stableTip         time.Time
+		stableTipDuration time.Duration
 	)
+
 	wg.Add(2)
 	go func() {
-		height, err := waitForStableTip(context.Background(), ethClients)
+		height, waiting, err := waitForStableTip(context.Background(), ethClients)
 		if err != nil {
+			logrus.Error(err)
 			groupErr = err
 		}
 		finalizedHeight = height
+		stableTip = time.Now()
+		stableTipDuration = (stableTip.Sub(launchedIssuers)) - waiting
+		logrus.Infof("Took %v to reach stable tip", stableTipDuration)
 		wg.Done()
 	}()
 
@@ -115,6 +121,7 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 		for i := 0; i < p.numLists; i++ {
 			err := <-errs
 			if err != nil {
+				logrus.Error(err)
 				groupErr = err
 			}
 		}
@@ -127,19 +134,17 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 	if groupErr != nil {
 		return groupErr
 	}
-	stableTip := time.Now()
-	stableTipDuration := stableTip.Sub(launchedIssuers)
-	logrus.Infof("Took %v to reach stable tip", stableTipDuration)
 
-	if err := confirmBlocks(context.Background(), finalizedHeight, ethClients); err != nil {
+	err := confirmBlocks(context.Background(), finalizedHeight, ethClients)
+	if err != nil {
 		return err
 	}
+
 	finishedVerifying := time.Now()
 	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(stableTip))
 
 	for _, txList := range txLists {
-		cEthClient := funder.CChainEthAPI()
-		if err := confirmTxList(context.Background(), cEthClient, txList); err != nil {
+		if err := confirmTxList(context.Background(), funder.CChainEthAPI(), txList); err != nil {
 			return err
 		}
 	}
@@ -149,7 +154,13 @@ func (p *parallelBasicTxXputTest) ExecuteTest() error {
 
 	totalTxs := p.numLists * p.numTxs
 	tps := float64(totalTxs) / stableTipDuration.Seconds()
-	logrus.Infof("Finalized %d transactions in %v (%f TPS). Checking time start to finish: %v", totalTxs, stableTipDuration, tps, finishedConfirming.Sub(launchedIssuers))
+	logrus.Infof(
+		"Finalized %d transactions in %v (%f TPS). Checking time start to finish: %v",
+		totalTxs,
+		stableTipDuration,
+		tps,
+		finishedConfirming.Sub(launchedIssuers),
+	)
 
 	return nil
 }
