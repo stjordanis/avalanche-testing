@@ -18,24 +18,39 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type parallelBasicTxXputTest struct {
+type parallelTxXputTest struct {
 	client   []*services.Client
 	numLists int
 	numTxs   int
 }
 
-// NewBasicTransactionThroughputTest returns a test executor that will run a small xput test of [numTxs] from each of [numLists] accounts
-// Note: all issued to the same node.
-func NewBasicTransactionThroughputTest(client []*services.Client, numLists int, numTxs int) tester.AvalancheTester {
-	return &parallelBasicTxXputTest{
-		client:   client,
+// NewBasicTransactionThroughputTest returns a test executor that will run
+// a small xput test of [numTxs] from each of [numLists] accounts
+//
+// Note: all transactions issued to the same node.
+func NewBasicTransactionThroughputTest(client *services.Client, numLists int, numTxs int) tester.AvalancheTester {
+	return &parallelTxXputTest{
+		client:   []*services.Client{client},
+		numLists: numLists,
+		numTxs:   numTxs,
+	}
+}
+
+// NewContentiousBlockThroughputTest returns a test executor that will run
+// a xput test of [numTxs] from each of [numLists] accounts
+//
+// Note: transactions for a given account will be issued from the same node but
+// transactions for different accounts could be broadcast from different nodes.
+func NewContentiousBlockThroughputTest(clients []*services.Client, numLists int, numTxs int) tester.AvalancheTester {
+	return &parallelTxXputTest{
+		client:   clients,
 		numLists: numLists,
 		numTxs:   numTxs,
 	}
 }
 
 // ExecuteTest ...
-func (p *parallelBasicTxXputTest) ExecuteTest() error {
+func (p *parallelTxXputTest) ExecuteTest() error {
 	// create first client that funds rest of clients
 	// import funds to all addresses at start of test
 	funder := p.client[0]

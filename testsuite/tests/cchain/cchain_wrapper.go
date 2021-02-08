@@ -53,10 +53,16 @@ func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	}
 
 	logrus.Infof("Executing basic consecutive transactions test.")
-	if err := NewBasicTransactionThroughputTest(clients, 5, 1000).ExecuteTest(); err != nil {
+	if err := NewBasicTransactionThroughputTest(clients[0], 5, 1000).ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Basic transaction test failed"))
 	}
 	logrus.Infof("Basic transaction test completed successfully.")
+
+	logrus.Infof("Executing contentious block production test.")
+	if err := NewContentiousBlockThroughputTest(clients, 20, 250).ExecuteTest(); err != nil {
+		context.Fatal(stacktrace.Propagate(err, "Contentious block production test failed"))
+	}
+	logrus.Infof("Contentious block production test completed successfully.")
 
 	logrus.Infof("Executing basic ETH API test.")
 	if err := NewEthAPIExecutor(clients[0].CChainEthAPI()).ExecuteTest(); err != nil {
