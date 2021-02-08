@@ -127,7 +127,7 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 		}
 		finalizedHeight = height
 		stableTip = time.Now()
-		stableTipDuration = (stableTip.Sub(launchedIssuers)) - waiting
+		stableTipDuration = stableTip.Sub(launchedIssuers) - waiting
 		logrus.Infof("Took %v to reach stable tip", stableTipDuration)
 		wg.Done()
 	}()

@@ -80,10 +80,10 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 	for _, tx := range txs {
 		receipt, err := client.TransactionReceipt(ctx, tx.Hash())
 		if err != nil {
-			return err
+			return fmt.Errorf("could not retrieve transaction %s: %w", tx.Hash().Hex(), err)
 		}
 
-		logrus.Infof("Transaction was in block: (%s, %d)", receipt.BlockHash.Hex(), receipt.BlockNumber)
+		logrus.Infof("Transaction %s was in block: (%s, %d)", tx.Hash().Hex(), receipt.BlockHash.Hex(), receipt.BlockNumber)
 	}
 
 	return nil
@@ -163,7 +163,7 @@ func waitForStableTip(ctx context.Context, clients []*ethclient.Client) (uint64,
 		}
 
 		if consecutiveSame >= consecutiveHeights {
-			return heights[0], time.Duration(consecutiveSame) * waitForTipSleep, nil
+			return heights[0], time.Duration(consecutiveSame-1) * waitForTipSleep, nil
 		}
 		if consecutiveDifferent >= consecutiveHeights {
 			return 0, 0, fmt.Errorf("block production is stuck at %v", heights)
