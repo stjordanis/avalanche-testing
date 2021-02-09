@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"math/rand"
 	"reflect"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/ava-labs/coreth/params"
 	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/neilotoole/errgroup"
 	"github.com/sirupsen/logrus"
 )
 
@@ -128,6 +130,18 @@ func issueTxList(ctx context.Context, client *ethclient.Client, txs []*types.Tra
 	return nil
 }
 
+func confirmTxLists(ctx context.Context, clients []*ethclient.Client, lists [][]*types.Transaction) error {
+	g, gctx := errgroup.WithContext(ctx) // limits concurrency to # of cores
+	for _, list := range lists {
+		g.Go(func() error {
+			l := list
+			return confirmTxList(gctx, clients[rand.Intn(len(clients))], l)
+		})
+	}
+
+	return g.Wait()
+}
+
 func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.Transaction) error {
 	for _, tx := range txs {
 		receipt, err := client.TransactionReceipt(ctx, tx.Hash())
@@ -141,31 +155,41 @@ func confirmTxList(ctx context.Context, client *ethclient.Client, txs []*types.T
 	return nil
 }
 
-// confirmBlocks ensures all *ethclient.Clients return the same blocks for
-// a given height.
-func confirmBlocks(ctx context.Context, maxHeight uint64, clients []*ethclient.Client) error {
-	for i := uint64(0); i <= maxHeight; i++ {
-		var hash string
+func confirmBlock(ctx context.Context, height uint64, clients []*ethclient.Client) error {
+	var hash string
 
-		for j, c := range clients {
-			b, err := c.BlockByNumber(ctx, big.NewInt(int64(i)))
-			if err != nil {
-				return err
-			}
+	for i, c := range clients {
+		b, err := c.BlockByNumber(ctx, big.NewInt(int64(height)))
+		if err != nil {
+			return err
+		}
 
-			blockHash := b.Hash().Hex()
-			if len(hash) == 0 {
-				hash = blockHash
-				continue
-			}
+		blockHash := b.Hash().Hex()
+		if i == 0 {
+			hash = blockHash
+			continue
+		}
 
-			if hash != blockHash {
-				return fmt.Errorf("node %d got hash %s but expected %s for height %d", j, blockHash, hash, i)
-			}
+		if hash != blockHash {
+			return fmt.Errorf("node %d got hash %s but expected %s for height %d", i, blockHash, hash, height)
 		}
 	}
 
 	return nil
+}
+
+// confirmBlocks ensures all *ethclient.Clients return the same blocks for
+// a given height.
+func confirmBlocks(ctx context.Context, maxHeight uint64, clients []*ethclient.Client) error {
+	g, gctx := errgroup.WithContext(ctx) // limits concurrency to # of cores
+	for i := uint64(0); i <= maxHeight; i++ {
+		height := i
+		g.Go(func() error {
+			return confirmBlock(gctx, height, clients)
+		})
+	}
+
+	return g.Wait()
 }
 
 // waitForStableTip ensures an array of *ethclient.Clients all report the same

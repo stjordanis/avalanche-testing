@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"sync"
+	"math/rand"
 	"time"
 
 	"github.com/ava-labs/avalanche-testing/avalanche/services"
@@ -113,70 +113,38 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 		errs <- err
 	}
 	launchedIssuers := time.Now()
-	launchClient := 0
 	for _, txList := range txLists {
-		go launchIssueTxList(context.Background(), ethClients[launchClient], txList)
-
-		launchClient++
-		if launchClient >= len(ethClients) {
-			launchClient = 0
-		}
+		go launchIssueTxList(ctx, ethClients[rand.Intn(len(ethClients))], txList)
 	}
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers))
 
-	var (
-		wg       sync.WaitGroup
-		groupErr error
-
-		finalizedHeight   uint64
-		stableTip         time.Time
-		stableTipDuration time.Duration
-	)
-
-	wg.Add(2)
-	go func() {
-		height, waiting, err := waitForStableTip(context.Background(), ethClients)
+	for i := 0; i < p.numLists; i++ {
+		err := <-errs
 		if err != nil {
-			logrus.Error(err)
-			groupErr = err
+			return err
 		}
-		finalizedHeight = height
-		stableTip = time.Now()
-		stableTipDuration = stableTip.Sub(launchedIssuers) - waiting
-		logrus.Infof("Took %v to reach stable tip", stableTipDuration)
-		wg.Done()
-	}()
-
-	go func() {
-		for i := 0; i < p.numLists; i++ {
-			err := <-errs
-			if err != nil {
-				logrus.Error(err)
-				groupErr = err
-			}
-		}
-		finishedIssuing := time.Now()
-		logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers))
-		wg.Done()
-	}()
-
-	wg.Wait()
-	if groupErr != nil {
-		return groupErr
 	}
+	finishedIssuing := time.Now()
+	logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers))
 
-	if err := confirmBlocks(context.Background(), finalizedHeight, ethClients); err != nil {
+	finalizedHeight, waiting, err := waitForStableTip(ctx, ethClients)
+	if err != nil {
+		return err
+	}
+	stableTip := time.Now()
+	stableTipDuration := stableTip.Sub(launchedIssuers) - waiting
+	logrus.Infof("Took %v to reach tip stability", stableTipDuration)
+
+	if err := confirmBlocks(ctx, finalizedHeight, ethClients); err != nil {
 		return err
 	}
 
 	finishedVerifying := time.Now()
 	logrus.Infof("Took %v to verify blocks", finishedVerifying.Sub(stableTip))
 
-	for _, txList := range txLists {
-		if err := confirmTxList(context.Background(), funder.CChainEthAPI(), txList); err != nil {
-			return err
-		}
+	if err := confirmTxLists(ctx, ethClients, txLists); err != nil {
+		return err
 	}
 
 	finishedConfirming := time.Now()
