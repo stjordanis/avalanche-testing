@@ -3,6 +3,7 @@ package cchain
 import (
 	"context"
 	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -11,6 +12,7 @@ import (
 	"github.com/ava-labs/avalanchego/api"
 	"github.com/ava-labs/avalanchego/utils/crypto"
 	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/coreth"
 	"github.com/ava-labs/coreth/core/types"
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/ava-labs/coreth/params"
@@ -28,10 +30,11 @@ var (
 	user               = api.UserPass{Username: "Jameson", Password: "Javier23r79h"}
 	key                = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN"
 	prefixedPrivateKey = fmt.Sprintf("PrivateKey-%s", key)
-	avaxAmount         = uint64(10000000000000000)
-	x2cConversion      = uint64(1000000000)
-	cChainID           = big.NewInt(43112)
-	signer             = types.NewEIP155Signer(cChainID)
+	// avaxAmount         = uint64(5000000000000000) // 50, 250
+	avaxAmount    = uint64(1000000000000000)
+	x2cConversion = uint64(1000000000)
+	cChainID      = big.NewInt(43112)
+	signer        = types.NewEIP155Signer(cChainID)
 
 	ethAddr common.Address
 )
@@ -48,6 +51,55 @@ func init() {
 	}
 	secpKey := pk.(*crypto.PrivateKeySECP256K1R)
 	ethAddr = evm.GetEthAddress(secpKey)
+}
+
+func createAndConfirmTransfers(ctx context.Context, client *ethclient.Client, pk *ecdsa.PrivateKey, dests []common.Address, nonce uint64, amount *big.Int) error {
+	txs := make([]common.Hash, len(dests))
+	for i, dest := range dests {
+		tx := types.NewTransaction(nonce+uint64(i), dest, amount, 21000, big.NewInt(470*params.GWei), nil)
+		signedTx, err := types.SignTx(tx, signer, pk)
+		if err != nil {
+			return fmt.Errorf("failed to sign transaction: %w", err)
+		}
+		txs[i] = signedTx.Hash()
+
+		if err := client.SendTransaction(ctx, signedTx); err != nil {
+			return err
+		}
+	}
+
+	for _, tx := range txs {
+		for {
+			_, err := client.TransactionReceipt(ctx, tx)
+			if errors.Is(err, coreth.NotFound) {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			} else if err != nil {
+				return err
+			}
+
+			break
+		}
+	}
+
+	return nil
+}
+
+func computeBalancePerAddress(ctx context.Context, client *ethclient.Client, addr common.Address, recipients int) (*big.Int, *big.Int, error) {
+	balance, err := client.BalanceAt(ctx, addr, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	txFee := big.NewInt(21000 * 470 * params.GWei)
+	feePayments := new(big.Int).Mul(big.NewInt(int64(recipients)), txFee)
+	sendableBalance := new(big.Int).Sub(balance, feePayments)
+	balancePerAddress := new(big.Int).Div(sendableBalance, big.NewInt(int64(recipients)))
+
+	baseTxCost := new(big.Int).Add(txFee, big.NewInt(1))
+	txLimit := new(big.Int).Div(balancePerAddress, baseTxCost)
+
+	return balancePerAddress, txLimit, nil
 }
 
 // createConsecutiveBasicEthTransactions ...

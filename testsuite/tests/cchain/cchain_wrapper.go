@@ -59,6 +59,7 @@ func (test Test) Run(network networks.Network, context testsuite.TestContext) {
 	logrus.Infof("Basic transaction test completed successfully.")
 
 	logrus.Infof("Executing contentious block production test.")
+	// TODO: break into own network test
 	if err := NewContentiousBlockThroughputTest(clients, 20, 250).ExecuteTest(); err != nil {
 		context.Fatal(stacktrace.Propagate(err, "Contentious block production test failed"))
 	}

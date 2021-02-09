@@ -51,8 +51,7 @@ func NewContentiousBlockThroughputTest(clients []*services.Client, numLists int,
 
 // ExecuteTest ...
 func (p *parallelTxXputTest) ExecuteTest() error {
-	// create first client that funds rest of clients
-	// import funds to all addresses at start of test
+	ctx := context.Background()
 	funder := p.client[0]
 	workflowRunner := helpers.NewRPCWorkFlowRunner(
 		funder,
@@ -65,9 +64,11 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 		ethClients[i] = c.CChainEthAPI()
 	}
 
-	pks := make([]*ecdsa.PrivateKey, p.numLists)
-	addrs := make([]common.Address, p.numLists)
-	for i := 0; i < p.numLists; i++ {
+	// Generate addresses
+	addresses := p.numLists + 1
+	pks := make([]*ecdsa.PrivateKey, addresses)
+	addrs := make([]common.Address, addresses)
+	for i := 0; i < addresses; i++ {
 		pk, err := ethcrypto.GenerateKey()
 		if err != nil {
 			return fmt.Errorf("problem creating new private key: %w", err)
@@ -77,20 +78,35 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 		addrs[i] = ethAddr
 	}
 
-	logrus.Infof("Funding %d C Chain addresses.", len(addrs))
-	if err := workflowRunner.FundCChainAddresses(addrs, avaxAmount); err != nil {
+	logrus.Infof("Moving all X-Chain Funds to C-Chain.")
+	if err := workflowRunner.MoveBalanceToCChain(addrs[0]); err != nil {
+		return err
+	}
+
+	amountPerAddress, txLimit, err := computeBalancePerAddress(ctx, ethClients[0], addrs[0], p.numLists)
+	if err != nil {
+		return err
+	}
+
+	if int64(p.numTxs) > txLimit.Int64() {
+		return fmt.Errorf("want to send %d transactions per address but can only send %d", p.numTxs, txLimit)
+	}
+
+	logrus.Infof("Sending %d nAVAX each to %d C Chain addresses.", amountPerAddress, len(addrs)-1)
+	if err := createAndConfirmTransfers(ctx, ethClients[0], pks[0], addrs[1:], 0, amountPerAddress); err != nil {
 		return err
 	}
 
 	txLists := make([][]*types.Transaction, p.numLists)
-	for i := 0; i < p.numLists; i++ {
+	for i := 1; i < addresses; i++ {
 		txs, err := createConsecutiveBasicEthTransactions(pks[i], addrs[i], 0, p.numTxs)
 		if err != nil {
 			return err
 		}
-		txLists[i] = txs
+		txLists[i-1] = txs
 	}
 
+	logrus.Infof("Issuing %d transactions.", p.numLists*p.numTxs)
 	errs := make(chan error, p.numLists)
 	launchIssueTxList := func(ctx context.Context, ethclient *ethclient.Client, txList []*types.Transaction) {
 		err := issueTxList(ctx, ethclient, txList)
@@ -150,8 +166,7 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 		return groupErr
 	}
 
-	err := confirmBlocks(context.Background(), finalizedHeight, ethClients)
-	if err != nil {
+	if err := confirmBlocks(context.Background(), finalizedHeight, ethClients); err != nil {
 		return err
 	}
 

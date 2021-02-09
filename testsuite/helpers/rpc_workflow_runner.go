@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/units"
 	"github.com/ava-labs/avalanchego/vms/avm"
 
 	avalancheNetwork "github.com/ava-labs/avalanche-testing/avalanche/networks"
@@ -14,6 +15,7 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/vms/platformvm"
+	"github.com/ava-labs/coreth/plugin/evm"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/palantir/stacktrace"
 	"github.com/sirupsen/logrus"
@@ -78,6 +80,7 @@ func (runner RPCWorkFlowRunner) ImportGenesisFunds() (string, error) {
 	if err != nil {
 		return "", stacktrace.Propagate(err, "Failed to take control of genesis account.")
 	}
+
 	return genesisAddress, nil
 }
 
@@ -446,6 +449,65 @@ func (runner RPCWorkFlowRunner) VerifyXChainAVABalance(address string, expectedB
 	return nil
 }
 
+func (runner RPCWorkFlowRunner) MoveBalanceToCChain(addr common.Address) error {
+	avmClient := runner.client.XChainAPI()
+	cChainClient := runner.client.CChainAPI()
+	_, _ = runner.client.KeystoreAPI().CreateUser(runner.userPass)
+
+	xAddr, err := avmClient.ImportKey(
+		runner.userPass,
+		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	balanceReply, err := avmClient.GetBalance(xAddr, constants.AvaxAssetID.String())
+	if err != nil {
+		return err
+	}
+
+	// Account for import/export fees
+	sendableBalance := uint64(balanceReply.Balance) - units.Avax
+	logrus.Infof("Sending %d to %s on the C-Chain", sendableBalance, addr.String())
+
+	_, err = cChainClient.ImportKey(
+		runner.userPass,
+		avalancheNetwork.DefaultLocalNetGenesisConfig.FundedAddresses.PrivateKey,
+	)
+	if err != nil {
+		return err
+	}
+
+	return runner.orchestrateAtomicTransactions(avmClient, cChainClient, xAddr, []common.Address{addr}, sendableBalance)
+}
+
+func (runner RPCWorkFlowRunner) orchestrateAtomicTransactions(avmClient *avm.Client, cChainClient *evm.Client, xAddr string, addrs []common.Address, avaxAmount uint64) error {
+	for i, addr := range addrs {
+		cChainBech32 := fmt.Sprintf("C%s", xAddr[1:])
+		txID, err := avmClient.ExportAVAX(runner.userPass, nil, "", avaxAmount, cChainBech32)
+		if err != nil {
+			return fmt.Errorf("Failed to export AVAX to C-Chain for address %d: %w", i, err)
+		}
+		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
+			return err
+		}
+
+		txID, err = cChainClient.Import(runner.userPass, addr.Hex(), "X")
+		if err != nil {
+			return fmt.Errorf("Failed to import AVAX to C-Chain: %w", err)
+		}
+
+		// TODO replace sleep with confirm C-Chain Atomic Tx when
+		// atomic tx getTxStatus is implemented.
+		if err := runner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // FundCChainAddresses ...
 func (runner RPCWorkFlowRunner) FundCChainAddresses(addrs []common.Address, avaxAmount uint64) error {
 	avmClient := runner.client.XChainAPI()
@@ -468,27 +530,5 @@ func (runner RPCWorkFlowRunner) FundCChainAddresses(addrs []common.Address, avax
 		return err
 	}
 
-	for _, addr := range addrs {
-		cChainBech32 := fmt.Sprintf("C%s", xAddr[1:])
-		txID, err := avmClient.ExportAVAX(runner.userPass, nil, "", avaxAmount, cChainBech32)
-		if err != nil {
-			return fmt.Errorf("Failed to export AVAX to C-Chain: %w", err)
-		}
-		if err := runner.AwaitXChainTransactionAcceptance(txID); err != nil {
-			return err
-		}
-
-		txID, err = cChainClient.Import(runner.userPass, addr.Hex(), "X")
-		if err != nil {
-			return fmt.Errorf("Failed to import AVAX to C-Chain: %w", err)
-		}
-
-		// TODO replace sleep with confirm C-Chain Atomic Tx when
-		// atomic tx getTxStatus is implemented.
-		if err := runner.AwaitCChainAtomicTransactionAcceptance(txID); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return runner.orchestrateAtomicTransactions(avmClient, cChainClient, xAddr, addrs, avaxAmount)
 }
