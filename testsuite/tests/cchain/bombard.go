@@ -14,6 +14,7 @@ import (
 	"github.com/ava-labs/coreth/ethclient"
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/sirupsen/logrus"
 )
@@ -119,22 +120,42 @@ func (p *parallelTxXputTest) ExecuteTest() error {
 	startedGoRoutines := time.Now()
 	logrus.Infof("Took %v to launch issuers", startedGoRoutines.Sub(launchedIssuers))
 
-	for i := 0; i < p.numLists; i++ {
-		err := <-errs
+	var (
+		finalizedHeight   uint64
+		waiting           time.Duration
+		stableTip         time.Time
+		stableTipDuration time.Duration
+	)
+
+	g, _ := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		for i := 0; i < p.numLists; i++ {
+			err := <-errs
+			if err != nil {
+				logrus.Error(err)
+				return err
+			}
+		}
+		finishedIssuing := time.Now()
+		logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers))
+		return nil
+	})
+
+	g.Go(func() error {
+		finalizedHeight, waiting, err = waitForStableTip(ctx, ethClients)
 		if err != nil {
+			logrus.Error(err)
 			return err
 		}
-	}
-	finishedIssuing := time.Now()
-	logrus.Infof("Took %v to finish issuing (after launching issuers)", finishedIssuing.Sub(launchedIssuers))
+		stableTip = time.Now()
+		stableTipDuration = stableTip.Sub(launchedIssuers) - waiting
+		logrus.Infof("Took %v to reach tip stability", stableTipDuration)
+		return nil
+	})
 
-	finalizedHeight, waiting, err := waitForStableTip(ctx, ethClients)
-	if err != nil {
+	if err := g.Wait(); err != nil {
 		return err
 	}
-	stableTip := time.Now()
-	stableTipDuration := stableTip.Sub(launchedIssuers) - waiting
-	logrus.Infof("Took %v to reach tip stability", stableTipDuration)
 
 	if err := confirmBlocks(ctx, finalizedHeight, ethClients); err != nil {
 		return err
